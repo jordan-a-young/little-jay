@@ -3,9 +3,11 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Plugin, ResolvedConfig } from "vite-plus";
 import { themeSettings } from "./src/theme-settings.js";
-import stateIllustrations from "@ljay/brand/states/manifest.json" with { type: "json" };
+import stateIllustrations from "@littlejay/brand/states/manifest.json" with { type: "json" };
 
-const brandRoot = path.dirname(fileURLToPath(import.meta.resolve("@ljay/brand/site.webmanifest")));
+const brandRoot = path.dirname(
+  fileURLToPath(import.meta.resolve("@littlejay/brand/site.webmanifest")),
+);
 const themeSource = fileURLToPath(new URL("./src/theme-store.js", import.meta.url));
 const publicFiles = [
   "icons/favicon.svg",

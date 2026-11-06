@@ -1,5 +1,5 @@
 {
-  "name": "@ljay/playground",
+  "name": "@littlejay/playground",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -10,10 +10,10 @@
     "preview": "vp preview"
   },
   "dependencies": {
-    "@ljay/brand": "workspace:*",
-    "@ljay/http": "workspace:*",
-    "@ljay/tokens": "workspace:*",
-    "@ljay/ui": "workspace:*",
+    "@littlejay/brand": "workspace:*",
+    "@littlejay/http": "workspace:*",
+    "@littlejay/tokens": "workspace:*",
+    "@littlejay/ui": "workspace:*",
     "@tanstack/react-query": "5.104.5",
     "@tanstack/react-router": "1.170.46",
     "prism-react-renderer": "2.4.1",

@@ -7,7 +7,7 @@ const documents: Record<string, CatalogDocument> = {
     overview:
       "Horizontal, manually activated content tabs. Stable item values link native non-submit triggers to panels; workflow state and responsive layout stay application-owned.",
     usage:
-      'import { Tabs } from "@ljay/ui/tabs";\nimport "@ljay/ui/styles.css";\n\n<Tabs label="Document views" items={[\n  { value: "draft", label: "Draft", content: <Draft /> },\n  { value: "preview", label: "Preview", content: <Preview /> },\n]} />',
+      'import { Tabs } from "@littlejay/ui/tabs";\nimport "@littlejay/ui/styles.css";\n\n<Tabs label="Document views" items={[\n  { value: "draft", label: "Draft", content: <Draft /> },\n  { value: "preview", label: "Preview", content: <Preview /> },\n]} />',
     props: [
       {
         name: "label",
@@ -58,7 +58,7 @@ const documents: Record<string, CatalogDocument> = {
     overview:
       "Native metadata semantics with wrapping for long values. Applications supply dt/dd pairs; no domain schema is inferred.",
     usage:
-      'import { DescriptionList } from "@ljay/ui/description-list";\nimport "@ljay/ui/styles.css";\n\n<DescriptionList><dt>State</dt><dd>Saved</dd></DescriptionList>',
+      'import { DescriptionList } from "@littlejay/ui/description-list";\nimport "@littlejay/ui/styles.css";\n\n<DescriptionList><dt>State</dt><dd>Saved</dd></DescriptionList>',
     props: [
       {
         name: "Native dl props",
@@ -83,7 +83,7 @@ const documents: Record<string, CatalogDocument> = {
     overview:
       "Native details/summary preserves browser keyboard behavior without an interaction dependency.",
     usage:
-      'import { Disclosure } from "@ljay/ui/disclosure";\n\n<Disclosure summary="Metadata">Saved draft details</Disclosure>',
+      'import { Disclosure } from "@littlejay/ui/disclosure";\n\n<Disclosure summary="Metadata">Saved draft details</Disclosure>',
     props: [
       {
         name: "summary",
@@ -114,7 +114,7 @@ const documents: Record<string, CatalogDocument> = {
     overview:
       "Escaped inert text only: no HTML, Markdown, linkification, syntax execution, or permission interpretation. Long lines wrap; tall output scrolls.",
     usage:
-      'import { TextBlock } from "@ljay/ui/text-block";\n\n<TextBlock aria-label="Artifact output" text={untrustedText} />',
+      'import { TextBlock } from "@littlejay/ui/text-block";\n\n<TextBlock aria-label="Artifact output" text={untrustedText} />',
     props: [
       {
         name: "text",
@@ -145,7 +145,7 @@ const documents: Record<string, CatalogDocument> = {
     overview:
       "A 44px square native Button with a required accessible name and decorative icon content. Supply a consistently sized SVG, such as 20px. The default type is button, not submit.",
     usage:
-      'import { IconButton } from "@ljay/ui/icon-button";\n\n<IconButton label="Refresh preview" onClick={refresh}><RefreshIcon /></IconButton>',
+      'import { IconButton } from "@littlejay/ui/icon-button";\n\n<IconButton label="Refresh preview" onClick={refresh}><RefreshIcon /></IconButton>',
     props: [
       {
         name: "label",
@@ -178,7 +178,7 @@ const documents: Record<string, CatalogDocument> = {
     overview:
       "An accessible modal with a sheet layout variant, built on the focused Radix Dialog primitive. Portal, focus trapping/restoration, and Escape dismissal are primitive-owned; application actions remain application-owned.",
     usage:
-      'import { Dialog, DialogTrigger, DialogContent } from "@ljay/ui/dialog";\nimport "@ljay/ui/styles.css";\n\n<Dialog>\n  <DialogTrigger>Inspect</DialogTrigger>\n  <DialogContent title="Draft preview" description="Read-only local data.">Content</DialogContent>\n</Dialog>',
+      'import { Dialog, DialogTrigger, DialogContent } from "@littlejay/ui/dialog";\nimport "@littlejay/ui/styles.css";\n\n<Dialog>\n  <DialogTrigger>Inspect</DialogTrigger>\n  <DialogContent title="Draft preview" description="Read-only local data.">Content</DialogContent>\n</Dialog>',
     props: [
       {
         name: "Dialog",

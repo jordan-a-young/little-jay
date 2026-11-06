@@ -15,6 +15,7 @@ export default defineConfig({
       textarea: "src/textarea/index.tsx",
       "native-select": "src/native-select/index.tsx",
       checkbox: "src/checkbox/index.tsx",
+      switch: "src/switch/index.tsx",
       "description-list": "src/description-list/index.tsx",
       disclosure: "src/disclosure/index.tsx",
       "text-block": "src/text-block/index.tsx",

@@ -1,5 +1,5 @@
 import { useId } from "react";
-import { Button, Field, NativeSelect } from "@ljay/ui";
+import { Button, Field, NativeSelect } from "@littlejay/ui";
 import { useTheme } from "../use-theme.js";
 import type { PreviewWidth } from "./PreviewFrame.js";
 

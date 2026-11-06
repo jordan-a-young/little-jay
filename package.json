@@ -7,7 +7,7 @@
     "secrets:install": "sh scripts/install-gitleaks.sh",
     "secrets:staged": "node scripts/check-secrets.mjs staged",
     "secrets:scan": "node scripts/check-secrets.mjs history",
-    "dev": "pnpm --filter @ljay/tokens --filter @ljay/server --filter @ljay/http --filter @ljay/ui build && pnpm --parallel --filter @ljay/playground --filter @ljay/api dev",
+    "dev": "pnpm --filter @littlejay/tokens --filter @littlejay/server --filter @littlejay/http --filter @littlejay/ui build && pnpm --parallel --filter @littlejay/playground --filter @littlejay/api dev",
     "build": "vp run -r build",
     "check": "node scripts/build-tokens.mjs --check && vp check",
     "typecheck": "tsc -p tsconfig.json && pnpm -r typecheck",

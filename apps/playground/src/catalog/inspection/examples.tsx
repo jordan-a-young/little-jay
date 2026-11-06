@@ -12,7 +12,7 @@ import {
   Field,
   Input,
   Button,
-} from "@ljay/ui";
+} from "@littlejay/ui";
 
 function LocalDraft() {
   const [count, setCount] = useState(0);

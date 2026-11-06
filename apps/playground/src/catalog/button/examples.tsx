@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Field, NativeSelect, type ButtonVariant } from "@ljay/ui";
+import { Button, Field, NativeSelect, type ButtonVariant } from "@littlejay/ui";
 
 const variants: readonly ButtonVariant[] = ["primary", "secondary", "outline", "ghost", "danger"];
 

@@ -34,5 +34,5 @@ Repeat the staged-file and history review for each publication; an earlier clean
 ## Separate publication decisions
 
 - Public GitHub source and npm publication are separate operations. `private: true` prevents accidental npm publishing but does not hide public repository content.
-- Keep package privacy flags and provisional `@ljay` scope unchanged until npm publication is separately requested. Before that publication, verify scope ownership and ensure each tarball includes the correct license and third-party notices, without implying an MIT artwork license.
+- The owner selected the public npm registry and reports creating the `littlejay` npm organization. Packages now use `@littlejay`; this records the scope decision, not a registry ownership/authentication check. Keep `private: true` and `0.0.0` unchanged until release preparation is separately requested. Do not configure credentials, publish access, release automation, or publication as part of the scope rename. Before publication, verify organization permissions and ensure each tarball includes the correct license and third-party notices, without implying an MIT artwork license.
 - Deployments need their own review of public metadata, origins, service configuration, and asset permissions. None is authorized by adding a license or creating a GitHub repository.

@@ -4,7 +4,7 @@ A minimal monorepo for reusable React components, theme tokens, bounded JSON tra
 
 ## Package usage and coding agents
 
-Each private package ships a usage README with public imports, compatibility, setup, application-policy boundaries, verification, and licensing guidance. Start with `node_modules/@ljay/<package>/README.md` in an installed consumer. See [consumer-agent setup](docs/CONSUMER-AGENTS.md) for an opt-in consumer `AGENTS.md` example and the isolated tarball discovery check. Dependency instructions are not assumed to load automatically; these guides do not authorize publication or artwork reuse.
+Each private package ships a usage README with public imports, compatibility, setup, application-policy boundaries, verification, and licensing guidance. Start with `node_modules/@littlejay/<package>/README.md` in an installed consumer. See [consumer-agent setup](docs/CONSUMER-AGENTS.md) for an opt-in consumer `AGENTS.md` example and the isolated tarball discovery check. Dependency instructions are not assumed to load automatically; these guides do not authorize publication or artwork reuse.
 
 ## Run on your workstation
 
@@ -35,7 +35,7 @@ Individual checks: `pnpm check`, `pnpm build`, `pnpm typecheck`, `pnpm test`, an
 
 ## Dismissible Alert
 
-Alert is non-dismissible by default. Supply `onDismiss` to show a native non-submit close button; the callback requests dismissal but does not hide the Alert. The application owns visibility and restores focus when removing focused content. `dismissLabel` defaults to `"Dismiss alert"`; custom labels must be nonblank. Root and `@ljay/ui/alert` imports expose the same props.
+Alert is non-dismissible by default. Supply `onDismiss` to show a native non-submit close button; the callback requests dismissal but does not hide the Alert. The application owns visibility and restores focus when removing focused content. `dismissLabel` defaults to `"Dismiss alert"`; custom labels must be nonblank. Root and `@littlejay/ui/alert` imports expose the same props.
 
 ```tsx
 {
@@ -52,14 +52,14 @@ If dismissal removes the focused close button, move focus to a meaningful surviv
 ## Loading indicator
 
 ```tsx
-import { LoadingIndicator } from "@ljay/ui/loading-indicator";
-import "@ljay/ui/styles.css";
+import { LoadingIndicator } from "@littlejay/ui/loading-indicator";
+import "@littlejay/ui/styles.css";
 
 <LoadingIndicator />
 <LoadingIndicator label="Checking…" />
 ```
 
-Visible text is optional; icon-only rendering includes hidden “Loading” text. The spinner uses the primary theme color and follows font size. Reduced motion stops rotation. No live role, busy state, focus change, or disabling behavior is added automatically: use a single application-owned `role="status"` region for announcements, or `aria-hidden="true"` on a redundant indicator next to existing loading text. Loading state, requests, and paused/offline behavior remain application-owned. Root `@ljay/ui` imports are also supported. See `/#/loading-indicator/local` for a local-only state example.
+Visible text is optional; icon-only rendering includes hidden “Loading” text. The spinner uses the primary theme color and follows font size. Reduced motion stops rotation. No live role, busy state, focus change, or disabling behavior is added automatically: use a single application-owned `role="status"` region for announcements, or `aria-hidden="true"` on a redundant indicator next to existing loading text. Loading state, requests, and paused/offline behavior remain application-owned. Root `@littlejay/ui` imports are also supported. See `/#/loading-indicator/local` for a local-only state example.
 
 ## Test coverage
 
@@ -76,13 +76,13 @@ These are combined Node/jsdom test coverage numbers, not exclusively unit-test c
 ```text
 apps/
   playground/    Searchable component catalog and application-pattern sandbox
-  api/           Example server using @ljay/server
+  api/           Example server using @littlejay/server
 packages/
-  brand/         @ljay/brand: canonical Pebble artwork and browser assets
-  tokens/        @ljay/tokens: framework-independent theme CSS
-  ui/            @ljay/ui: controls, workflow feedback, and compiled CSS
-  http/          @ljay/http: bounded, decoded JSON requests using platform fetch
-  server/        @ljay/server: factory and opt-in error/health/readiness plugins
+  brand/         @littlejay/brand: canonical Pebble artwork and browser assets
+  tokens/        @littlejay/tokens: framework-independent theme CSS
+  ui/            @littlejay/ui: controls, workflow feedback, and compiled CSS
+  http/          @littlejay/http: bounded, decoded JSON requests using platform fetch
+  server/        @littlejay/server: factory and opt-in error/health/readiness plugins
 ```
 
 Layers are introduced only when they contain useful code. Radix Dialog supports the modal slice; TypeBox validates one local API endpoint. Each real project owns its application-specific schemas.
@@ -94,17 +94,17 @@ The [component catalog](docs/CATALOG.md) organizes Foundations, Components, and 
 Navigation uses TanStack Router directly in the playground with hash history, preserving static-host deep links. The router's typed context shares the application's existing QueryClient for future loader/hook integration; no shared router package or extra query cache is introduced. See `apps/playground/src/router.tsx` and the [routing contract](docs/CATALOG.md#viewing-and-navigation).
 
 ```tsx
-import { Button } from "@ljay/ui/button";
-import "@ljay/ui/styles.css";
+import { Button } from "@littlejay/ui/button";
+import "@littlejay/ui/styles.css";
 
 export function Example() {
   return <Button onClick={() => console.log("Clicked")}>Continue</Button>;
 }
 ```
 
-The root `@ljay/ui` export also works. Button forwards native React button props, including ref, disabled, aria attributes, and explicit submit type. Its default type is `button` so it does not accidentally submit forms. It includes keyboard focus and disabled styles. No interaction primitive dependency is needed for a native button.
+The root `@littlejay/ui` export also works. Button forwards native React button props, including ref, disabled, aria attributes, and explicit submit type. Its default type is `button` so it does not accidentally submit forms. It includes keyboard focus and disabled styles. No interaction primitive dependency is needed for a native button.
 
-Button's `variant` is `primary` (the default), `secondary`, `outline`, `ghost`, or `danger`. All variants use semantic colors from the active light/dark theme. Secondary is neutral with a border; outline uses a primary-colored edge; ghost has no resting fill or edge. Danger pairs `--lj-danger` with `--lj-background` text; recheck that pair's contrast when overriding either color. Visual variants do not add confirmation, authorization, or action behavior. `ButtonVariant` is exported from the root and `@ljay/ui/button`; IconButton inherits the same optional variant.
+Button's `variant` is `primary` (the default), `secondary`, `outline`, `ghost`, or `danger`. All variants use semantic colors from the active light/dark theme. Secondary is neutral with a border; outline uses a primary-colored edge; ghost has no resting fill or edge. Danger pairs `--lj-danger` with `--lj-background` text; recheck that pair's contrast when overriding either color. Visual variants do not add confirmation, authorization, or action behavior. `ButtonVariant` is exported from the root and `@littlejay/ui/button`; IconButton inherits the same optional variant.
 
 ```tsx
 <Button>Continue</Button>
@@ -121,8 +121,8 @@ Compiled component CSS includes the default theme and does not include a global 
 These components are designed for run lists, connection feedback, and isolated inspectors, starting with Graph Workbench's needs. They do not know about workflows, approvals, or execution permissions.
 
 ```tsx
-import { Alert, Button, EmptyState, ErrorBoundary, StatusIndicator } from "@ljay/ui";
-import "@ljay/ui/styles.css";
+import { Alert, Button, EmptyState, ErrorBoundary, StatusIndicator } from "@littlejay/ui";
+import "@littlejay/ui/styles.css";
 
 <StatusIndicator tone="warning">Awaiting review</StatusIndicator>;
 <Alert tone="danger" title="Connection lost" action={<Button onClick={reload}>Reload</Button>}>
@@ -134,29 +134,29 @@ import "@ljay/ui/styles.css";
 </ErrorBoundary>;
 ```
 
-Subpath imports also work: `@ljay/ui/alert`, `@ljay/ui/empty-state`, `@ljay/ui/status-indicator`, and `@ljay/ui/error-boundary`. `Alert`, `EmptyState`, and `StatusIndicator` accept native attributes, refs, and `className`. Tone is `neutral`, `info`, `success`, `warning`, or `danger`; applications choose the label and tone, rather than the library interpreting domain states. `EmptyState` has no implicit announcement role. `StatusIndicator` includes caller-supplied text and is not a live region unless the caller requests one. `Alert` defaults to `role="alert"` for danger and `role="status"` otherwise; override `role` (for example, `note`) for static explanatory content.
+Subpath imports also work: `@littlejay/ui/alert`, `@littlejay/ui/empty-state`, `@littlejay/ui/status-indicator`, and `@littlejay/ui/error-boundary`. `Alert`, `EmptyState`, and `StatusIndicator` accept native attributes, refs, and `className`. Tone is `neutral`, `info`, `success`, `warning`, or `danger`; applications choose the label and tone, rather than the library interpreting domain states. `EmptyState` has no implicit announcement role. `StatusIndicator` includes caller-supplied text and is not a live region unless the caller requests one. `Alert` defaults to `role="alert"` for danger and `role="status"` otherwise; override `role` (for example, `note`) for static explanatory content.
 
 `ErrorBoundary` catches descendant rendering/lifecycle failures and errors React routes from Actions. Its default fallback exposes no diagnostic message and offers a non-submit retry button. Supply `onError(error, info)` for your own reporting policy; sanitize diagnostic data before sending it anywhere. Supply a static `fallback` node, or `fallback={({ error, reset }) => ...}` for a custom view. `onReset` runs before clearing the error, and changing `resetKey` while failed also resets it—use a run/panel identity, not a frequently changing event cursor. Ordinary rerenders do not reset a failure. Reset remounts the failed subtree, so its effects may run again; it must not trigger an unapproved command or replay a mutation.
 
 Boundaries do not catch server-rendering errors, ordinary event-handler/async failures, or failures in their own fallback. Expected network/validation failures normally belong in `Alert`, preserving drafts and existing data. With TanStack Query's `throwOnError` or suspense queries, pair the boundary's `onReset` with `QueryErrorResetBoundary`'s reset callback. Core UI has no dependency on TanStack Query.
 
-The playground demonstrates a render failure without taking down sibling controls. Its health read uses `@ljay/http` over native `fetch`, the Query-provided abort signal, and TanStack React Query with a 30-second stale window; explicit Refresh requests fresh data. Responses are bounded to 4 KiB, decoded at runtime, and time out after 10 seconds. When offline, Query pauses the request and the UI labels the cached result rather than claiming a fresh check; it resumes on reconnection. No library-owned cache or automatic mutation retries are introduced. See [the transport contract](docs/HTTP.md).
+The playground demonstrates a render failure without taking down sibling controls. Its health read uses `@littlejay/http` over native `fetch`, the Query-provided abort signal, and TanStack React Query with a 30-second stale window; explicit Refresh requests fresh data. Responses are bounded to 4 KiB, decoded at runtime, and time out after 10 seconds. When offline, Query pauses the request and the UI labels the cached result rather than claiming a fresh check; it resumes on reconnection. No library-owned cache or automatic mutation retries are introduced. See [the transport contract](docs/HTTP.md).
 
 ## Inspection and modals
 
 `DescriptionList`, `Disclosure`, `TextBlock`, and `IconButton` are exported at the root and their kebab-case subpaths. DescriptionList uses native `dl` with caller-supplied `dt`/`dd` pairs; Disclosure uses native `details`/`summary`. TextBlock requires a `text` string, escapes it as React text, wraps long lines, and provides a keyboard-focusable scrolling area. Supply a descriptive `aria-label` or `aria-labelledby`; named output defaults to a region, while unnamed output adds no landmark. An explicit role is preserved. It accepts neither children nor HTML injection. IconButton requires a descriptive nonblank `label`, hides its decorative icon from assistive technology, and retains Button's native disabled, non-submit, ref, and focus behavior.
 
-`Dialog`, `DialogTrigger`, `DialogContent`, and `DialogClose` are available at `@ljay/ui/dialog`. Content requires a nonblank visible `title`, supports an optional `description`, and includes a Close button. `variant="sheet"` uses the same modal behavior in a side layout. Controlled `open`/`onOpenChange` and uncontrolled `defaultOpen` use Radix's portal, focus trap/restoration, and dismiss behavior. Keep the trigger mounted for restoration. Portals inherit tokens at their destination: document themes work directly; scoped overrides need `portalContainer` inside that scope. No modal animation or global reset is added.
+`Dialog`, `DialogTrigger`, `DialogContent`, and `DialogClose` are available at `@littlejay/ui/dialog`. Content requires a nonblank visible `title`, supports an optional `description`, and includes a Close button. `variant="sheet"` uses the same modal behavior in a side layout. Controlled `open`/`onOpenChange` and uncontrolled `defaultOpen` use Radix's portal, focus trap/restoration, and dismiss behavior. Keep the trigger mounted for restoration. Portals inherit tokens at their destination: document themes work directly; scoped overrides need `portalContainer` inside that scope. No modal animation or global reset is added.
 
 The focused `@radix-ui/react-dialog@1.3.1` package supports React 19; its [documented APIs](https://www.radix-ui.com/primitives/docs/components/dialog) cover this slice without pulling in an entire widget collection. UI now declares React DOM 19 as a peer alongside React. Catalog pages include safe local interactions and a controlled sheet example at `/#/dialog/sheet`.
 
 ## Form components
 
-`Field`, `Input`, `Textarea`, `NativeSelect`, and `Checkbox` are available from `@ljay/ui` or their lowercase subpaths (`@ljay/ui/field`, `@ljay/ui/input`, `@ljay/ui/textarea`, `@ljay/ui/native-select`, `@ljay/ui/checkbox`). They use native elements, React 19 ref props, and compiled reset-free CSS. They have no form-library dependency or internal value state.
+`Field`, `Input`, `Textarea`, `NativeSelect`, and `Checkbox` are available from `@littlejay/ui` or their lowercase subpaths (`@littlejay/ui/field`, `@littlejay/ui/input`, `@littlejay/ui/textarea`, `@littlejay/ui/native-select`, `@littlejay/ui/checkbox`). They use native elements, React 19 ref props, and compiled reset-free CSS. They have no form-library dependency or internal value state.
 
 ```tsx
-import { Field, Input, Textarea, NativeSelect, Checkbox } from "@ljay/ui";
-import "@ljay/ui/styles.css";
+import { Field, Input, Textarea, NativeSelect, Checkbox } from "@littlejay/ui";
+import "@littlejay/ui/styles.css";
 
 <Field id="run-name" label="Run name" description="A short, recognizable name" required>
   <Input name="name" defaultValue="Review notes" maxLength={80} />
@@ -193,7 +193,7 @@ After a submission started with focus inside the workflow form, validation focus
 
 Prefer native controls and React 19 Actions, `useActionState`, and `useFormStatus` for straightforward forms. Client Actions work in Vite; Server Functions require a supporting server framework and are not automatically provided by Fastify. Successful Actions reset uncontrolled fields, including when returning a validation result, so preserve drafts explicitly. React 19 is not a replacement for complex field arrays, field-level validation, or server authorization; adopt a form library only when those needs justify it. See the [React form documentation](https://react.dev/reference/react-dom/components/form).
 
-Use `@ljay/http` for bounded decoded JSON over `fetch` on both client and server. TanStack React Query owns client request caching, invalidation, and query lifecycle. Existing OpenAPI clients and application-specific schemas stay in their owning applications. TypeBox now validates the local `/api/text-preview` example; it does not establish shared domain schemas.
+Use `@littlejay/http` for bounded decoded JSON over `fetch` on both client and server. TanStack React Query owns client request caching, invalidation, and query lifecycle. Existing OpenAPI clients and application-specific schemas stay in their owning applications. TypeBox now validates the local `/api/text-preview` example; it does not establish shared domain schemas.
 
 Next priorities are recorded in [the roadmap](docs/ROADMAP.md). Track requested improvements, investigations, and potential additions in the [backlog](docs/BACKLOG.md); entries are planned work, not implemented features or changes to Graph Workbench.
 
@@ -201,9 +201,9 @@ Next priorities are recorded in [the roadmap](docs/ROADMAP.md). Track requested 
 
 The [Pebble app-state showcase](docs/PEBBLE-STATES.md) is available at `#pebble-states` in the playground. It demonstrates static loading, success, error, and empty illustrations with local-only Retry/Create project actions.
 
-The approved Pebble branding kit is integrated in `@ljay/brand` and `@ljay/tokens`. The playground applies the active theme to the document, persists explicit light/dark choices, otherwise follows system appearance, and updates browser theme-color. See [branding documentation](docs/BRANDING.md) for canonical files, asset imports, token generation, project overrides, deployment paths, and automatic public-file synchronization. The manifest does not add offline/PWA functionality; no public site URL or social metadata is configured.
+The approved Pebble branding kit is integrated in `@littlejay/brand` and `@littlejay/tokens`. The playground applies the active theme to the document, persists explicit light/dark choices, otherwise follows system appearance, and updates browser theme-color. See [branding documentation](docs/BRANDING.md) for canonical files, asset imports, token generation, project overrides, deployment paths, and automatic public-file synchronization. The manifest does not add offline/PWA functionality; no public site URL or social metadata is configured.
 
-Use `@ljay/tokens/theme.css` independently of React. Tailwind projects can import `@ljay/tokens/tailwind.css` after Tailwind to expose semantic utility classes. UI retains `@ljay/ui/theme.css` and `@ljay/ui/tailwind.css` convenience entries.
+Use `@littlejay/tokens/theme.css` independently of React. Tailwind projects can import `@littlejay/tokens/tailwind.css` after Tailwind to expose semantic utility classes. UI retains `@littlejay/ui/theme.css` and `@littlejay/ui/tailwind.css` convenience entries.
 
 Override variables after the default theme import:
 
@@ -219,7 +219,7 @@ Set `data-theme="dark"` on an ancestor for the dark palette, or `data-theme="lig
 ## Server
 
 ```ts
-import { createServer } from "@ljay/server";
+import { createServer } from "@littlejay/server";
 
 const server = createServer({ logger: true });
 server.get("/hello", async () => ({ message: "Hello" }));
@@ -251,7 +251,7 @@ The Vite proxy is development-only. Production deployments need a matching rever
 
 pnpm workspaces link packages; Vite+ supplies build orchestration, formatting, linting, tests, and package builds. CI runs a frozen install and `pnpm ready`.
 
-The source is hosted in the private GitHub repository `jordan-a-young/little-jay`, with CI and secret-scanning workflows running on pushes and pull requests. The packages remain private and unpublished to npm, and `@ljay` remains provisional. Confirm scope ownership before any future npm publishing. GitHub hosting and npm publication are separate decisions; `private: true` does not hide files if a repository is made public.
+The source is hosted in the private GitHub repository `jordan-a-young/little-jay`, with CI and secret-scanning workflows running on pushes and pull requests. Packages use the `@littlejay` scope for the owner's npm organization; the intended future destination is the public npm registry. They remain private at `0.0.0` and unpublished. Registry credentials, access settings, release versions, and publication are not configured or authorized by this scope choice. GitHub hosting and npm publication are separate decisions; `private: true` does not hide files if a repository is made public.
 
 ## License and artwork
 

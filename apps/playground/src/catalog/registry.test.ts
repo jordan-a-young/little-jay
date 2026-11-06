@@ -27,6 +27,7 @@ describe("catalog registry and links", () => {
       "field",
       "input",
       "native-select",
+      "switch",
       "textarea",
       "description-list",
       "dialog",
@@ -50,7 +51,7 @@ describe("catalog registry and links", () => {
     ]);
   });
   it("has stable unique pages for all foundations, components, and patterns", () => {
-    expect(catalogPages).toHaveLength(24);
+    expect(catalogPages).toHaveLength(25);
     expect(new Set(catalogPages.map((page) => page.id)).size).toBe(catalogPages.length);
     expect(catalogPages.some((page) => page.id === "native-select")).toBe(true);
   });
@@ -58,6 +59,7 @@ describe("catalog registry and links", () => {
     expect(filterCatalog("  BUTTON ").map((page) => page.id)).toEqual(["button", "icon-button"]);
     expect(filterCatalog("forms native").map((page) => page.id)).toContain("native-select");
     expect(filterCatalog("spinner").map((page) => page.id)).toEqual(["loading-indicator"]);
+    expect(filterCatalog("toggle").map((page) => page.id)).toEqual(["switch"]);
     expect(filterCatalog("hooks").map((page) => page.id)).toEqual(["hooks"]);
     expect(filterCatalog("panels").map((page) => page.id)).toEqual(["tabs"]);
     expect(filterCatalog("no such component")).toEqual([]);

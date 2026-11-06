@@ -1,9 +1,9 @@
 # JSON transport
 
-`@ljay/http` is a private ESM browser/Node package with one operation, `fetchJson`, and a structured `HttpError`. The playground's health query is its first consumer.
+`@littlejay/http` is a private ESM browser/Node package with one operation, `fetchJson`, and a structured `HttpError`. The playground's health query is its first consumer.
 
 ```ts
-import { fetchJson, HttpError } from "@ljay/http";
+import { fetchJson, HttpError } from "@littlejay/http";
 
 const status = await fetchJson("/api/health", {
   signal,

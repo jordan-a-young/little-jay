@@ -6,7 +6,7 @@ const document: CatalogDocument = {
   overview:
     "A native button for an explicit action. Choose primary, secondary, outline, ghost, or danger styling from the active color theme. Use links for navigation.",
   usage:
-    'import { Button } from "@ljay/ui/button";\nimport "@ljay/ui/styles.css";\n\n<Button onClick={continueLocally}>Continue</Button>;',
+    'import { Button } from "@littlejay/ui/button";\nimport "@littlejay/ui/styles.css";\n\n<Button onClick={continueLocally}>Continue</Button>;',
   props: [
     {
       name: "variant",

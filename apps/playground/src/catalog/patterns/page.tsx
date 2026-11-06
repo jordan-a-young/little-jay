@@ -7,7 +7,7 @@ const documents: Record<string, CatalogDocument> = {
     overview:
       "The existing local workflow configuration form, preserved as a composition pattern. React 19 Actions validate locally and retain submitted drafts. No workflow is saved or started.",
     usage:
-      'import { Field, Input, Button } from "@ljay/ui";\n\n<form action={validateLocally}>\n  <Field label="Workflow name" required>\n    <Input name="name" defaultValue={draft.name} />\n  </Field>\n  <Button type="submit">Validate configuration</Button>\n</form>',
+      'import { Field, Input, Button } from "@littlejay/ui";\n\n<form action={validateLocally}>\n  <Field label="Workflow name" required>\n    <Input name="name" defaultValue={draft.name} />\n  </Field>\n  <Button type="submit">Validate configuration</Button>\n</form>',
     props: [],
     accessibility: [
       "Field connects each control to its label, description, and error.",
@@ -34,7 +34,7 @@ const documents: Record<string, CatalogDocument> = {
     props: [],
     accessibility: [
       "Real connection state is communicated in text. Offline cached data is not presented as a fresh health check.",
-      "The query uses @ljay/http with native fetch, its abort signal, a 4 KiB response limit, a 10-second timeout, a runtime decoder, a 30-second stale window, and no automatic retries.",
+      "The query uses @littlejay/http with native fetch, its abort signal, a 4 KiB response limit, a 10-second timeout, a runtime decoder, a 30-second stale window, and no automatic retries.",
       "This demo reads /api/health. The API keeps its default port 5050; development and production require a matching proxy.",
       "Reset preview resets local component state but does not erase the shared query cache. Refresh API explicitly requests fresh data.",
     ],

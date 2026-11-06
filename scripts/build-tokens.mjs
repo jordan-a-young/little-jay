@@ -87,7 +87,7 @@ if (process.argv.includes("--check")) {
   assert.equal(
     await readFile(new URL("theme.css", root), "utf8"),
     output,
-    "Theme output is stale; run pnpm --filter @ljay/tokens build",
+    "Theme output is stale; run pnpm --filter @littlejay/tokens build",
   );
 } else {
   await writeFile(new URL("theme.css", root), output);

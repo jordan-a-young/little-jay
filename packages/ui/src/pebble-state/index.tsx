@@ -1,5 +1,5 @@
 import type { ComponentProps, ReactNode } from "react";
-import illustrations from "@ljay/brand/states/manifest.json" with { type: "json" };
+import illustrations from "@littlejay/brand/states/manifest.json" with { type: "json" };
 import { EmptyState } from "../empty-state/index.js";
 
 export type PebbleStateKind = "loading" | "success" | "error" | "empty";

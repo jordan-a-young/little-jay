@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Field, Input } from "@ljay/ui";
+import { Field, Input } from "@littlejay/ui";
 import { filterCatalog } from "../catalog/registry.js";
 import { CatalogLink } from "../catalog/navigation.js";
 
@@ -8,7 +8,7 @@ export function Sidebar({ selectedPage }: { selectedPage: string }) {
   const pages = filterCatalog(query);
   const groups = [...new Set(pages.map((page) => page.group))];
   return (
-    <aside className="catalog-sidebar">
+    <aside className="catalog-sidebar" aria-label="Catalog navigation" tabIndex={0}>
       <Field label="Find a component or guide">
         <Input
           type="search"
@@ -37,7 +37,11 @@ export function Sidebar({ selectedPage }: { selectedPage: string }) {
             </ul>
           </section>
         ))}
-        {pages.length === 0 && <p role="status">No matching components or guides.</p>}
+        {pages.length === 0 && (
+          <p role="status" className="catalog-search-empty">
+            No matching components or guides.
+          </p>
+        )}
       </nav>
     </aside>
   );

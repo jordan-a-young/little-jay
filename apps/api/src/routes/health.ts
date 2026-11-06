@@ -1,1 +1,1 @@
-export { healthRoutes } from "@ljay/server";
+export { healthRoutes } from "@littlejay/server";

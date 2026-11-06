@@ -1,11 +1,11 @@
-# @ljay/http
+# @littlejay/http
 
 Private ESM bounded JSON transport for browsers and Node with platform-compatible fetch, AbortController, and Web Streams. No React, CommonJS entry point, or CSS setup is required. The repository validates Node 26.13.0; other runtimes need consumer verification. Public exports and declarations are listed in [package.json](package.json).
 
 ## Imports
 
 ```ts
-import { fetchJson, HttpError } from "@ljay/http";
+import { fetchJson, HttpError } from "@littlejay/http";
 
 const status = await fetchJson("https://example.test/api/health", {
   timeoutMs: 10_000,

@@ -76,11 +76,14 @@ export const catalogPages: readonly CatalogRegistration[] = [
         : "status loading success error empty feedback",
     component: feedback,
   })),
-  ...["Checkbox", "Field", "Input", "NativeSelect", "Textarea"].map((title) => ({
+  ...["Checkbox", "Field", "Input", "NativeSelect", "Switch", "Textarea"].map((title) => ({
     id: title.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase(),
     title,
     group: "Components / Forms" as const,
-    keywords: "label validation native form control",
+    keywords:
+      title === "Switch"
+        ? "toggle on off boolean native form control"
+        : "label validation native form control",
     component: forms,
   })),
   ...["DescriptionList", "Dialog", "Disclosure", "IconButton", "Tabs", "TextBlock"].map(

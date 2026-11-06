@@ -1,4 +1,4 @@
-import { DescriptionList } from "@ljay/ui";
+import { DescriptionList } from "@littlejay/ui";
 import healthQuerySource from "../../health.ts?raw";
 import applicationSource from "../../main.tsx?raw";
 import apiConnectionSource from "../patterns/examples.tsx?raw";

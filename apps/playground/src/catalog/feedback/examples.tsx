@@ -7,7 +7,7 @@ import {
   LoadingIndicator,
   PebbleState,
   StatusIndicator,
-} from "@ljay/ui";
+} from "@littlejay/ui";
 
 export function LoadingIndicatorExamples() {
   return (

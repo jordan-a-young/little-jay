@@ -1,11 +1,12 @@
 @import "tailwindcss";
-@import "@ljay/ui/styles.css";
-@import "@ljay/ui/tailwind.css";
+@import "@littlejay/ui/styles.css";
+@import "@littlejay/ui/tailwind.css";
 @source "../../../packages/ui/src";
 html {
   color-scheme: var(--lj-color-scheme);
   background: var(--lj-background);
   color: var(--lj-content);
+  overflow: hidden;
 }
 body {
   margin: 0;
@@ -13,11 +14,17 @@ body {
 }
 .catalog-shell {
   display: grid;
-  grid-template-columns: 17rem minmax(0, 1fr);
-  min-height: 100vh;
+  grid-template-columns: clamp(7.5rem, 28vw, 17rem) minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
   font-family: var(--lj-font-sans);
 }
 .catalog-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
   grid-column: 1 / -1;
   display: flex;
   flex-wrap: wrap;
@@ -30,9 +37,18 @@ body {
 }
 .catalog-sidebar {
   min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-gutter: stable;
+  scrollbar-color: transparent transparent;
   padding: 1.5rem;
   border-right: 1px solid var(--lj-border);
   background: var(--lj-surface);
+}
+.catalog-search-empty {
+  margin-block-start: 1.5rem;
 }
 .catalog-nav-group {
   margin-top: 1.5rem;
@@ -49,6 +65,7 @@ body {
   display: block;
   padding: 0.375rem 0.625rem;
   border-radius: var(--lj-radius-control);
+  overflow-wrap: anywhere;
 }
 .catalog-nav-group a[aria-current="page"] {
   background: var(--lj-primary);
@@ -57,13 +74,52 @@ body {
 }
 .catalog-main {
   min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-gutter: stable;
+  scrollbar-color: transparent transparent;
   width: 100%;
   max-width: 80rem;
   margin-inline: auto;
   padding: 2rem clamp(1rem, 3vw, 3rem);
 }
+.catalog-sidebar:hover,
+.catalog-sidebar:focus-within,
+.catalog-main:hover,
+.catalog-main:focus-within {
+  scrollbar-color: var(--lj-muted) transparent;
+}
+.catalog-sidebar > *,
+.catalog-main > * {
+  scrollbar-color: auto;
+}
+.catalog-sidebar::-webkit-scrollbar,
+.catalog-main::-webkit-scrollbar {
+  width: 0.5rem;
+  height: 0.5rem;
+}
+.catalog-sidebar::-webkit-scrollbar-thumb,
+.catalog-main::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: transparent;
+}
+.catalog-sidebar:hover::-webkit-scrollbar-thumb,
+.catalog-sidebar:focus-within::-webkit-scrollbar-thumb,
+.catalog-main:hover::-webkit-scrollbar-thumb,
+.catalog-main:focus-within::-webkit-scrollbar-thumb {
+  background: var(--lj-muted);
+}
+@media (forced-colors: active) {
+  .catalog-sidebar,
+  .catalog-main {
+    scrollbar-color: auto;
+  }
+}
 .catalog-page-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
@@ -317,6 +373,10 @@ body {
   outline: 2px solid var(--lj-primary);
   outline-offset: 3px;
 }
+.catalog-sidebar:focus-visible,
+.catalog-main:focus-visible {
+  outline-offset: -3px;
+}
 .catalog-skip {
   position: fixed;
   top: 0.5rem;
@@ -347,24 +407,27 @@ body {
   border-radius: var(--lj-radius-control);
 }
 @media (max-width: 48rem) {
-  .catalog-shell {
-    grid-template-columns: minmax(0, 1fr);
+  .catalog-header {
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+  .catalog-header .brand-home {
+    width: clamp(7.5rem, 36vw, 17.1875rem);
+  }
+  .catalog-header .playground-label {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
   }
   .catalog-sidebar {
-    border-right: 0;
-    border-bottom: 1px solid var(--lj-border);
-  }
-  .catalog-sidebar nav {
-    max-height: 16rem;
-    overflow-y: auto;
-    margin-top: 1rem;
+    padding: 1rem 0.5rem;
+    font-size: 0.875rem;
   }
   .catalog-main {
-    padding: 1.5rem 1rem;
+    padding: 1rem 0.75rem;
   }
   .catalog-preview-track,
   .catalog-preview {
-    padding: 0.75rem;
+    padding: 0.5rem;
   }
 }
 .playground-header {

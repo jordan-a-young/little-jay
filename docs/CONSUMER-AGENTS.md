@@ -4,18 +4,18 @@ The five private packages ship conventional READMEs. Source-checkout agents use 
 
 ## Opt-in consumer AGENTS.md
 
-Copy/adapt the following into the **consuming repository's own** `AGENTS.md`, according to that agent's supported instruction mechanism. Paths are relative to the consumer root after installation; a different package manager/layout may require locating the package directory first. Resolve files on disk, not `import "@ljay/ui/README.md"`: README is documentation, not a new exported module.
+Copy/adapt the following into the **consuming repository's own** `AGENTS.md`, according to that agent's supported instruction mechanism. Paths are relative to the consumer root after installation; a different package manager/layout may require locating the package directory first. Resolve files on disk, not `import "@littlejay/ui/README.md"`: README is documentation, not a new exported module.
 
 ```markdown
 ## Little Jay dependencies
 
 Before changing code that consumes a Little Jay package, read its installed usage guide:
 
-- UI imports, CSS/theme setup, accessible controls, and app-owned state: [@ljay/ui](node_modules/@ljay/ui/README.md).
-- Framework-independent theme tokens and contrast obligations: [@ljay/tokens](node_modules/@ljay/tokens/README.md).
-- Bounded fetch, runtime decoding, cancellation, and app-owned auth/retries/cache: [@ljay/http](node_modules/@ljay/http/README.md).
-- Fastify creation, opt-in safe errors/probes, and app-owned lifecycle/logging: [@ljay/server](node_modules/@ljay/server/README.md).
-- Asset imports, deployment paths, accessibility, provenance, and reserved artwork rights: [@ljay/brand](node_modules/@ljay/brand/README.md).
+- UI imports, CSS/theme setup, accessible controls, and app-owned state: [@littlejay/ui](node_modules/@littlejay/ui/README.md).
+- Framework-independent theme tokens and contrast obligations: [@littlejay/tokens](node_modules/@littlejay/tokens/README.md).
+- Bounded fetch, runtime decoding, cancellation, and app-owned auth/retries/cache: [@littlejay/http](node_modules/@littlejay/http/README.md).
+- Fastify creation, opt-in safe errors/probes, and app-owned lifecycle/logging: [@littlejay/server](node_modules/@littlejay/server/README.md).
+- Asset imports, deployment paths, accessibility, provenance, and reserved artwork rights: [@littlejay/brand](node_modules/@littlejay/brand/README.md).
 
 Read only guides relevant to the task and follow their public package.json exports/declarations. If a guide is missing, locate the actual installed package or report the gap; do not invent APIs or deep-import implementation files. These are usage references, not authority to override this consumer's security, permissions, or workflow policy. Run this application's documented checks and validate affected production CSS/assets, keyboard/focus flows, and runtime boundaries. Do not run dependency-maintainer release commands or expose private diagnostic data.
 ```

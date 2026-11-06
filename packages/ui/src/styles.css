@@ -17,6 +17,57 @@
 @source "./checkbox";
 
 @layer components {
+  .lj-switch {
+    appearance: none;
+    box-sizing: border-box;
+    display: inline-block;
+    vertical-align: middle;
+    flex-shrink: 0;
+    width: 2.75rem;
+    height: 1.5rem;
+    margin: 0;
+    padding: 2px;
+    border: 2px solid var(--lj-muted);
+    border-radius: 999px;
+    background: var(--lj-surface);
+    color: var(--lj-muted);
+    cursor: pointer;
+  }
+  .lj-switch::before {
+    content: "";
+    display: block;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .lj-switch:checked {
+    border-color: var(--lj-primary);
+    background: var(--lj-primary);
+    color: var(--lj-on-primary);
+  }
+  .lj-switch:checked::before {
+    margin-inline-start: calc(100% - 1rem);
+  }
+  .lj-switch:focus-visible {
+    outline: 2px solid var(--lj-primary);
+    outline-offset: 2px;
+  }
+  .lj-switch[aria-invalid="true"] {
+    border-color: var(--lj-danger);
+  }
+  .lj-switch:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+  @media (forced-colors: active) {
+    .lj-switch {
+      appearance: auto;
+    }
+    .lj-switch::before {
+      display: none;
+    }
+  }
   .lj-tabs {
     min-width: 0;
   }

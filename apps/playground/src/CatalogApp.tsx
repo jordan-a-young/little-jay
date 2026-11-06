@@ -1,8 +1,8 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import { Outlet } from "@tanstack/react-router";
-import { ErrorBoundary } from "@ljay/ui";
-import logoLight from "@ljay/brand/logos/lockup-light.svg";
-import logoDark from "@ljay/brand/logos/lockup-dark.svg";
+import { ErrorBoundary } from "@littlejay/ui";
+import logoLight from "@littlejay/brand/logos/lockup-light.svg";
+import logoDark from "@littlejay/brand/logos/lockup-dark.svg";
 import { useTheme } from "./use-theme.js";
 import { catalogPages } from "./catalog/registry.js";
 import { CatalogLink, useCatalogSelection } from "./catalog/navigation.js";
@@ -57,9 +57,14 @@ export function CatalogApp() {
         <span className="playground-label">Component catalog</span>
       </header>
       <Sidebar selectedPage={pageId} />
-      <main id="catalog-content" tabIndex={-1} className="catalog-main">
+      <main
+        id="catalog-content"
+        tabIndex={0}
+        aria-labelledby="catalog-page-title"
+        className="catalog-main"
+      >
         <div className="catalog-page-header">
-          <h1 ref={heading} tabIndex={-1}>
+          <h1 id="catalog-page-title" ref={heading} tabIndex={-1}>
             {page?.title ?? "Page not found"}
           </h1>
           <Toolbar

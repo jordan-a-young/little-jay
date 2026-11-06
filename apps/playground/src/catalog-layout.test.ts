@@ -1,0 +1,55 @@
+import { readFile } from "node:fs/promises";
+import { describe, expect, it } from "vite-plus/test";
+
+const stylesheet = await readFile(new URL("./styles.css", import.meta.url), "utf8");
+
+function rulesFor(className: string) {
+  return [...stylesheet.matchAll(new RegExp(`\\.${className}\\s*\\{([^}]+)\\}`, "g"))].map(
+    (match) => match[1]!,
+  );
+}
+
+describe("catalog scroll layout contract", () => {
+  it("bounds the shell to the viewport with a separate header and shrinkable pane row", () => {
+    const shell = rulesFor("catalog-shell")[0]!;
+    expect(shell).toMatch(/height:\s*100dvh/);
+    expect(shell).toMatch(/grid-template-rows:\s*auto minmax\(0,\s*1fr\)/);
+    expect(shell).toMatch(/overflow:\s*hidden/);
+  });
+
+  it.each(["catalog-sidebar", "catalog-main"])("gives %s its own contained scroll area", (name) => {
+    const pane = rulesFor(name)[0]!;
+    expect(pane).toMatch(/min-height:\s*0/);
+    expect(pane).toMatch(/overflow:\s*auto/);
+    expect(pane).toMatch(/overscroll-behavior:\s*contain/);
+    expect(pane).toMatch(/scrollbar-gutter:\s*stable/);
+  });
+
+  it("keeps the header sticky above both panes and never stacks the sidebar", () => {
+    const header = rulesFor("catalog-header")[0]!;
+    expect(header).toMatch(/position:\s*sticky/);
+    expect(header).toMatch(/top:\s*0/);
+    expect(header).toMatch(/z-index:\s*[1-9]/);
+    for (const shell of rulesFor("catalog-shell")) {
+      expect(shell).not.toMatch(/grid-template-columns:\s*minmax\(0,\s*1fr\)\s*;/);
+    }
+  });
+
+  it("separates empty search feedback from the search field", () => {
+    expect(rulesFor("catalog-search-empty")[0]).toMatch(/margin-block-start:\s*1\.5rem/);
+  });
+
+  it.each(["catalog-sidebar", "catalog-main"])(
+    "hides %s scrollbars at rest without changing their width",
+    (name) => {
+      const pane = rulesFor(name)[0]!;
+      expect(pane).toMatch(/scrollbar-width:\s*thin/);
+      expect(pane).toMatch(/scrollbar-color:\s*transparent transparent/);
+      expect(stylesheet).toContain(`.${name}:hover`);
+      expect(stylesheet).toContain(`.${name}:focus-within`);
+      expect(stylesheet).toMatch(/scrollbar-color:\s*var\(--lj-muted\) transparent/);
+      expect(stylesheet).toContain(`.${name} > *`);
+      expect(stylesheet).toMatch(/\.catalog-main\s*>\s*\*\s*\{\s*scrollbar-color:\s*auto/);
+    },
+  );
+});

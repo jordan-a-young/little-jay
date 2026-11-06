@@ -4,12 +4,12 @@ Little Jay is the brand; Pebble is the cozy seated young blue jay. The original 
 
 ## Canonical files
 
-- `packages/brand`: selected SVG/PNG logos, Pebble, icons, banners, manifest, `FONT-NOTICES.txt`, and the original kit README for provenance. `@ljay/brand` is private and framework-independent, with explicit asset exports and no React components.
+- `packages/brand`: selected SVG/PNG logos, Pebble, icons, banners, manifest, `FONT-NOTICES.txt`, and the original kit README for provenance. `@littlejay/brand` is private and framework-independent, with explicit asset exports and no React components.
 - `packages/tokens/source/palette.json` and `source/tokens.css`: the approved kit's source of truth.
 - `packages/tokens/theme.css`: generated semantic theme, not a hand-maintained second palette. `scripts/build-tokens.mjs` validates agreement between the approved JSON and CSS, then preserves existing `--lj-*` names and accessible feedback extensions.
 - `packages/tokens/tailwind.css`: semantic utilities shared by UI and application code. UI's compiled stylesheet includes the generated theme; consumers need neither Tailwind nor a global reset.
 
-Change approved token sources together, then run `pnpm --filter @ljay/tokens build`. `pnpm check` rejects stale generated CSS, and dependency-ordered builds regenerate it before UI compilation. Restart `pnpm dev` after changing token sources so compiled UI CSS is rebuilt. Component source edits retain hot reload. Do not import `source/tokens.css` alongside the generated theme.
+Change approved token sources together, then run `pnpm --filter @littlejay/tokens build`. `pnpm check` rejects stale generated CSS, and dependency-ordered builds regenerate it before UI compilation. Restart `pnpm dev` after changing token sources so compiled UI CSS is rebuilt. Component source edits retain hot reload. Do not import `source/tokens.css` alongside the generated theme.
 
 Brand primitives remain distinct from action colors:
 
@@ -26,9 +26,9 @@ Use semantic `primary`, `background`, `surface`, `content`, `muted`, and `border
 Static loading/success/error/empty illustrations and the reusable React presentation are documented in [Pebble app states](PEBBLE-STATES.md). Canonical PNGs and their manifest live in `packages/brand/states`; browser copies use the same synchronization plugin.
 
 ```tsx
-import logoLight from "@ljay/brand/logos/lockup-light.svg";
-import logoDark from "@ljay/brand/logos/lockup-dark.svg";
-import pebble from "@ljay/brand/mascot/pebble.svg";
+import logoLight from "@littlejay/brand/logos/lockup-light.svg";
+import logoDark from "@littlejay/brand/logos/lockup-dark.svg";
+import pebble from "@littlejay/brand/mascot/pebble.svg";
 
 <img src={theme === "dark" ? logoDark : logoLight} alt="Little Jay" width={275} height={75} />;
 <img src={pebble} alt="" width={160} height={160} />;
@@ -42,7 +42,7 @@ The playground sets `data-theme="light"` or `data-theme="dark"` on `document.doc
 
 Explicit light/dark preferences use `little-jay.theme` in local storage. Missing/invalid storage follows `prefers-color-scheme`; choosing **System** in the Settings popover's Theme selector removes the explicit preference. System changes apply only in system mode. Storage events synchronize tabs. Blocked persistence retains the in-memory selection. Stable snapshots use `useSyncExternalStore`, with one shared media/storage listener pair and cleanup. Theme changes do not key/remount the form. Browser `theme-color` follows the resolved background.
 
-Override variables after importing `@ljay/ui/styles.css` (or `@ljay/tokens/theme.css` for non-React use):
+Override variables after importing `@littlejay/ui/styles.css` (or `@littlejay/tokens/theme.css` for non-React use):
 
 ```css
 :root {
@@ -66,14 +66,14 @@ Override foreground/background together and recheck contrast. Nested `data-theme
 HTML uses `%BASE_URL%branding/...`. The manifest uses `./icons/...`, with `start_url` and `scope` set to `../`, because it lives at `<app-base>/branding/site.webmanifest`. This supports same-origin pathname bases `/` or `/little-jay/`; CDN hosting needs a separate deployment decision. Example:
 
 ```sh
-pnpm --filter @ljay/playground build --base=/little-jay/
+pnpm --filter @littlejay/playground build --base=/little-jay/
 ```
 
 Manifest colors are static install-time defaults; HTML `theme-color` changes with appearance. Icons are standard `purpose: any`, not maskable. No service worker or offline support is implied. No public site URL is configured, so no canonical URL or social metadata is invented. Raster social previews are available for a future explicitly configured site.
 
 ## Adding another application
 
-1. Add `@ljay/brand` and the needed `@ljay/ui`/`@ljay/tokens` workspace dependencies.
+1. Add `@littlejay/brand` and the needed `@littlejay/ui`/`@littlejay/tokens` workspace dependencies.
 2. Import assets through exports and the shared stylesheet once. Use appropriate alt text and explicit dimensions.
 3. Adopt the playground's document-level preference/bootstrap pattern with one theme owner per document.
 4. Adapt the app-local plugin's synchronization allowlist to the new app's public directory, or use your framework's equivalent hook. Resolve sources through brand exports; do not maintain duplicate artwork.

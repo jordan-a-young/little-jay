@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState } from "react";
-import { Button, ErrorBoundary } from "@ljay/ui";
+import { Button, ErrorBoundary } from "@littlejay/ui";
 
 export type CodeLanguage = "tsx" | "css";
 const HighlightedCode = lazy(() => import("./HighlightedCode.js"));

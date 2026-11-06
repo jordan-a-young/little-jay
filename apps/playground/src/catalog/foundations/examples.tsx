@@ -1,8 +1,8 @@
-import pebble from "@ljay/brand/mascot/pebble.svg";
-import logoLight from "@ljay/brand/logos/lockup-light.svg";
-import logoDark from "@ljay/brand/logos/lockup-dark.svg";
-import palette from "@ljay/tokens/palette.json";
-import { Button, Field, Input } from "@ljay/ui";
+import pebble from "@littlejay/brand/mascot/pebble.svg";
+import logoLight from "@littlejay/brand/logos/lockup-light.svg";
+import logoDark from "@littlejay/brand/logos/lockup-dark.svg";
+import palette from "@littlejay/tokens/palette.json";
+import { Button, Field, Input } from "@littlejay/ui";
 import { useTheme } from "../../use-theme.js";
 import { CatalogLink } from "../navigation.js";
 

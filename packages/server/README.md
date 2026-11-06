@@ -1,11 +1,11 @@
-# @ljay/server
+# @littlejay/server
 
 Private Node ESM Fastify foundations, currently using Fastify 5.12.8 and fastify-plugin 6.0.1. The repository validates Node 26.13.0; verify other supported Fastify runtimes in your application. No browser runtime, React, CSS, or CommonJS entry point is provided. See [package.json](package.json) and shipped declarations for public exports and Fastify types.
 
 ## Imports
 
 ```ts
-import { createServer, healthRoutes, safeErrorsPlugin } from "@ljay/server";
+import { createServer, healthRoutes, safeErrorsPlugin } from "@littlejay/server";
 
 const app = createServer({ bodyLimit: 16_384 });
 app.register(safeErrorsPlugin);

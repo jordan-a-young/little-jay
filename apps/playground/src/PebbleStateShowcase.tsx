@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, PebbleState } from "@ljay/ui";
+import { Button, PebbleState } from "@littlejay/ui";
 
 export function PebbleStateShowcase() {
   const [retried, setRetried] = useState(false);

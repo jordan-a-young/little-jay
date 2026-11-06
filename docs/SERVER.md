@@ -1,11 +1,11 @@
 # Server contracts
 
-`@ljay/server` exports `createServer`, `safeErrorsPlugin`, and `healthRoutes`, their option/response types, and the existing Fastify types. The factory only creates Fastify: routes, listener startup, shutdown, and process listeners remain app-owned.
+`@littlejay/server` exports `createServer`, `safeErrorsPlugin`, and `healthRoutes`, their option/response types, and the existing Fastify types. The factory only creates Fastify: routes, listener startup, shutdown, and process listeners remain app-owned.
 
 ## Opt-in safe errors
 
 ```ts
-import { createServer, healthRoutes, safeErrorsPlugin } from "@ljay/server";
+import { createServer, healthRoutes, safeErrorsPlugin } from "@littlejay/server";
 
 const app = createServer({ bodyLimit: 16_384 });
 app.register(safeErrorsPlugin);

@@ -1,4 +1,4 @@
-import { createServer, safeErrorsPlugin, type FastifyServerOptions } from "@ljay/server";
+import { createServer, safeErrorsPlugin, type FastifyServerOptions } from "@littlejay/server";
 import { healthRoutes } from "./routes/health.js";
 import { textPreviewRoutes } from "./routes/text-preview.js";
 import { LogController } from "fastify";

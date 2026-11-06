@@ -1,4 +1,4 @@
-import palette from "@ljay/tokens/palette.json";
+import palette from "@littlejay/tokens/palette.json";
 
 export const themeSettings = {
   storageKey: "little-jay.theme",

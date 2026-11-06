@@ -1,4 +1,4 @@
-# @ljay/brand
+# @littlejay/brand
 
 Canonical, framework-independent Little Jay artwork from the approved Pebble kit. This package is private and has no runtime framework dependencies.
 
@@ -11,9 +11,9 @@ Canonical, framework-independent Little Jay artwork from the approved Pebble kit
 - `banners/`: light/dark banners and raster social previews, available for future use. Social images are not automatically imported or assigned a public domain.
 - `site.webmanifest`: relative URLs suitable for an app serving the manifest at `<app-base>/branding/site.webmanifest`.
 
-Import an explicitly exported asset through your bundler, for example `import logo from "@ljay/brand/logos/lockup-light.svg"`. Preserve the image's aspect ratio and supply explicit dimensions. Lockups are 1100×300; use proportional display dimensions such as 275×75. Pebble is a 1024×1024 SVG viewport/PNG; use square display dimensions and do not stretch the underlying viewBox. Use `alt="Little Jay"` for a meaningful logo and `alt=""` for purely decorative mascot artwork. Do not inline or reconstruct Pebble in React or CSS.
+Import an explicitly exported asset through your bundler, for example `import logo from "@littlejay/brand/logos/lockup-light.svg"`. Preserve the image's aspect ratio and supply explicit dimensions. Lockups are 1100×300; use proportional display dimensions such as 275×75. Pebble is a 1024×1024 SVG viewport/PNG; use square display dimensions and do not stretch the underlying viewBox. Use `alt="Little Jay"` for a meaningful logo and `alt=""` for purely decorative mascot artwork. Do not inline or reconstruct Pebble in React or CSS.
 
-The approved palette and original CSS live in `@ljay/tokens` under `source/`; that package generates the shared theme. Do not maintain a second app theme alongside it. See the workspace README for theme preferences, overrides, and automatic browser-asset synchronization.
+The approved palette and original CSS live in `@littlejay/tokens` under `source/`; that package generates the shared theme. Do not maintain a second app theme alongside it. See the workspace README for theme preferences, overrides, and automatic browser-asset synchronization.
 
 [SOURCE-README.md](SOURCE-README.md) preserves the original kit's provenance and directions. Its suggestion to copy the entire kit to public is superseded by the repository's explicit synchronization allowlist. Original reference raster, preview sheet, ZIP, font binaries, and unused icon variants are deliberately not included. Artwork and notices were copied from the original download without altering it. Only manifest URLs were adapted for app-relative deployment.
 
@@ -21,7 +21,7 @@ The wordmarks are outlined from Ubuntu Sans Bold and need no web font. Retain [F
 
 ## Imports and compatibility
 
-Use the explicit asset exports in [package.json](package.json), for example `import logo from "@ljay/brand/logos/lockup-light.svg"` in a bundler that handles asset URLs. There is no root JavaScript API, React peer dependency, or CommonJS entry point. Static files need no CSS or theme runtime. The workspace documentation paths mentioned above are private source-repository references, not files installed with this package.
+Use the explicit asset exports in [package.json](package.json), for example `import logo from "@littlejay/brand/logos/lockup-light.svg"` in a bundler that handles asset URLs. There is no root JavaScript API, React peer dependency, or CommonJS entry point. Static files need no CSS or theme runtime. The workspace documentation paths mentioned above are private source-repository references, not files installed with this package.
 
 ## Accessibility and deployment
 

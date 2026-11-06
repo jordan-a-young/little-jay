@@ -13,7 +13,7 @@ const documents: Record<string, CatalogDocument> = {
     overview:
       "Compact indeterminate activity with optional visible text. The application owns loading state, busy regions, and announcements. Motion stops when reduced motion is preferred.",
     usage:
-      'import { LoadingIndicator } from "@ljay/ui/loading-indicator";\nimport "@ljay/ui/styles.css";\n\n<LoadingIndicator />\n<LoadingIndicator label="Checking…" />',
+      'import { LoadingIndicator } from "@littlejay/ui/loading-indicator";\nimport "@littlejay/ui/styles.css";\n\n<LoadingIndicator />\n<LoadingIndicator label="Checking…" />',
     props: [
       {
         name: "label",
@@ -52,7 +52,7 @@ const documents: Record<string, CatalogDocument> = {
     overview:
       "Feedback with a semantic tone, optional title/action, and opt-in dismissal. The application owns the message and visibility. Static catalog examples explicitly use role=note rather than announcing on mount.",
     usage:
-      'import { Alert, Button } from "@ljay/ui";\nimport "@ljay/ui/styles.css";\n\n<Alert tone="danger" title="Connection lost" action={<Button onClick={reload}>Reload</Button>}>\n  Your last saved checkpoint is available.\n</Alert>',
+      'import { Alert, Button } from "@littlejay/ui";\nimport "@littlejay/ui/styles.css";\n\n<Alert tone="danger" title="Connection lost" action={<Button onClick={reload}>Reload</Button>}>\n  Your last saved checkpoint is available.\n</Alert>',
     props: [
       commonProps,
       {
@@ -129,7 +129,7 @@ const documents: Record<string, CatalogDocument> = {
     overview:
       "A compact text-first empty panel with an optional action. Use PebbleState when a larger decorative illustration helps; retain meaningful visible copy in either case.",
     usage:
-      'import { EmptyState } from "@ljay/ui/empty-state";\nimport "@ljay/ui/styles.css";\n\n<EmptyState title="No checkpoints yet">Start a run to create its first checkpoint.</EmptyState>',
+      'import { EmptyState } from "@littlejay/ui/empty-state";\nimport "@littlejay/ui/styles.css";\n\n<EmptyState title="No checkpoints yet">Start a run to create its first checkpoint.</EmptyState>',
     props: [
       commonProps,
       { name: "title", type: "ReactNode / required", description: "Visible state label." },
@@ -156,7 +156,7 @@ const documents: Record<string, CatalogDocument> = {
     overview:
       "A small text-and-tone status label for lists and inspectors. Applications select the words and tone; the UI does not infer domain states or approval policy.",
     usage:
-      'import { StatusIndicator } from "@ljay/ui/status-indicator";\nimport "@ljay/ui/styles.css";\n\n<StatusIndicator tone="warning">Awaiting review</StatusIndicator>',
+      'import { StatusIndicator } from "@littlejay/ui/status-indicator";\nimport "@littlejay/ui/styles.css";\n\n<StatusIndicator tone="warning">Awaiting review</StatusIndicator>',
     props: [
       {
         name: "tone",
@@ -191,7 +191,7 @@ const documents: Record<string, CatalogDocument> = {
     overview:
       "Isolates descendant rendering failures so sibling navigation and controls remain available. Expected validation and network failures usually belong in Alert rather than throwing away a working panel.",
     usage:
-      'import { ErrorBoundary } from "@ljay/ui/error-boundary";\n\n<ErrorBoundary onReset={repairLocalState} resetKey={panelId}>\n  <CheckpointInspector />\n</ErrorBoundary>',
+      'import { ErrorBoundary } from "@littlejay/ui/error-boundary";\n\n<ErrorBoundary onReset={repairLocalState} resetKey={panelId}>\n  <CheckpointInspector />\n</ErrorBoundary>',
     props: [
       { name: "children", type: "ReactNode", description: "The isolated rendering subtree." },
       {
@@ -228,7 +228,7 @@ const documents: Record<string, CatalogDocument> = {
     overview:
       "Static, transparent illustrations for loading, success, error, and empty states. Images are lazy-loaded from canonical branding assets; applications supply copy, state, actions, and announcement policy.",
     usage:
-      'import { PebbleState } from "@ljay/ui/pebble-state";\nimport "@ljay/ui/styles.css";\n\n<PebbleState state="empty" heading="No projects yet."\n  assetBaseUrl={`${import.meta.env.BASE_URL}branding/`} />',
+      'import { PebbleState } from "@littlejay/ui/pebble-state";\nimport "@littlejay/ui/styles.css";\n\n<PebbleState state="empty" heading="No projects yet."\n  assetBaseUrl={`${import.meta.env.BASE_URL}branding/`} />',
     props: [
       commonProps,
       {

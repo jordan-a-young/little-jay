@@ -193,7 +193,7 @@ importers:
       '@fastify/type-provider-typebox':
         specifier: 6.3.0
         version: 6.3.0(ajv-formats@3.0.1)(typebox@1.4.4)
-      '@ljay/server':
+      '@littlejay/server':
         specifier: workspace:*
         version: link:../../packages/server
       ajv-formats:
@@ -221,16 +221,16 @@ importers:
 
   apps/playground:
     dependencies:
-      '@ljay/brand':
+      '@littlejay/brand':
         specifier: workspace:*
         version: link:../../packages/brand
-      '@ljay/http':
+      '@littlejay/http':
         specifier: workspace:*
         version: link:../../packages/http
-      '@ljay/tokens':
+      '@littlejay/tokens':
         specifier: workspace:*
         version: link:../../packages/tokens
-      '@ljay/ui':
+      '@littlejay/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       '@tanstack/react-query':
@@ -308,10 +308,10 @@ importers:
 
   packages/ui:
     dependencies:
-      '@ljay/brand':
+      '@littlejay/brand':
         specifier: workspace:*
         version: link:../brand
-      '@ljay/tokens':
+      '@littlejay/tokens':
         specifier: workspace:*
         version: link:../tokens
       '@radix-ui/react-dialog':

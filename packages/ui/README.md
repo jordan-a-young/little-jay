@@ -1,4 +1,4 @@
-# @ljay/ui
+# @littlejay/ui
 
 Private ESM React 19 components. React and React DOM `^19.0.0` are peer dependencies; use the same React installation as the application. Consume only the public exports in [package.json](package.json), not `src` or hashed build chunks. No CommonJS entry point is provided.
 
@@ -7,9 +7,9 @@ Private ESM React 19 components. React and React DOM `^19.0.0` are peer dependen
 Root and component subpath imports expose the same components and types:
 
 ```tsx
-import { Button, Field, Input } from "@ljay/ui";
-import { LoadingIndicator } from "@ljay/ui/loading-indicator";
-import "@ljay/ui/styles.css";
+import { Button, Field, Input } from "@littlejay/ui";
+import { LoadingIndicator } from "@littlejay/ui/loading-indicator";
+import "@littlejay/ui/styles.css";
 
 export function NameForm() {
   return (
@@ -28,11 +28,11 @@ The indicator above is illustrative, not connected to submission. Other public c
 
 ## CSS and theming
 
-Load `@ljay/ui/styles.css` once at the application entry. It contains compiled component utilities and the semantic theme: **no Tailwind installation or global reset is required**. The optional `@ljay/ui/theme.css` is theme-only; `@ljay/ui/tailwind.css` supplies mappings for apps already using Tailwind 4, not a replacement for compiled component CSS.
+Load `@littlejay/ui/styles.css` once at the application entry. It contains compiled component utilities and the semantic theme: **no Tailwind installation or global reset is required**. The optional `@littlejay/ui/theme.css` is theme-only; `@littlejay/ui/tailwind.css` supplies mappings for apps already using Tailwind 4, not a replacement for compiled component CSS.
 
 Use `data-theme="light"` or `data-theme="dark"` on the document root or a subtree. The application owns preference persistence and system-theme selection. Override semantic `--lj-*` properties after the library stylesheet, scoped to the relevant theme/container; review foreground/background contrast together. Brand blue is not the primary action color. For locally themed dialogs, place the portal in the themed subtree using `portalContainer`; document-root themes inherit normally.
 
-PebbleState needs application-served assets. Copy the state PNGs from the installed `@ljay/brand/states/manifest.json` into your own public asset pipeline, preserving names and proportions. Pass a deployment-aware `assetBaseUrl` ending in `/` (for example `/my-app/branding/`, with images under `states/`). The library does not copy assets or infer the app base URL. Artwork has separate reserved rights; read the installed brand README before reuse.
+PebbleState needs application-served assets. Copy the state PNGs from the installed `@littlejay/brand/states/manifest.json` into your own public asset pipeline, preserving names and proportions. Pass a deployment-aware `assetBaseUrl` ending in `/` (for example `/my-app/branding/`, with images under `states/`). The library does not copy assets or infer the app base URL. Artwork has separate reserved rights; read the installed brand README before reuse.
 
 ## Accessibility
 
@@ -46,13 +46,27 @@ PebbleState needs application-served assets. Copy the state PNGs from the instal
 
 These components own presentation, not authentication, authorization, workflow transitions, network calls, caches, validation schemas, or routing. Disabled controls and accessibility attributes are not security boundaries. The application owns pending state, retries, draft preservation, reset behavior, and safe error reporting; ErrorBoundary is not a catch-all for asynchronous/event-handler failures.
 
-## Tabs
+## Switch
 
-`Tabs`, `TabsProps`, and `TabsItem` are available from the root and `@ljay/ui/tabs`:
+`Switch` and `SwitchProps` are available from `@littlejay/ui` and `@littlejay/ui/switch`. Load the compiled stylesheet as above.
 
 ```tsx
-import { Tabs } from "@ljay/ui/tabs";
-import "@ljay/ui/styles.css";
+import { Field, Switch } from "@littlejay/ui";
+
+<Field label="Enable notifications" orientation="horizontal">
+  <Switch name="notifications" defaultChecked />
+</Field>;
+```
+
+This is a native checkbox with fixed `role="switch"`: Space or clicking the label toggles it. Keep the label stable and describe the setting, not the current state. Use `checked` with `onChange={(event) => setEnabled(event.currentTarget.checked)}` for controlled state, or `defaultChecked` for uncontrolled state. Native input props, ref, required, disabled, Field descriptions/errors, form reset and submission are supported. Unchecked/disabled controls are omitted from FormData; the default submitted value is `"on"`. Controlled reset and any persistence or side effects are application-owned. Do not set a separate `aria-checked`; the native checked state supplies it. Use Checkbox for selection/consent rather than an on/off setting.
+
+## Tabs
+
+`Tabs`, `TabsProps`, and `TabsItem` are available from the root and `@littlejay/ui/tabs`:
+
+```tsx
+import { Tabs } from "@littlejay/ui/tabs";
+import "@littlejay/ui/styles.css";
 
 export function DocumentViews() {
   return (
@@ -84,4 +98,4 @@ Use your consuming application's checks. Exercise affected keyboard/focus flows,
 
 ## License
 
-Project-authored code and documentation are covered by [MIT](LICENSE). Branding artwork is excluded from that grant; no artwork reuse or trademark permission is implied. Preserve dependency notices and the installed `@ljay/brand` provenance/font notices.
+Project-authored code and documentation are covered by [MIT](LICENSE). Branding artwork is excluded from that grant; no artwork reuse or trademark permission is implied. Preserve dependency notices and the installed `@littlejay/brand` provenance/font notices.

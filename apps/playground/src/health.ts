@@ -1,5 +1,5 @@
 import { queryOptions } from "@tanstack/react-query";
-import { fetchJson } from "@ljay/http";
+import { fetchJson } from "@littlejay/http";
 
 export const healthQueryOptions = queryOptions({
   queryKey: ["api", "health"],

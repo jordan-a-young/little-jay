@@ -1,4 +1,42 @@
-import { Checkbox, Field, Input, NativeSelect, Textarea } from "@ljay/ui";
+import { useState } from "react";
+import { Checkbox, Field, Input, NativeSelect, Switch, Textarea } from "@littlejay/ui";
+
+export function SwitchExample() {
+  return (
+    <Field
+      label="Enable notifications"
+      orientation="horizontal"
+      description="Local example only; no notifications are sent."
+    >
+      <Switch name="notifications" defaultChecked />
+    </Field>
+  );
+}
+
+export function ControlledSwitch() {
+  const [enabled, setEnabled] = useState(false);
+  return (
+    <div>
+      <Field label="Enable notifications" orientation="horizontal">
+        <Switch checked={enabled} onChange={(event) => setEnabled(event.currentTarget.checked)} />
+      </Field>
+      <p>Notifications: {enabled ? "On" : "Off"} (local example only)</p>
+    </div>
+  );
+}
+
+export function DisabledSwitch() {
+  return (
+    <div className="grid gap-4">
+      <Field label="Notifications on" orientation="horizontal" disabled>
+        <Switch defaultChecked />
+      </Field>
+      <Field label="Notifications off" orientation="horizontal" disabled>
+        <Switch />
+      </Field>
+    </div>
+  );
+}
 
 export function FieldExample() {
   return (

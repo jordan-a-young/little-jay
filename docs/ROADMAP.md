@@ -6,7 +6,7 @@ Build small, useful pieces for Graph Workbench first. Other project consumers ar
 
 - App-local component catalog with searchable navigation, lazy category pages, URL-addressable examples, usage/props/accessibility docs, theme/width controls, and isolated preview reset. No Storybook dependency.
 
-- Canonical private `@ljay/brand` assets, approved Pebble palette, generated shared tokens, and document-level persisted/system appearance. Browser icons and manifest synchronize automatically for development and builds.
+- Canonical private `@littlejay/brand` assets, approved Pebble palette, generated shared tokens, and document-level persisted/system appearance. Browser icons and manifest synchronize automatically for development and builds.
 
 - Framework-independent light/dark tokens and semantic feedback colors.
 - Native Button; Alert, EmptyState, StatusIndicator, and resettable ErrorBoundary.
@@ -16,7 +16,7 @@ Build small, useful pieces for Graph Workbench first. Other project consumers ar
 - Native DescriptionList/Disclosure, inert escaped TextBlock, and named IconButton with local catalog consumers.
 - Focused Radix Dialog modal foundation and sheet variant, with controlled dismissal, portal, keyboard/focus coverage, and reset-free theme styling.
 - Accessible horizontal Tabs with manual activation, controlled/uncontrolled selection, disabled/RTL keyboard navigation, lazily mounted preserved panels and local catalog examples. No consumer migration is included.
-- `@ljay/http`: bounded platform-fetch JSON transport, cancellation/deadlines, runtime decoders, and safe structured errors; consumed by the existing TanStack Query health read.
+- `@littlejay/http`: bounded platform-fetch JSON transport, cancellation/deadlines, runtime decoders, and safe structured errors; consumed by the existing TanStack Query health read.
 - Configurable Fastify factory; opt-in canonical safe-error and configurable health/readiness plugins; app-owned routes, startup, logging, and shutdown.
 - Matched TypeBox/provider packages through one concrete stateless `/api/text-preview` endpoint. No shared validation abstraction.
 - Five-package tarball coverage, strict external NodeNext declarations, and a no-Tailwind UI consumer including inspection and modal controls.
@@ -32,7 +32,7 @@ Each slice needs meaningful interaction tests, theme/no-reset checks, strict dec
 
 - Use TanStack React Query for client caching and invalidation. Keep query keys, authentication scope, mutation policy, and SSE projections in applications. Do not build a second query cache or replace an existing generated OpenAPI client solely for consistency.
 - Add real app-owned readiness checks when dependencies exist; keep their timeouts and resource lifecycle explicit.
-- Separate `@ljay/validation` only when real shared formats, decoders, or error mapping justify it. Do not migrate other projects' Zod contracts as a side effect.
+- Separate `@littlejay/validation` only when real shared formats, decoders, or error mapping justify it. Do not migrate other projects' Zod contracts as a side effect.
 
 ## Deferred
 

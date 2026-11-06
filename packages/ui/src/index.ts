@@ -15,6 +15,7 @@ export { Input, type InputProps } from "./input/index.js";
 export { Textarea, type TextareaProps } from "./textarea/index.js";
 export { NativeSelect, type NativeSelectProps } from "./native-select/index.js";
 export { Checkbox, type CheckboxProps } from "./checkbox/index.js";
+export { Switch, type SwitchProps } from "./switch/index.js";
 export { DescriptionList, type DescriptionListProps } from "./description-list/index.js";
 export { Disclosure, type DisclosureProps } from "./disclosure/index.js";
 export { TextBlock, type TextBlockProps } from "./text-block/index.js";

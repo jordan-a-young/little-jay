@@ -10,7 +10,7 @@ export default defineConfig(({ command }) => ({
       command === "serve"
         ? [
             {
-              find: "@ljay/ui/styles.css",
+              find: "@littlejay/ui/styles.css",
               replacement: fileURLToPath(
                 new URL("../../packages/ui/src/styles.css", import.meta.url),
               ),

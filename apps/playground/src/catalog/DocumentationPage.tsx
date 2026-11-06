@@ -1,4 +1,4 @@
-import { Field, NativeSelect } from "@ljay/ui";
+import { Field, NativeSelect } from "@littlejay/ui";
 import { CodeBlock } from "./CodeBlock.js";
 import { PreviewFrame } from "../shell/PreviewFrame.js";
 import { useNavigate } from "@tanstack/react-router";

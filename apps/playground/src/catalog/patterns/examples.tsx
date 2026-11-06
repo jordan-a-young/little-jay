@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Alert, Button } from "@ljay/ui";
+import { Alert, Button } from "@littlejay/ui";
 import { healthQueryOptions } from "../../health.js";
 export { WorkflowForm } from "../../WorkflowForm.js";
 

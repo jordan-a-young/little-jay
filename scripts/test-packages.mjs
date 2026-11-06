@@ -34,7 +34,7 @@ const dependencies = {
 
 for (const name of ["brand", "tokens", "ui", "server", "http"]) {
   run(["pack", "--pack-destination", consumer], path.join(workspace, "packages", name));
-  dependencies[`@ljay/${name}`] = `file:./ljay-${name}-0.0.0.tgz`;
+  dependencies[`@littlejay/${name}`] = `file:./littlejay-${name}-0.0.0.tgz`;
 }
 
 await writeFile(
@@ -43,7 +43,7 @@ await writeFile(
 );
 await writeFile(
   path.join(consumer, "pnpm-workspace.yaml"),
-  'overrides:\n  "@ljay/tokens": file:./ljay-tokens-0.0.0.tgz\n  "@ljay/brand": file:./ljay-brand-0.0.0.tgz\n',
+  'overrides:\n  "@littlejay/tokens": file:./littlejay-tokens-0.0.0.tgz\n  "@littlejay/brand": file:./littlejay-brand-0.0.0.tgz\n',
 );
 run(["install", "--ignore-scripts"], consumer);
 
@@ -112,10 +112,14 @@ const consumerInstructions = consumerGuide.match(/```markdown\n([\s\S]*?)\n```/)
 assert.ok(consumerInstructions, "Consumer guide must contain an AGENTS.md example");
 await writeFile(path.join(consumer, "AGENTS.md"), consumerInstructions[1]);
 const installedInstructions = await readFile(path.join(consumer, "AGENTS.md"), "utf8");
-const discoveredGuides = [...installedInstructions.matchAll(/\]\((node_modules\/@ljay\/[^)]+)\)/g)];
+const discoveredGuides = [
+  ...installedInstructions.matchAll(/\]\((node_modules\/@littlejay\/[^)]+)\)/g),
+];
 assert.deepEqual(
   discoveredGuides.map((match) => match[1]).sort(),
-  ["brand", "http", "server", "tokens", "ui"].map((name) => `node_modules/@ljay/${name}/README.md`),
+  ["brand", "http", "server", "tokens", "ui"].map(
+    (name) => `node_modules/@littlejay/${name}/README.md`,
+  ),
   "Consumer instructions must lead to each installed package README",
 );
 for (const [, guide] of discoveredGuides) {
@@ -139,7 +143,7 @@ for (const [, guide] of discoveredGuides) {
 }
 console.log("Consumer AGENTS.md discovers all five installed READMEs; packaged links verified.");
 
-const stateSource = path.join(consumer, "node_modules/@ljay/brand/states");
+const stateSource = path.join(consumer, "node_modules/@littlejay/brand/states");
 const stateManifest = JSON.parse(await readFile(path.join(stateSource, "manifest.json"), "utf8"));
 const statePublic = path.join(consumer, "public/branding/states");
 await mkdir(statePublic, { recursive: true });
@@ -160,7 +164,7 @@ async function checkExportTargets(directory, target) {
 }
 
 for (const name of ["brand", "tokens", "ui", "server", "http"]) {
-  const directory = path.join(consumer, "node_modules", "@ljay", name);
+  const directory = path.join(consumer, "node_modules", "@littlejay", name);
   const manifest = JSON.parse(await readFile(path.join(directory, "package.json"), "utf8"));
   assert.equal(manifest.private, true);
   await checkExportTargets(directory, manifest.exports);
@@ -190,8 +194,8 @@ for (const name of ["brand", "tokens", "ui", "server", "http"]) {
 await writeFile(
   path.join(consumer, "server.mjs"),
   `import assert from "node:assert/strict";
-import { createServer, healthRoutes, safeErrorsPlugin } from "@ljay/server";
-import { fetchJson, HttpError } from "@ljay/http";
+import { createServer, healthRoutes, safeErrorsPlugin } from "@littlejay/server";
+import { fetchJson, HttpError } from "@littlejay/http";
 const before = [process.listeners("SIGINT"), process.listeners("SIGTERM")];
 const server = createServer({ exposeHeadRoutes: false });
 try {
@@ -224,38 +228,44 @@ await writeFile(
   `import { useActionState, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { useFormStatus } from "react-dom";
-import { Button, Alert as RootAlert, LoadingIndicator as RootLoadingIndicator, type LoadingIndicatorProps as RootLoadingIndicatorProps, type AlertProps as RootAlertProps, type ButtonVariant as RootButtonVariant } from "@ljay/ui";
-import { Button as SubpathButton, type ButtonProps, type ButtonVariant } from "@ljay/ui/button";
-import { Alert, type AlertProps } from "@ljay/ui/alert";
-import { EmptyState } from "@ljay/ui/empty-state";
-import { PebbleState, type PebbleStateProps } from "@ljay/ui/pebble-state";
-import { StatusIndicator } from "@ljay/ui/status-indicator";
-import { LoadingIndicator, type LoadingIndicatorProps } from "@ljay/ui/loading-indicator";
-import { ErrorBoundary } from "@ljay/ui/error-boundary";
-import { Field } from "@ljay/ui/field";
-import { Input, type InputProps } from "@ljay/ui/input";
-import { Textarea } from "@ljay/ui/textarea";
-import { NativeSelect } from "@ljay/ui/native-select";
-import { Checkbox } from "@ljay/ui/checkbox";
-import { DescriptionList, type DescriptionListProps } from "@ljay/ui/description-list";
-import { Disclosure, type DisclosureProps } from "@ljay/ui/disclosure";
-import { TextBlock, type TextBlockProps } from "@ljay/ui/text-block";
-import { IconButton, type IconButtonProps } from "@ljay/ui/icon-button";
-import { Dialog, DialogTrigger, DialogContent, DialogClose, type DialogProps, type DialogTriggerProps, type DialogContentProps, type DialogCloseProps } from "@ljay/ui/dialog";
-import { Tabs, type TabsProps, type TabsItem } from "@ljay/ui/tabs";
-import { Tabs as RootTabs, type TabsProps as RootTabsProps, type TabsItem as RootTabsItem } from "@ljay/ui";
-import { fetchJson, HttpError, type FetchJsonOptions, type HttpErrorCode } from "@ljay/http";
-import type { HealthRoutesOptions, SafeErrorResponse, healthRoutes, safeErrorsPlugin } from "@ljay/server";
-import logoLight from "@ljay/brand/logos/lockup-light.svg";
-import logoDark from "@ljay/brand/logos/lockup-dark.svg";
-import pebblePng from "@ljay/brand/mascot/pebble.png";
-import type { createServer, FastifyInstance } from "@ljay/server";
-import "@ljay/ui/styles.css";
+import { Button, Alert as RootAlert, LoadingIndicator as RootLoadingIndicator, type LoadingIndicatorProps as RootLoadingIndicatorProps, type AlertProps as RootAlertProps, type ButtonVariant as RootButtonVariant } from "@littlejay/ui";
+import { Button as SubpathButton, type ButtonProps, type ButtonVariant } from "@littlejay/ui/button";
+import { Alert, type AlertProps } from "@littlejay/ui/alert";
+import { EmptyState } from "@littlejay/ui/empty-state";
+import { PebbleState, type PebbleStateProps } from "@littlejay/ui/pebble-state";
+import { StatusIndicator } from "@littlejay/ui/status-indicator";
+import { LoadingIndicator, type LoadingIndicatorProps } from "@littlejay/ui/loading-indicator";
+import { ErrorBoundary } from "@littlejay/ui/error-boundary";
+import { Field } from "@littlejay/ui/field";
+import { Input, type InputProps } from "@littlejay/ui/input";
+import { Textarea } from "@littlejay/ui/textarea";
+import { NativeSelect } from "@littlejay/ui/native-select";
+import { Checkbox } from "@littlejay/ui/checkbox";
+import { Switch, type SwitchProps } from "@littlejay/ui/switch";
+import { Switch as RootSwitch, type SwitchProps as RootSwitchProps } from "@littlejay/ui";
+import { DescriptionList, type DescriptionListProps } from "@littlejay/ui/description-list";
+import { Disclosure, type DisclosureProps } from "@littlejay/ui/disclosure";
+import { TextBlock, type TextBlockProps } from "@littlejay/ui/text-block";
+import { IconButton, type IconButtonProps } from "@littlejay/ui/icon-button";
+import { Dialog, DialogTrigger, DialogContent, DialogClose, type DialogProps, type DialogTriggerProps, type DialogContentProps, type DialogCloseProps } from "@littlejay/ui/dialog";
+import { Tabs, type TabsProps, type TabsItem } from "@littlejay/ui/tabs";
+import { Tabs as RootTabs, type TabsProps as RootTabsProps, type TabsItem as RootTabsItem } from "@littlejay/ui";
+import { fetchJson, HttpError, type FetchJsonOptions, type HttpErrorCode } from "@littlejay/http";
+import type { HealthRoutesOptions, SafeErrorResponse, healthRoutes, safeErrorsPlugin } from "@littlejay/server";
+import logoLight from "@littlejay/brand/logos/lockup-light.svg";
+import logoDark from "@littlejay/brand/logos/lockup-dark.svg";
+import pebblePng from "@littlejay/brand/mascot/pebble.png";
+import type { createServer, FastifyInstance } from "@littlejay/server";
+import "@littlejay/ui/styles.css";
 import "./overrides.css";
 type ServerResult = ReturnType<typeof createServer>;
 const serverTypecheck: ServerResult | FastifyInstance | undefined = undefined;
 void serverTypecheck;
 type Assert<Condition extends true> = Condition;
+type MatchingSwitchProps = Assert<RootSwitchProps extends SwitchProps ? SwitchProps extends RootSwitchProps ? true : false : false>;
+type FixedSwitchSemantics = Assert<Extract<"type" | "role" | "aria-checked", keyof SwitchProps> extends never ? true : false>;
+const switchContracts: [MatchingSwitchProps, FixedSwitchSemantics] = [true, true];
+void switchContracts;
 type MatchingButtonVariants = Assert<RootButtonVariant extends ButtonVariant ? ButtonVariant extends RootButtonVariant ? true : false : false>;
 type ValidButtonVariants = Assert<"unsupported" extends ButtonVariant ? false : true>;
 type AlertDismissContract = Assert<AlertProps["onDismiss"] extends (() => void) | undefined ? true : false>;
@@ -299,6 +309,8 @@ function NativeForm() {
       <Field label="External prompt"><Textarea name="prompt" defaultValue={state.prompt} /></Field>
       <Field label="External mode"><NativeSelect key={state.mode} name="mode" defaultValue={state.mode}><option value="plan">Plan</option><option value="review">Review</option></NativeSelect></Field>
       <Field label="External review" orientation="horizontal"><Checkbox name="review" value="yes" defaultChecked={state.review} /></Field>
+      <Field label="External notifications" orientation="horizontal" error="Example switch error"><Switch name="notifications" defaultChecked /></Field>
+      <Field label="External controlled switch" orientation="horizontal"><RootSwitch checked={state.review} onChange={() => {}} /></Field>
       <Field label="External disabled" disabled><Input name="disabled" defaultValue="Unavailable" /></Field>
       <SubmitFields />
     </form>

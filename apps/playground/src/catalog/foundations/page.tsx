@@ -9,7 +9,7 @@ const documents: Record<string, CatalogDocument> = {
     overview:
       "Little Jay's lightweight component catalog: named examples, usage snippets, prop reference, and accessibility notes, built on the existing React/Vite playground without Storybook. Components remain framework-light and examples stay application-local.",
     usage:
-      'import { Button } from "@ljay/ui/button";\nimport "@ljay/ui/styles.css";\n\n<Button onClick={continueLocally}>Continue</Button>;',
+      'import { Button } from "@littlejay/ui/button";\nimport "@littlejay/ui/styles.css";\n\n<Button onClick={continueLocally}>Continue</Button>;',
     props: [],
     accessibility: [
       "Use the searchable sidebar and ordinary links; browser Back/Forward and direct example URLs are supported.",
@@ -22,7 +22,7 @@ const documents: Record<string, CatalogDocument> = {
         id: "default",
         title: "Welcome",
         component: IntroductionExample,
-        code: 'import { Button } from "@ljay/ui";\n\n<Button>Continue</Button>',
+        code: 'import { Button } from "@littlejay/ui";\n\n<Button>Continue</Button>',
       },
     ],
   },
@@ -30,7 +30,7 @@ const documents: Record<string, CatalogDocument> = {
     overview:
       "Use semantic action, content, surface, border, and focus colors. Brand Jay Blue is separate from the accessible light/dark primary action colors. The document owns persisted appearance; missing preferences follow the system.",
     usage:
-      '/* Load after importing @ljay/ui/styles.css */\n:root { --lj-radius-control: 0.5rem; }\n:root[data-theme="light"] {\n  --lj-primary: #2463a6;\n  --lj-on-primary: #ffffff;\n}',
+      '/* Load after importing @littlejay/ui/styles.css */\n:root { --lj-radius-control: 0.5rem; }\n:root[data-theme="light"] {\n  --lj-primary: #2463a6;\n  --lj-on-primary: #ffffff;\n}',
     usageLanguage: "css",
     props: [],
     accessibility: [
@@ -50,14 +50,14 @@ const documents: Record<string, CatalogDocument> = {
   },
   branding: {
     overview:
-      "Little Jay is the brand; Pebble is the cozy seated young blue jay. Canonical logos, mascot, icons, banners, and static state PNGs live in the private framework-independent @ljay/brand package.",
+      "Little Jay is the brand; Pebble is the cozy seated young blue jay. Canonical logos, mascot, icons, banners, and static state PNGs live in the private framework-independent @littlejay/brand package.",
     usage:
-      'import logoLight from "@ljay/brand/logos/lockup-light.svg";\nimport logoDark from "@ljay/brand/logos/lockup-dark.svg";\n\n<img src={theme === "dark" ? logoDark : logoLight}\n  alt="Little Jay" width={275} height={75} />',
+      'import logoLight from "@littlejay/brand/logos/lockup-light.svg";\nimport logoDark from "@littlejay/brand/logos/lockup-dark.svg";\n\n<img src={theme === "dark" ? logoDark : logoLight}\n  alt="Little Jay" width={275} height={75} />',
     props: [],
     accessibility: [
       "Use light-lettering lockup-dark on dark backgrounds and dark-lettering lockup-light on light backgrounds.",
       "Preserve image proportions and explicit dimensions. Decorative Pebble images use empty alt text.",
-      "Browser icons and state illustrations synchronize from @ljay/brand before development/builds. Do not edit generated public copies.",
+      "Browser icons and state illustrations synchronize from @littlejay/brand before development/builds. Do not edit generated public copies.",
       "State PNGs are static, not animations. No offline support or public site domain is implied.",
     ],
     examples: [

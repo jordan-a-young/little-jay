@@ -58,6 +58,41 @@ describe("component catalog", () => {
     );
   }
 
+  it("exposes named keyboard-focusable sidebar/content panes and retains the skip destination", async () => {
+    await renderApp("#/tabs");
+    const sidebar = container.querySelector<HTMLElement>(".catalog-sidebar")!;
+    const main = container.querySelector<HTMLElement>("main")!;
+    expect(sidebar.getAttribute("aria-label")).toBe("Catalog navigation");
+    expect(sidebar.tabIndex).toBe(0);
+    expect(main.getAttribute("aria-labelledby")).toBe(container.querySelector("h1")?.id);
+    expect(main.tabIndex).toBe(0);
+    await act(() => container.querySelector<HTMLAnchorElement>(".catalog-skip")!.click());
+    expect(document.activeElement).toBe(main);
+    expect(router.state.location.pathname).toBe("/tabs");
+  });
+
+  it("retains the native search input and separates empty results feedback, then restores navigation", async () => {
+    await renderApp("#/button");
+    const sidebar = container.querySelector(".catalog-sidebar")!;
+    const search = sidebar.querySelector<HTMLInputElement>('input[type="search"]')!;
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!;
+    await act(() => {
+      setter.call(search, "no-such-catalog-item");
+      search.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    const empty = sidebar.querySelector('[role="status"]')!;
+    expect(empty.textContent).toBe("No matching components or guides.");
+    expect(empty.classList.contains("catalog-search-empty")).toBe(true);
+    expect(sidebar.querySelectorAll("nav a")).toHaveLength(0);
+    await act(() => {
+      setter.call(search, "");
+      search.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    expect(sidebar.querySelector('input[type="search"]')).toBe(search);
+    expect(sidebar.querySelector('[role="status"]')).toBeNull();
+    expect(sidebar.querySelectorAll("nav a")).toHaveLength(catalogPages.length);
+  });
+
   it("gives preview settings, code panes, and workflow-state examples nameable roles", async () => {
     await renderApp("#/status-indicator");
     await vi.waitFor(() => expect(container.querySelector(".catalog-code pre")).not.toBeNull());
@@ -231,7 +266,7 @@ describe("component catalog", () => {
         "PebbleState",
         "StatusIndicator",
       ],
-      ["Checkbox", "Field", "Input", "NativeSelect", "Textarea"],
+      ["Checkbox", "Field", "Input", "NativeSelect", "Switch", "Textarea"],
       ["DescriptionList", "Dialog", "Disclosure", "IconButton", "Tabs", "TextBlock"],
       ["Workflow form", "API connection"],
     ]);

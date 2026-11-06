@@ -1,10 +1,10 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vite-plus/test";
-import palette from "@ljay/tokens/palette.json";
-import stateIllustrations from "@ljay/brand/states/manifest.json" with { type: "json" };
+import palette from "@littlejay/tokens/palette.json";
+import stateIllustrations from "@littlejay/brand/states/manifest.json" with { type: "json" };
 
-const theme = readFileSync(new URL(import.meta.resolve("@ljay/tokens/theme.css")), "utf8");
-const brandRoot = new URL("./", import.meta.resolve("@ljay/brand/site.webmanifest"));
+const theme = readFileSync(new URL(import.meta.resolve("@littlejay/tokens/theme.css")), "utf8");
+const brandRoot = new URL("./", import.meta.resolve("@littlejay/brand/site.webmanifest"));
 
 function contrast(first: string, second: string) {
   const luminance = (hex: string) => {
