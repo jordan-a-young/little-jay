@@ -20,10 +20,10 @@ Build small, useful pieces for Graph Workbench first. Other project consumers ar
 - Matched TypeBox/provider packages through one concrete stateless `/api/text-preview` endpoint. No shared validation abstraction.
 - Five-package tarball coverage, strict external NodeNext declarations, and a no-Tailwind UI consumer including inspection and modal controls.
 
-## Next: inspect and configure workflows
+## Next: prepare components for workflows
 
-1. The [pinned Graph Workbench pilot inspection](GRAPH-WORKBENCH-PILOT.md) covers `/builder/v2`'s node inspector at local commit `6ff4334`. Existing controls cover the inspected flow; no new shared primitive is confirmed. Next is separate approval of a node-inspector-only adoption with agreed private tarballs, consumer-toolchain verification and scoped CSS coexistence checks. Retain domain validation, pending/permission policy, drafts and historical behavior. Private GitHub hosting is not npm publication. No Graph Workbench changes are authorized by this local inspection.
-2. Pressed-state ToggleGroup only with a concrete consumer. Tabs are only for actual tab panels. Menu/Tooltip and additional complex widgets remain separate demand-driven slices.
+1. The [pinned Graph Workbench assessment](GRAPH-WORKBENCH-PILOT.md#broader-component-readiness-assessment) covers representative current presentation needs at local commit `6ff4334`. The user's objective is Little Jay readiness: **do not rebuild, migrate or adopt packages in Graph Workbench now**. Existing controls/app-local composition cover the inspected forms, feedback, metadata and inert review needs. Consumer-toolchain/private-package/CSS integration stays deferred until adoption is separately requested.
+2. Scope reusable Tabs against the legacy builder's responsive Library/Canvas/Inspector content panels. This is a Little Jay-only component/catalog candidate, not an approved consumer migration or an implemented export. Define state preservation, keyboard/activation and responsive ownership before coding. Pressed node/history selection already uses native Button props; ToggleGroup, Menu/Tooltip and additional complex widgets need missing-behavior evidence.
 
 Each slice needs meaningful interaction tests, theme/no-reset checks, strict declarations, and an external tarball consumer before adoption. New exported contracts require independent review. A Graph Workbench adoption change needs its own scoped implementation and regression checks; existing workflow limits, approvals, historical behavior, and sandbox policies must remain intact.
 
