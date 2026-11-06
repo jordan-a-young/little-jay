@@ -14,6 +14,16 @@ Track requested improvements, investigations, documentation, tooling, and potent
 
 Statuses distinguish completed requests from pending work. Investigation items must establish scope before becoming implementation tasks.
 
+### CAT-002: Independent sidebar/content scrolling and sticky header
+
+- **Status:** Needs inspection (confirmed request; implementation pending).
+- **Owner:** Playground application shell and layout, not shared UI components.
+- **Request:** Keep the sidebar on the left and make the sidebar and main content separate scrollable containers. Scrolling either container must not scroll the other. Keep the header sticky at the top.
+- **Acceptance:** The left sidebar and main content maintain independent scroll positions; wheel, touch and keyboard scrolling in one pane must not move the other, including at scroll boundaries. The playground header remains visible at the top while either pane scrolls. Preserve keyboard access, visible focus, navigation/deep links, and catalog preview state; avoid focus traps and unintended document-level scroll chaining.
+- **Likely entry points:** `apps/playground/src/CatalogApp.tsx`, `apps/playground/src/shell/Sidebar.tsx`, and `apps/playground/src/styles.css`; inspect current layout/scroll ownership before changing them. Narrow-screen behavior must be scoped without making navigation or content inaccessible.
+- **Verification plan:** Focused layout regressions plus real-browser checks for independent pane positions, scroll-boundary isolation, sticky header, keyboard/wheel/touch behavior, and desktop/narrow layouts. Existing shell/navigation behavior must remain intact.
+- **Next action:** Inspect the current shell and define the responsive layout before implementation. This entry records the request only; no UI changes are authorized by the backlog addition.
+
 ### CAT-001: Alphabetize component sections
 
 - **Status:** Implemented.
