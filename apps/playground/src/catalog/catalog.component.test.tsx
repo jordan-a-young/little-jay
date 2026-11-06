@@ -1,4 +1,4 @@
-import { act } from "react";
+import { act, lazy, type ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
@@ -57,6 +57,41 @@ describe("component catalog", () => {
       ),
     );
   }
+
+  it("reuses LoadingIndicator in one page-loading status without moving focus or remounting the shell", async () => {
+    const page = catalogPages.find((candidate) => candidate.id === "button")!;
+    const originalComponent = page.component;
+    let finishLoading!: () => void;
+    const loading = new Promise<{ default: () => ReactNode }>((resolve) => {
+      finishLoading = () => resolve({ default: () => <p>Documentation ready.</p> });
+    });
+    page.component = lazy(() => loading);
+    try {
+      await renderApp();
+      const status = Array.from(container.querySelectorAll('[role="status"]')).find(
+        (region) => region.textContent === "Loading documentation…",
+      )!;
+      const indicator = status.querySelector(".lj-loading-indicator");
+      expect(indicator).not.toBeNull();
+      expect(container.querySelectorAll(".lj-loading-indicator")).toHaveLength(1);
+      expect(indicator?.querySelector('[role="status"], [role="alert"]')).toBeNull();
+      expect(
+        indicator?.querySelector(".lj-loading-indicator-spinner")?.getAttribute("aria-hidden"),
+      ).toBe("true");
+      expect(status.querySelector("button, input, select, textarea, a, [tabindex]")).toBeNull();
+      const search = container.querySelector<HTMLInputElement>('input[type="search"]')!;
+      search.focus();
+      await act(() => finishLoading());
+      await vi.waitFor(() => expect(container.textContent).toContain("Documentation ready."));
+      expect(container.querySelector(".lj-loading-indicator")).toBeNull();
+      expect(container.textContent).not.toContain("Loading documentation…");
+      expect(container.querySelector('input[type="search"]')).toBe(search);
+      expect(document.activeElement).toBe(search);
+      expect(fetch).not.toHaveBeenCalled();
+    } finally {
+      page.component = originalComponent;
+    }
+  });
 
   it("exposes named keyboard-focusable sidebar/content panes and retains the skip destination", async () => {
     await renderApp("#/tabs");
@@ -267,7 +302,7 @@ describe("component catalog", () => {
         "StatusIndicator",
       ],
       ["Checkbox", "Field", "Input", "NativeSelect", "Switch", "Textarea"],
-      ["DescriptionList", "Dialog", "Disclosure", "IconButton", "Tabs", "TextBlock"],
+      ["Card", "DescriptionList", "Dialog", "Disclosure", "IconButton", "Tabs", "TextBlock"],
       ["Workflow form", "API connection"],
     ]);
     const search = container.querySelector('input[type="search"]')!;
@@ -289,6 +324,42 @@ describe("component catalog", () => {
       "/status-indicator",
     ]);
   });
+
+  it("uses Card and CardContent for the outer preview without adding a landmark or focus stop", async () => {
+    await renderApp();
+    await vi.waitFor(() => expect(container.querySelector(".catalog-preview")).not.toBeNull());
+    const surface = container.querySelector(".catalog-preview-track")!;
+    expect(surface.classList.contains("lj-card")).toBe(true);
+    expect(surface.firstElementChild?.classList.contains("lj-card-content")).toBe(true);
+    expect(surface.hasAttribute("role")).toBe(false);
+    expect(surface.hasAttribute("tabindex")).toBe(false);
+  });
+
+  it.each(["default", "minimal"])(
+    "renders the Card %s deep link without requests",
+    async (example) => {
+      await renderApp(`#/card/${example}`);
+      await vi.waitFor(() =>
+        expect(container.querySelector(".catalog-preview .lj-card")).not.toBeNull(),
+      );
+      expect(container.querySelector("h1")?.textContent).toBe("Card");
+      expect(container.querySelector(".catalog-preview .lj-card")?.hasAttribute("role")).toBe(
+        false,
+      );
+      expect(fetch).not.toHaveBeenCalled();
+      if (example === "default") {
+        const action = container.querySelector<HTMLButtonElement>(
+          ".catalog-preview .lj-card-footer button",
+        )!;
+        action.focus();
+        await act(() => action.click());
+        expect(container.querySelector('.catalog-preview [role="status"]')?.textContent).toBe(
+          "Local inspections: 1",
+        );
+        expect(document.activeElement).toBe(action);
+      }
+    },
+  );
 
   it("renders docs, API reference, named examples, and search without mounting the health query", async () => {
     await renderApp();

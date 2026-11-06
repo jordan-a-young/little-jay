@@ -8,7 +8,7 @@
 - Record requested improvements, investigations, and consumer-inspection gaps in `docs/BACKLOG.md`; distinguish confirmed requirements from deferred candidates. Backlog entries do not authorize implementation, adoption, or publication.
 - Use [the task-to-file map](docs/REPO-MAP.md) to locate likely owners, source entry points, contracts, and tests before broader searches. It is a starting point, not an exhaustive file inventory or a substitute for checking current code.
 - Maintain the map in the same change whenever you add/remove a workspace or task area, move/rename mapped paths, or change ownership, entry points, generators, or test locations. Update affected scoped `AGENTS.md` files too. Verify mapped paths still exist; ordinary implementation edits need no map rewrite when its guidance remains accurate.
-- Preserve unfamiliar changes. The source is hosted in a private GitHub repository; do not commit, push, publish packages, change visibility, or deploy unless requested.
+- Preserve unfamiliar changes. The source is hosted on GitHub; do not commit, push, publish packages, change visibility, or deploy unless requested.
 
 ## Bounded troubleshooting
 

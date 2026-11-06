@@ -30,6 +30,8 @@ TanStack Router uses hash history, so a same-origin deployment prefix needs no e
 - `/#/dialog/sheet`
 - `/#/tabs`
 - `/#/tabs/controlled`
+- `/#/card`
+- `/#/card/minimal`
 - `/little-jay/#/pebble-state/empty` for a pathname-prefixed build
 
 The earlier `#pebble-states` URL remains an alias for the all-states showcase. Browser Back/Forward restores page/example selection. Missing pages and examples provide recovery UI instead of silently showing unrelated documentation. Preview-local state is not stored in the URL and resets when changing examples or leaving a page.
@@ -89,7 +91,11 @@ Alert's **Success / static** and **Warning / static** examples demonstrate the e
 
 LoadingIndicator's default example shows a spinner with and without visible text; neither static preview creates a live region. Omitted or blank `label` text retains hidden “Loading” text. The **Caller-owned local activity** example toggles an indicator inside one app-owned status region without making requests or starting a timer. Reduced-motion preferences stop rotation but retain the indicator/text. Query, Actions, offline pause handling, and form disabling/focus policy are unchanged.
 
+The catalog also uses LoadingIndicator while a lazy documentation page loads. Its visible label remains “Loading documentation…” inside the existing application-owned status region; the indicator adds no live role or focus behavior. The shell remains mounted and the fallback disappears when the page resolves. Syntax-highlighting Suspense keeps its separate plain-text fallback rather than replacing readable code with a spinner.
+
 Tabs lives alphabetically in Inspection. Its **Manual activation / preserved local draft** example contains an editable draft, local counter, preview and disabled tab. Left/Right/Home/End move focus without activation; native Enter/Space or click selects content. Content mounts on first selection and stays mounted while its item remains. The **Caller-owned selection** example also demonstrates an external selection button without automatic focus movement. Neither example makes requests, starts workflows or migrates Graph Workbench. The application remains responsible for responsive all-panels layouts, pausing hidden effects and canvas remeasurement. Reset preview unmounts the entire example and clears its local draft/counter.
+
+Card lives alphabetically in Inspection, with composed header/content/footer and minimal-content examples. Helpers render divs; the examples supply explicit headings and native actions. The outer preview frame also uses shared Card/CardContent rather than duplicate app-owned border/padding/background styling. Its width constraints, inner dashed preview boundary and keyed reset remain application-owned; resizing/settings preserve the local draft and action count, while Reset preview remounts them. No new landmark, focus stop or card-wide action is introduced, and code/popover surfaces keep their own styling.
 
 Components stay in `packages/ui`, canonical artwork in `packages/brand`, and tokens in `packages/tokens`. Catalog docs, controls, preview state, and application patterns remain in the playground. Do not make a UI component import catalog code or add domain policy to the library.
 

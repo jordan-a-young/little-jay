@@ -236,10 +236,6 @@ body {
 }
 .catalog-preview-track {
   margin-top: 1rem;
-  padding: 1rem;
-  border: 1px solid var(--lj-border);
-  border-radius: var(--lj-radius-control);
-  background: var(--lj-background);
 }
 .catalog-preview {
   max-width: 100%;

@@ -12,7 +12,41 @@ import {
   Field,
   Input,
   Button,
+  Card,
+  CardHeader,
+  CardContent,
+  CardFooter,
 } from "@littlejay/ui";
+
+export function CardExample() {
+  const [inspections, setInspections] = useState(0);
+  return (
+    <Card>
+      <CardHeader>
+        <h3 className="m-0 font-semibold">Local draft</h3>
+        <p>Composed content and actions. Nothing is saved or sent.</p>
+      </CardHeader>
+      <CardContent>
+        <Field label="Card draft">
+          <Input defaultValue="Keep these unsaved notes" />
+        </Field>
+        <p>{"long-draft-identifier-".repeat(8)}</p>
+      </CardContent>
+      <CardFooter>
+        <Button onClick={() => setInspections((count) => count + 1)}>Inspect locally</Button>
+        <p role="status">Local inspections: {inspections}</p>
+      </CardFooter>
+    </Card>
+  );
+}
+
+export function MinimalCardExample() {
+  return (
+    <Card>
+      <CardContent>A simple content surface. Sections and actions are optional.</CardContent>
+    </Card>
+  );
+}
 
 function LocalDraft() {
   const [count, setCount] = useState(0);

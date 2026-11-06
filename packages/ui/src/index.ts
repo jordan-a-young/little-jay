@@ -1,4 +1,14 @@
 export { Button, type ButtonProps, type ButtonVariant } from "./button/index.js";
+export {
+  Card,
+  CardHeader,
+  CardContent,
+  CardFooter,
+  type CardProps,
+  type CardHeaderProps,
+  type CardContentProps,
+  type CardFooterProps,
+} from "./card/index.js";
 export { Alert, type AlertProps } from "./alert/index.js";
 export { EmptyState, type EmptyStateProps } from "./empty-state/index.js";
 export { PebbleState, type PebbleStateProps, type PebbleStateKind } from "./pebble-state/index.js";

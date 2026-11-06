@@ -3,6 +3,46 @@ import type { CatalogDocument, CatalogPageProps } from "../types.js";
 import * as examples from "./examples.js";
 
 const documents: Record<string, CatalogDocument> = {
+  card: {
+    overview:
+      "A lightweight themed content surface. Optional header, content and footer helpers compose native divs without state, implicit landmarks or card-wide actions.",
+    usage:
+      'import { Card, CardHeader, CardContent, CardFooter } from "@littlejay/ui/card";\nimport { Button } from "@littlejay/ui/button";\nimport "@littlejay/ui/styles.css";\n\n<Card>\n  <CardHeader><h3>Draft notes</h3></CardHeader>\n  <CardContent>Local content</CardContent>\n  <CardFooter><Button>Inspect</Button></CardFooter>\n</Card>',
+    props: [
+      {
+        name: "Card",
+        type: "ComponentProps<div>",
+        description:
+          "Native root props/ref/className; supplies a semantic-token surface and border, but no padding, heading, landmark or focus stop.",
+      },
+      {
+        name: "CardHeader / CardContent / CardFooter",
+        type: "ComponentProps<div>",
+        description:
+          "Optional native divs with 1rem padding. Footer uses wrapping flex layout for caller-supplied actions. No provider or required nesting contract.",
+      },
+    ],
+    accessibility: [
+      "Supply the appropriate heading level and explicit landmark name/role only when the content needs one. Header and footer helpers do not render global header/footer landmarks.",
+      "Card is not a button or link. Put native actions inside it; do not add a click handler as a substitute for keyboard-accessible controls or nest controls in a card-wide link.",
+      "Children remain safely rendered React content. The caller owns data, loading, permissions, focus and state. Native props and refs are forwarded by every helper.",
+      "The catalog's outer preview uses the same Card/CardContent surface. Preview width and reset behavior stay app-owned; code and popover surfaces keep their own treatments.",
+    ],
+    examples: [
+      {
+        id: "default",
+        title: "Composed content and local actions",
+        component: examples.CardExample,
+        code: '<Card>\n  <CardHeader><h3>Local draft</h3></CardHeader>\n  <CardContent><Field label="Card draft"><Input defaultValue="Unsaved notes" /></Field></CardContent>\n  <CardFooter><Button onClick={inspectLocally}>Inspect locally</Button></CardFooter>\n</Card>',
+      },
+      {
+        id: "minimal",
+        title: "Minimal content surface",
+        component: examples.MinimalCardExample,
+        code: "<Card><CardContent>Sections and actions are optional.</CardContent></Card>",
+      },
+    ],
+  },
   tabs: {
     overview:
       "Horizontal, manually activated content tabs. Stable item values link native non-submit triggers to panels; workflow state and responsive layout stay application-owned.",

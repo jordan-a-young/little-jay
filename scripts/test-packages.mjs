@@ -260,6 +260,8 @@ import { IconButton, type IconButtonProps } from "@littlejay/ui/icon-button";
 import { Dialog, DialogTrigger, DialogContent, DialogClose, type DialogProps, type DialogTriggerProps, type DialogContentProps, type DialogCloseProps } from "@littlejay/ui/dialog";
 import { Tabs, type TabsProps, type TabsItem } from "@littlejay/ui/tabs";
 import { Tabs as RootTabs, type TabsProps as RootTabsProps, type TabsItem as RootTabsItem } from "@littlejay/ui";
+import { Card, CardHeader, CardContent, CardFooter, type CardProps, type CardHeaderProps, type CardContentProps, type CardFooterProps } from "@littlejay/ui/card";
+import { Card as RootCard, CardHeader as RootCardHeader, CardContent as RootCardContent, CardFooter as RootCardFooter, type CardProps as RootCardProps, type CardHeaderProps as RootCardHeaderProps, type CardContentProps as RootCardContentProps, type CardFooterProps as RootCardFooterProps } from "@littlejay/ui";
 import { fetchJson, HttpError, type FetchJsonOptions, type HttpErrorCode } from "@littlejay/http";
 import type { HealthRoutesOptions, SafeErrorResponse, healthRoutes, safeErrorsPlugin } from "@littlejay/server";
 import logoLight from "@littlejay/brand/logos/lockup-light.svg";
@@ -272,6 +274,9 @@ type ServerResult = ReturnType<typeof createServer>;
 const serverTypecheck: ServerResult | FastifyInstance | undefined = undefined;
 void serverTypecheck;
 type Assert<Condition extends true> = Condition;
+type MatchingCardContracts = Assert<[RootCardProps, RootCardHeaderProps, RootCardContentProps, RootCardFooterProps] extends [CardProps, CardHeaderProps, CardContentProps, CardFooterProps] ? [CardProps, CardHeaderProps, CardContentProps, CardFooterProps] extends [RootCardProps, RootCardHeaderProps, RootCardContentProps, RootCardFooterProps] ? true : false : false>;
+const matchingCardContracts: MatchingCardContracts = true;
+void matchingCardContracts;
 type MatchingSwitchProps = Assert<RootSwitchProps extends SwitchProps ? SwitchProps extends RootSwitchProps ? true : false : false>;
 type FixedSwitchSemantics = Assert<Extract<"type" | "role" | "aria-checked", keyof SwitchProps> extends never ? true : false>;
 const switchContracts: [MatchingSwitchProps, FixedSwitchSemantics] = [true, true];
@@ -378,6 +383,26 @@ function App() {
       </div>)}
     </section>
     <NativeForm />
+    <section aria-label="External cards">
+      {(["light", "dark"] as const).map(theme => {
+        const Surface = theme === "light" ? Card : RootCard;
+        const Header = theme === "light" ? CardHeader : RootCardHeader;
+        const Content = theme === "light" ? CardContent : RootCardContent;
+        const Footer = theme === "light" ? CardFooter : RootCardFooter;
+        return <div key={theme} data-theme={theme}>
+          <Surface data-consumer-card={theme}>
+            <Header><h2>External {theme} Card</h2></Header>
+            <Content><Field label={theme + " Card notes"}><Input defaultValue="Unsaved consumer Card draft" /></Field><p>{"long-consumer-card-value-".repeat(12)}</p></Content>
+            <Footer><Button onClick={() => setClicks(count => count + 1)}>Count inside {theme} Card</Button></Footer>
+          </Surface>
+        </div>;
+      })}
+      <Card data-consumer-hidden-footer>
+        <CardContent><Button>Before hidden Card footer</Button></CardContent>
+        <CardFooter hidden><Button>Hidden Card footer action</Button></CardFooter>
+        <CardContent><Button>After hidden Card footer</Button></CardContent>
+      </Card>
+    </section>
     <section aria-label="External inspection components">
       <Disclosure summary="Metadata"><DescriptionList><dt>State</dt><dd>Local preview</dd></DescriptionList></Disclosure>
       <TextBlock aria-label="Inert output" text={'<script>alert("inert")</script>'} />

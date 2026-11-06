@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import { Outlet } from "@tanstack/react-router";
-import { ErrorBoundary } from "@littlejay/ui";
+import { ErrorBoundary, LoadingIndicator } from "@littlejay/ui";
 import logoLight from "@littlejay/brand/logos/lockup-light.svg";
 import logoDark from "@littlejay/brand/logos/lockup-dark.svg";
 import { useTheme } from "./use-theme.js";
@@ -106,7 +106,13 @@ export function CatalogPage() {
       resetKey={href}
       fallback={<p>This catalog page could not load. Reload the page to try again.</p>}
     >
-      <Suspense fallback={<p role="status">Loading documentation…</p>}>
+      <Suspense
+        fallback={
+          <p role="status">
+            <LoadingIndicator label="Loading documentation…" />
+          </p>
+        }
+      >
         <Page key={pageId} pageId={pageId} {...(exampleId ? { exampleId } : {})} />
       </Suspense>
     </ErrorBoundary>

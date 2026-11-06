@@ -46,6 +46,34 @@ PebbleState needs application-served assets. Copy the state PNGs from the instal
 
 These components own presentation, not authentication, authorization, workflow transitions, network calls, caches, validation schemas, or routing. Disabled controls and accessibility attributes are not security boundaries. The application owns pending state, retries, draft preservation, reset behavior, and safe error reporting; ErrorBoundary is not a catch-all for asynchronous/event-handler failures.
 
+## Card
+
+`Card`, `CardHeader`, `CardContent` and `CardFooter`, with matching `*Props` types, are available from the root and `@littlejay/ui/card`. All render native divs with forwarded props/ref/className. Import the compiled stylesheet once:
+
+```tsx
+import { Card, CardHeader, CardContent, CardFooter } from "@littlejay/ui/card";
+import { Button } from "@littlejay/ui/button";
+import "@littlejay/ui/styles.css";
+
+export function DraftCard() {
+  return (
+    <Card>
+      <CardHeader>
+        <h2>Draft notes</h2>
+      </CardHeader>
+      <CardContent>Local content supplied by your application.</CardContent>
+      <CardFooter>
+        <Button>Inspect</Button>
+      </CardFooter>
+    </Card>
+  );
+}
+```
+
+Card supplies a semantic surface/background, content color, border, radius and long-text wrapping, but no root padding. Each optional helper adds 1rem padding; Footer lays out children in a wrapping flex row. Use only the sections you need, such as `<Card><CardContent>Content</CardContent></Card>`. The helpers need no provider and do not create headings or header/footer landmarks. Supply an appropriate heading level; add a named region only when the content merits one. Native child-element margins remain caller-owned, including in applications without a reset.
+
+There is no card-wide click target, tab stop, loading state or implicit role. Put real buttons/links inside rather than making the surface an inaccessible action or wrapping nested controls in a link. Application state, layout width, focus and actions stay with the caller. Native `hidden` is preserved, including on the flex footer; hidden actions are excluded from keyboard navigation. Keep native HTML injection props restricted to trusted content, just as for a native div; ordinary string children are escaped by React.
+
 ## Switch
 
 `Switch` and `SwitchProps` are available from `@littlejay/ui` and `@littlejay/ui/switch`. Load the compiled stylesheet as above.

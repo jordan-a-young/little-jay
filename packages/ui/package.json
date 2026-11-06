@@ -92,6 +92,11 @@
       "development": "./src/button/index.tsx",
       "import": "./dist/button.js"
     },
+    "./card": {
+      "types": "./dist/card.d.ts",
+      "development": "./src/card/index.tsx",
+      "import": "./dist/card.js"
+    },
     "./description-list": {
       "types": "./dist/description-list.d.ts",
       "development": "./src/description-list/index.tsx",

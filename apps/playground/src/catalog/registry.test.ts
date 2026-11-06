@@ -29,6 +29,7 @@ describe("catalog registry and links", () => {
       "native-select",
       "switch",
       "textarea",
+      "card",
       "description-list",
       "dialog",
       "disclosure",
@@ -51,7 +52,7 @@ describe("catalog registry and links", () => {
     ]);
   });
   it("has stable unique pages for all foundations, components, and patterns", () => {
-    expect(catalogPages).toHaveLength(25);
+    expect(catalogPages).toHaveLength(26);
     expect(new Set(catalogPages.map((page) => page.id)).size).toBe(catalogPages.length);
     expect(catalogPages.some((page) => page.id === "native-select")).toBe(true);
   });
@@ -62,6 +63,7 @@ describe("catalog registry and links", () => {
     expect(filterCatalog("toggle").map((page) => page.id)).toEqual(["switch"]);
     expect(filterCatalog("hooks").map((page) => page.id)).toEqual(["hooks"]);
     expect(filterCatalog("panels").map((page) => page.id)).toEqual(["tabs"]);
+    expect(filterCatalog("surface").map((page) => page.id)).toEqual(["card"]);
     expect(filterCatalog("no such component")).toEqual([]);
     expect(filterCatalog("")).toHaveLength(catalogPages.length);
   });

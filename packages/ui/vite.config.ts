@@ -4,6 +4,7 @@ export default defineConfig({
     entry: {
       index: "src/index.ts",
       button: "src/button/index.tsx",
+      card: "src/card/index.tsx",
       alert: "src/alert/index.tsx",
       "empty-state": "src/empty-state/index.tsx",
       "pebble-state": "src/pebble-state/index.tsx",

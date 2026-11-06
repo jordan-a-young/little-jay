@@ -17,6 +17,27 @@
 @source "./checkbox";
 
 @layer components {
+  .lj-card {
+    box-sizing: border-box;
+    min-width: 0;
+    border: 1px solid var(--lj-border);
+    border-radius: var(--lj-radius-control);
+    background: var(--lj-surface);
+    color: var(--lj-content);
+    overflow-wrap: anywhere;
+  }
+  .lj-card-header,
+  .lj-card-content,
+  .lj-card-footer {
+    min-width: 0;
+    padding: 1rem;
+  }
+  .lj-card-footer:not([hidden]) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
   .lj-switch {
     appearance: none;
     box-sizing: border-box;
