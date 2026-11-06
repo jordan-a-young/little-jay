@@ -21,6 +21,7 @@ export default defineConfig({
       dialog: "src/dialog/index.tsx",
     },
     format: ["esm"],
+    sourcemap: true,
     dts: { generator: "tsgo" },
     clean: true,
     outExtensions: () => ({ js: ".js" }),

@@ -39,15 +39,25 @@ Use [the verification matrix](docs/VERIFICATION.md) to select checks for the cha
 | `pnpm build`                              | Dependency-ordered builds; required before standalone typechecks/tests on a fresh checkout                                     |
 | `pnpm typecheck`                          | Root tooling and workspace TypeScript                                                                                          |
 | `pnpm test`                               | All configured test projects, one run                                                                                          |
+| `pnpm test:coverage`                      | Full suite with V8 coverage and source-inventory validation; build first                                                       |
 | `pnpm test <file-or-path>`                | Focused tests through the root configuration; packages do not have test scripts                                                |
 | `TMPDIR=/tmp/opencode pnpm test:packages` | Packs five libraries and tests an isolated consumer; retains temporary artifacts and may need registry access; never publishes |
-| `pnpm ready`                              | Full CI gate: check, build, typecheck, tests, and package-consumer checks                                                      |
+| `pnpm ready`                              | Full CI gate: check, build, typecheck, coverage tests, and package-consumer checks                                             |
 | `pnpm fmt`                                | Formats in place; prefer `pnpm exec vp fmt <changed-paths>` to avoid unrelated edits                                           |
 
 - Add regression coverage for observable behavior using existing colocated tests. `vite.config.ts` defines Node and jsdom component projects; do not add another test runner.
 - For source changes, build prerequisites before focused tests/typechecks. Use `pnpm ready` for final integration verification when practical; report exactly what ran and any failures or skipped checks. Documentation-only changes need formatting/link/command validation, not a full build or dependency install.
 - Never hand-edit `dist/`, `.vite/`, `packages/tokens/theme.css`, or `apps/playground/public/branding/`. Change their sources and use the documented generator/build.
 - Keep TypeScript/JavaScript ESM and existing module conventions. Prefer descriptive names and async/await; add only editor documentation comments when comments are needed.
+
+## Test setup and efficient iteration
+
+- Tests use Vitest bundled with Vite+, imported from `vite-plus/test`, and are configured centrally in `vite.config.ts`. The Node project runs colocated `.test.ts` app tests, `.test.ts`/`.test.tsx` package tests, and `scripts/check-coverage.test.ts`. The jsdom project runs `.component.test.tsx` files in UI and playground; these are excluded from the Node project. No workspace has its own test script.
+- Start with `pnpm test <file-or-path>`, such as `pnpm test packages/http/src/index.test.ts` or `pnpm test packages/ui/src`. Optionally narrow test names with `-t <pattern>`. Commands run once rather than watching; confirm they selected the intended tests. Preserve real behavioral assertions and existing cleanup patterns.
+- Build first on a fresh checkout. During iteration, reuse unchanged dependency installations and build outputs; rebuild changed libraries and prerequisites before testing consumers that resolve built exports. Use a dependency-inclusive build such as `pnpm --filter '@ljay/ui...' build` when needed, not a full rebuild for every test-only edit. Run the owning workspace's typecheck where available; root tooling tests use `pnpm exec tsc -p tsconfig.json`.
+- Run `pnpm test:coverage` for the full-suite coverage gate, not every focused edit. Each aggregate metric (statements, branches, functions, lines) must be **at least 90%**; this is not a per-file threshold. Coverage includes unimported authored app/package source, and source maps attribute built-library execution back to source. See [the coverage contract](README.md#test-coverage) for exclusions and reporting limits.
+- Inspect `coverage/index.html` or `coverage/coverage-summary.json` to choose meaningful missing scenarios. Do not lower thresholds, exclude executable source, or weaken assertions to make the gate pass. A below-target baseline remains a reported failure until improved; passing focused tests does not waive it.
+- Use `TMPDIR=/tmp/opencode pnpm ready` once for final integration when required by the verification matrix; it already includes coverage, so do not immediately repeat the full suite. Focused test runs, browser checks, and package-consumer checks establish different evidence and do not substitute for one another.
 
 ## Safety and local services
 

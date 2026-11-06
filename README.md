@@ -25,9 +25,19 @@ The secret-scanner installer downloads checksum-pinned Gitleaks into ignored `.t
 
 Stop development with Ctrl+C before running `pnpm build` or `pnpm ready`: clean library builds replace the generated files that the running apps consume.
 
-`pnpm ready` checks formatting/lint, builds packages in dependency order, checks TypeScript (including root tooling), runs tests, and verifies local tarballs. Build before running standalone `pnpm typecheck`, `pnpm test`, or `pnpm test:packages` on a fresh checkout: consumers use built package exports.
+`pnpm ready` checks formatting/lint, builds packages in dependency order, checks TypeScript (including root tooling), runs tests with coverage, and verifies local tarballs. Build before running standalone `pnpm typecheck`, `pnpm test`, `pnpm test:coverage`, or `pnpm test:packages` on a fresh checkout: consumers use built package exports.
 
 Individual checks: `pnpm check`, `pnpm build`, `pnpm typecheck`, `pnpm test`, and `pnpm test:packages`. Check includes generated-token freshness. `pnpm fmt` formats files in place. The tarball check packs all five libraries, installs them into an isolated temporary consumer, checks every export target, exercises HTTP and server plugins, checks strict NodeNext declarations, and builds a React application with brand images and no Tailwind installed. It never publishes. Because the packages are unpublished, the consumer overrides the UI's local brand/tokens dependencies to their tarballs. The temporary consumer path is printed and retained for inspection; set `TMPDIR` to select its parent directory. Installation may need registry access or an existing pnpm store. To preserve running apps' dist files, run production/package checks in an isolated source copy with its own install and build outputs.
+
+## Test coverage
+
+Run `pnpm test:coverage` after `pnpm build` for a full-suite V8 coverage report. `pnpm test` remains the faster, non-coverage command; use `pnpm test <file-or-path>` for focused tests. For focused coverage, use `pnpm test <file-or-path> --coverage`; its percentages are not a full-suite baseline.
+
+Reports are replaced on every coverage run and written to ignored `coverage/`: `index.html` for browsing, `coverage-summary.json` for totals and per-file metrics, `coverage-final.json` for detailed counts, and `lcov.info` for integrations. CI's `pnpm ready` runs coverage once and checks the report's file inventory. Each aggregate metric—statements, branches, functions, and lines—must be **at least 90%**; this is not a per-file minimum. A below-target result exits unsuccessfully even when every test passes. Focused runs with coverage also use these thresholds and are not expected to satisfy a full-repository gate; use focused tests without coverage during iteration.
+
+The denominator includes all authored `.ts`, `.tsx`, `.js`, and `.jsx` files under `apps/*/src/` and `packages/*/src/`, including unimported files, bootstrap files, and catalog examples. Tests and `.d.ts` declarations are excluded; type-only modules have no executable statements. Library builds emit source maps so execution through built package exports is remapped to source rather than counted twice as generated JavaScript. The generated UI export-only barrel (`packages/ui/dist/index.js`) has no executable statements or source map and is excluded; its authored source barrel remains included. The inventory check rejects missing source files and unexpected output paths.
+
+These are combined Node/jsdom test coverage numbers, not exclusively unit-test coverage. They do not measure CSS, artwork, HTML, build/configuration tooling outside `src/`, browser validation, or the separately executed package-consumer checks. Test-file counts and executed test-case counts are not coverage percentages. Compare reports from the same revision and toolchain; a worktree at committed HEAD does not include another worktree's uncommitted changes.
 
 ## Layout
 

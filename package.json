@@ -12,12 +12,14 @@
     "check": "node scripts/build-tokens.mjs --check && vp check",
     "typecheck": "tsc -p tsconfig.json && pnpm -r typecheck",
     "test": "vp test run",
+    "test:coverage": "vp test run --coverage && node scripts/check-coverage.mjs",
     "fmt": "vp fmt",
     "test:packages": "node scripts/test-packages.mjs",
-    "ready": "pnpm check && pnpm build && pnpm typecheck && pnpm test && pnpm test:packages"
+    "ready": "pnpm check && pnpm build && pnpm typecheck && pnpm test:coverage && pnpm test:packages"
   },
   "devDependencies": {
     "@types/node": "26.6.6",
+    "@vitest/coverage-v8": "5.1.0",
     "jsdom": "29.0.1",
     "typescript": "7.0.2",
     "vite": "npm:@voidzero-dev/vite-plus-core@1.5.0",
