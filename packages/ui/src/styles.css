@@ -17,6 +17,52 @@
 @source "./checkbox";
 
 @layer components {
+  .lj-tabs {
+    min-width: 0;
+  }
+  .lj-tabs-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    border-block-end: 1px solid var(--lj-border);
+  }
+  .lj-tabs-trigger {
+    box-sizing: border-box;
+    min-width: 0;
+    min-height: 44px;
+    max-width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 0;
+    border-block-end: 3px solid transparent;
+    border-radius: var(--lj-radius-control) var(--lj-radius-control) 0 0;
+    background: var(--lj-surface);
+    color: var(--lj-content);
+    font: inherit;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+  }
+  .lj-tabs-trigger[aria-selected="true"] {
+    border-block-end-color: var(--lj-primary);
+    color: var(--lj-primary);
+    font-weight: 600;
+  }
+  .lj-tabs-trigger:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+  .lj-tabs-trigger:focus-visible,
+  .lj-tabs-panel:focus-visible {
+    outline: 2px solid var(--lj-primary);
+    outline-offset: 2px;
+  }
+  .lj-tabs-panel {
+    min-width: 0;
+    padding-block: 1rem;
+    overflow-wrap: anywhere;
+  }
+  .lj-tabs-panel[hidden] {
+    display: none;
+  }
   .lj-loading-indicator {
     display: inline-flex;
     align-items: center;

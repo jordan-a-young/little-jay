@@ -83,13 +83,18 @@ export const catalogPages: readonly CatalogRegistration[] = [
     keywords: "label validation native form control",
     component: forms,
   })),
-  ...["DescriptionList", "Dialog", "Disclosure", "IconButton", "TextBlock"].map((title) => ({
-    id: title.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase(),
-    title,
-    group: "Components / Inspection" as const,
-    keywords: "metadata inspector native text modal sheet",
-    component: inspection,
-  })),
+  ...["DescriptionList", "Dialog", "Disclosure", "IconButton", "Tabs", "TextBlock"].map(
+    (title) => ({
+      id: title.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase(),
+      title,
+      group: "Components / Inspection" as const,
+      keywords:
+        title === "Tabs"
+          ? "tabs panels keyboard manual activation preserved state"
+          : "metadata inspector native text modal sheet",
+      component: inspection,
+    }),
+  ),
   {
     id: "workflow-form",
     title: "Workflow form",

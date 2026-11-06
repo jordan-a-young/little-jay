@@ -8,7 +8,54 @@ import {
   DialogTrigger,
   DialogContent,
   DialogClose,
+  Tabs,
+  Field,
+  Input,
+  Button,
 } from "@ljay/ui";
+
+function LocalDraft() {
+  const [count, setCount] = useState(0);
+  return (
+    <div>
+      <Field label="Local draft">
+        <Input defaultValue="Keep these unsaved notes" />
+      </Field>
+      <Button onClick={() => setCount(count + 1)}>Count locally: {count}</Button>
+      <p>Switch panels and return: the draft and count are preserved. No records or requests.</p>
+    </div>
+  );
+}
+
+const localTabs = [
+  { value: "draft", label: "Draft", content: <LocalDraft /> },
+  {
+    value: "preview",
+    label: "Preview",
+    content: <p>Local preview only. Arrow keys focus; Enter or Space activates.</p>,
+  },
+  { value: "unavailable", label: "Unavailable", disabled: true, content: null },
+];
+
+export function TabsExample() {
+  return <Tabs label="Local document views" items={localTabs} />;
+}
+
+export function ControlledTabsExample() {
+  const [value, setValue] = useState("preview");
+  return (
+    <div>
+      <Button onClick={() => setValue("draft")}>Select draft externally</Button>
+      <Tabs
+        label="Controlled local views"
+        items={localTabs}
+        value={value}
+        onValueChange={setValue}
+      />
+      <p role="status">Selected panel: {value}. Local-only application state.</p>
+    </div>
+  );
+}
 
 export function MetadataExample() {
   return (

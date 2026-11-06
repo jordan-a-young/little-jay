@@ -18,6 +18,7 @@ export { Checkbox, type CheckboxProps } from "./checkbox/index.js";
 export { DescriptionList, type DescriptionListProps } from "./description-list/index.js";
 export { Disclosure, type DisclosureProps } from "./disclosure/index.js";
 export { TextBlock, type TextBlockProps } from "./text-block/index.js";
+export { Tabs, type TabsProps, type TabsItem } from "./tabs/index.js";
 export { IconButton, type IconButtonProps } from "./icon-button/index.js";
 export {
   Dialog,

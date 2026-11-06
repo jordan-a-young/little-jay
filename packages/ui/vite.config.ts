@@ -20,6 +20,7 @@ export default defineConfig({
       "text-block": "src/text-block/index.tsx",
       "icon-button": "src/icon-button/index.tsx",
       dialog: "src/dialog/index.tsx",
+      tabs: "src/tabs/index.tsx",
     },
     format: ["esm"],
     sourcemap: true,

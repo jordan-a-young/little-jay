@@ -232,7 +232,7 @@ describe("component catalog", () => {
         "StatusIndicator",
       ],
       ["Checkbox", "Field", "Input", "NativeSelect", "Textarea"],
-      ["DescriptionList", "Dialog", "Disclosure", "IconButton", "TextBlock"],
+      ["DescriptionList", "Dialog", "Disclosure", "IconButton", "Tabs", "TextBlock"],
       ["Workflow form", "API connection"],
     ]);
     const search = container.querySelector('input[type="search"]')!;
@@ -443,6 +443,40 @@ describe("component catalog", () => {
     writeText.mockRejectedValueOnce(new Error("Clipboard blocked"));
     await act(async () => copy.click());
     expect(container.textContent).toContain("Select and copy the code below");
+  });
+
+  it("deep-links Tabs examples with local preserved drafts and caller-owned selection", async () => {
+    await renderApp("#/tabs/default");
+    await vi.waitFor(() =>
+      expect(container.querySelector('.catalog-preview [role="tablist"]')).not.toBeNull(),
+    );
+    const draft = container.querySelector<HTMLInputElement>(".catalog-preview input")!;
+    draft.value = "Unsaved local draft";
+    const tab = (name: string) =>
+      [...container.querySelectorAll<HTMLButtonElement>('.catalog-preview [role="tab"]')].find(
+        (button) => button.textContent === name,
+      )!;
+    await act(() => tab("Preview").click());
+    expect(
+      container.querySelector('.catalog-preview [role="tabpanel"]:not([hidden])')?.textContent,
+    ).toContain("Local preview only");
+    await act(() => tab("Draft").click());
+    expect(container.querySelector(".catalog-preview input")).toBe(draft);
+    expect(draft.value).toBe("Unsaved local draft");
+    await renderApp("#/tabs/controlled");
+    await vi.waitFor(() =>
+      expect(container.querySelector('.catalog-preview [role="status"]')?.textContent).toContain(
+        "preview",
+      ),
+    );
+    const external = [
+      ...container.querySelectorAll<HTMLButtonElement>(".catalog-preview button"),
+    ].find((button) => button.textContent === "Select draft externally")!;
+    await act(() => external.click());
+    expect(container.querySelector('.catalog-preview [role="status"]')?.textContent).toContain(
+      "draft",
+    );
+    expect(fetch).not.toHaveBeenCalled();
   });
 
   it("keeps every registered page connected to documentation and a renderable default example", async () => {

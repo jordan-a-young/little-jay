@@ -46,6 +46,38 @@ PebbleState needs application-served assets. Copy the state PNGs from the instal
 
 These components own presentation, not authentication, authorization, workflow transitions, network calls, caches, validation schemas, or routing. Disabled controls and accessibility attributes are not security boundaries. The application owns pending state, retries, draft preservation, reset behavior, and safe error reporting; ErrorBoundary is not a catch-all for asynchronous/event-handler failures.
 
+## Tabs
+
+`Tabs`, `TabsProps`, and `TabsItem` are available from the root and `@ljay/ui/tabs`:
+
+```tsx
+import { Tabs } from "@ljay/ui/tabs";
+import "@ljay/ui/styles.css";
+
+export function DocumentViews() {
+  return (
+    <Tabs
+      label="Document views"
+      items={[
+        {
+          value: "draft",
+          label: "Draft",
+          content: <input aria-label="Draft notes" defaultValue="Unsaved notes" />,
+        },
+        { value: "preview", label: "Preview", content: <p>Local preview</p> },
+        { value: "unavailable", label: "Unavailable", content: null, disabled: true },
+      ]}
+    />
+  );
+}
+```
+
+Items need stable, unique, nonblank string values and meaningful, noninteractive labels. `label` is the required nonblank accessible tab-list name. `defaultValue` sets uncontrolled initial selection; `value` and `onValueChange` support caller-controlled selection. Missing/removed/disabled selections display the first enabled item without a callback; empty/all-disabled lists have no selected panel. Fallback does not overwrite the requested value, so keep controlled values valid when they have domain meaning.
+
+Horizontal Left/Right arrows wrap through enabled tabs (mirrored in RTL); Home/End move focus to the ends. **Activation is manual**: Enter/Space or click selects a panel. Tab enters the list once and can continue to the named, focusable panel; Up/Down retain native behavior. Triggers never submit a form. External selection changes do not move focus; the application owns focus recovery if it hides focused content.
+
+Content mounts on first activation and stays mounted, hidden when inactive, while its item remains. Hidden content is removed from the keyboard/accessibility flow, but effects keep running: applications own pausing requests/timers and remeasuring canvases on visibility changes. Removing an item unmounts its content. No URL routing, graph-node selection, automatic activation, or responsive breakpoint policy is added. Styling requires the same compiled stylesheet and semantic theme as other components.
+
 ## Verification
 
 Use your consuming application's checks. Exercise affected keyboard/focus flows, form behavior, both themes, narrow layouts, and reduced motion where relevant. Verify production CSS and asset base paths, not just a workspace preview. Do not rebuild this dependency merely to iterate on application UI. Source-checkout maintainer commands and catalog examples live in the private source repository (`AGENTS.md`, `apps/playground`, and `docs/`); they are not installed-package instructions.

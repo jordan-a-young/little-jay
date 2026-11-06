@@ -101,6 +101,11 @@
       "development": "./src/icon-button/index.tsx",
       "import": "./dist/icon-button.js"
     },
+    "./tabs": {
+      "types": "./dist/tabs.d.ts",
+      "development": "./src/tabs/index.tsx",
+      "import": "./dist/tabs.js"
+    },
     "./dialog": {
       "types": "./dist/dialog.d.ts",
       "development": "./src/dialog/index.tsx",

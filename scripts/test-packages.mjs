@@ -242,6 +242,8 @@ import { Disclosure, type DisclosureProps } from "@ljay/ui/disclosure";
 import { TextBlock, type TextBlockProps } from "@ljay/ui/text-block";
 import { IconButton, type IconButtonProps } from "@ljay/ui/icon-button";
 import { Dialog, DialogTrigger, DialogContent, DialogClose, type DialogProps, type DialogTriggerProps, type DialogContentProps, type DialogCloseProps } from "@ljay/ui/dialog";
+import { Tabs, type TabsProps, type TabsItem } from "@ljay/ui/tabs";
+import { Tabs as RootTabs, type TabsProps as RootTabsProps, type TabsItem as RootTabsItem } from "@ljay/ui";
 import { fetchJson, HttpError, type FetchJsonOptions, type HttpErrorCode } from "@ljay/http";
 import type { HealthRoutesOptions, SafeErrorResponse, healthRoutes, safeErrorsPlugin } from "@ljay/server";
 import logoLight from "@ljay/brand/logos/lockup-light.svg";
@@ -260,6 +262,15 @@ type AlertDismissContract = Assert<AlertProps["onDismiss"] extends (() => void) 
 type MatchingAlertProps = Assert<RootAlertProps extends AlertProps ? AlertProps extends RootAlertProps ? true : false : false>;
 type OptionalLoadingText = Assert<{} extends LoadingIndicatorProps ? true : false>;
 type MatchingLoadingProps = Assert<RootLoadingIndicatorProps extends LoadingIndicatorProps ? LoadingIndicatorProps extends RootLoadingIndicatorProps ? true : false : false>;
+type MatchingTabsProps = Assert<RootTabsProps extends TabsProps ? TabsProps extends RootTabsProps ? true : false : false>;
+type MatchingTabsItems = Assert<RootTabsItem extends TabsItem ? TabsItem extends RootTabsItem ? true : false : false>;
+const tabsItems = [
+  { value: "draft", label: "Draft", content: <Field label="External tab draft"><Input defaultValue="Preserved consumer draft" /></Field> },
+  { value: "preview", label: "Preview", content: <p>External preview; manually activated.</p> },
+  { value: "disabled", label: "Disabled", content: null, disabled: true },
+] satisfies readonly TabsItem[];
+const tabsContracts: [MatchingTabsProps, MatchingTabsItems] = [true, true];
+void tabsContracts;
 const dismissibleAlertProps = { onDismiss: () => {}, dismissLabel: "Dismiss consumer notice" } satisfies AlertProps;
 const buttonVariants = ["primary", "secondary", "outline", "ghost", "danger"] as const satisfies readonly ButtonVariant[];
 type RequiredLabel = Assert<{} extends Pick<IconButtonProps, "label"> ? false : true>;
@@ -352,6 +363,8 @@ function App() {
       <IconButton label="Unavailable action" disabled><span>+</span></IconButton>
       <Dialog><DialogTrigger>Open external dialog</DialogTrigger><DialogContent title="External dialog" description="Local package fixture."><DialogClose>Done</DialogClose></DialogContent></Dialog>
       <Dialog><DialogTrigger>Open external sheet</DialogTrigger><DialogContent title="External sheet" variant="sheet"><TextBlock text="Safe text" /></DialogContent></Dialog>
+      <Tabs label="External content views" items={tabsItems} />
+      <div data-theme="dark"><RootTabs label="External controlled views" items={tabsItems} value="preview" onValueChange={() => {}} /></div>
     </section>
     <section aria-label="External workflow feedback">
       <section aria-label="External loading indicators">

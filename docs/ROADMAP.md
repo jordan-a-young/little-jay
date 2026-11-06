@@ -15,6 +15,7 @@ Build small, useful pieces for Graph Workbench first. Other project consumers ar
 - Playground examples for workflow feedback and isolated rendering failures.
 - Native DescriptionList/Disclosure, inert escaped TextBlock, and named IconButton with local catalog consumers.
 - Focused Radix Dialog modal foundation and sheet variant, with controlled dismissal, portal, keyboard/focus coverage, and reset-free theme styling.
+- Accessible horizontal Tabs with manual activation, controlled/uncontrolled selection, disabled/RTL keyboard navigation, lazily mounted preserved panels and local catalog examples. No consumer migration is included.
 - `@ljay/http`: bounded platform-fetch JSON transport, cancellation/deadlines, runtime decoders, and safe structured errors; consumed by the existing TanStack Query health read.
 - Configurable Fastify factory; opt-in canonical safe-error and configurable health/readiness plugins; app-owned routes, startup, logging, and shutdown.
 - Matched TypeBox/provider packages through one concrete stateless `/api/text-preview` endpoint. No shared validation abstraction.
@@ -23,7 +24,7 @@ Build small, useful pieces for Graph Workbench first. Other project consumers ar
 ## Next: prepare components for workflows
 
 1. The [pinned Graph Workbench assessment](GRAPH-WORKBENCH-PILOT.md#broader-component-readiness-assessment) covers representative current presentation needs at local commit `6ff4334`. The user's objective is Little Jay readiness: **do not rebuild, migrate or adopt packages in Graph Workbench now**. Existing controls/app-local composition cover the inspected forms, feedback, metadata and inert review needs. Consumer-toolchain/private-package/CSS integration stays deferred until adoption is separately requested.
-2. Scope reusable Tabs against the legacy builder's responsive Library/Canvas/Inspector content panels. This is a Little Jay-only component/catalog candidate, not an approved consumer migration or an implemented export. Define state preservation, keyboard/activation and responsive ownership before coding. Pressed node/history selection already uses native Button props; ToggleGroup, Menu/Tooltip and additional complex widgets need missing-behavior evidence.
+2. Tabs is implemented in Little Jay against that responsive content-panel use case; see UI-002 in the [backlog](BACKLOG.md) for its manual activation/state-preservation contract and verification. This does not migrate Graph Workbench or supply its responsive breakpoint policy. No further shared component gap is confirmed by the current inspection. Pressed node/history selection already uses native Button props; ToggleGroup, Menu/Tooltip and additional complex widgets need missing-behavior evidence.
 
 Each slice needs meaningful interaction tests, theme/no-reset checks, strict declarations, and an external tarball consumer before adoption. New exported contracts require independent review. A Graph Workbench adoption change needs its own scoped implementation and regression checks; existing workflow limits, approvals, historical behavior, and sandbox policies must remain intact.
 

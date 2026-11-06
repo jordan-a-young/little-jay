@@ -3,6 +3,57 @@ import type { CatalogDocument, CatalogPageProps } from "../types.js";
 import * as examples from "./examples.js";
 
 const documents: Record<string, CatalogDocument> = {
+  tabs: {
+    overview:
+      "Horizontal, manually activated content tabs. Stable item values link native non-submit triggers to panels; workflow state and responsive layout stay application-owned.",
+    usage:
+      'import { Tabs } from "@ljay/ui/tabs";\nimport "@ljay/ui/styles.css";\n\n<Tabs label="Document views" items={[\n  { value: "draft", label: "Draft", content: <Draft /> },\n  { value: "preview", label: "Preview", content: <Preview /> },\n]} />',
+    props: [
+      {
+        name: "label",
+        type: "string / required",
+        description: "Nonblank accessible name of the tab list.",
+      },
+      {
+        name: "items",
+        type: "readonly TabsItem[]",
+        description:
+          "Unique nonblank value, meaningful noninteractive label, content, and optional disabled flag. Keep values stable across rerenders/reordering.",
+      },
+      {
+        name: "value / defaultValue / onValueChange",
+        type: "string / string / (value: string) => void",
+        description:
+          "Controlled selection or uncontrolled initial selection. A controlled caller must accept onValueChange to activate a new panel. Focusing a trigger does not request activation.",
+      },
+      {
+        name: "Root div props",
+        type: "ref, className, dir, aria-*, data-*",
+        description:
+          "Native root props; children, raw HTML and native defaultValue are replaced by the item/selection API.",
+      },
+    ],
+    accessibility: [
+      "Tab enters the tab list once. Left/Right wrap through enabled triggers (mirrored in RTL); Home/End focus the first/last enabled trigger. Enter/Space or click activates; Up/Down keep their native behavior. Labels must not contain links or other interactive elements.",
+      "Content mounts only on first activation, then stays mounted in a hidden panel while its item remains. Hidden content is not in the keyboard/accessibility flow, but its effects continue: the application owns pausing timers, requests and canvas measurement. Removing an item or resetting the example unmounts its content.",
+      "Missing, removed or disabled selected values display the first enabled item without firing onValueChange; empty/all-disabled lists have no selected panel. Keep controlled values valid if selection has domain meaning. defaultValue is initial only; fallback does not overwrite the requested value.",
+      "Each panel is keyboard-focusable and named by its trigger. External controlled changes do not move focus; the caller owns focus recovery when it hides the currently focused content. This is not URL navigation, a graph-node selector, or a responsive layout engine.",
+    ],
+    examples: [
+      {
+        id: "default",
+        title: "Manual activation / preserved local draft",
+        component: examples.TabsExample,
+        code: '<Tabs label="Local document views" items={items} />',
+      },
+      {
+        id: "controlled",
+        title: "Caller-owned selection",
+        component: examples.ControlledTabsExample,
+        code: 'const [value, setValue] = useState("preview");\n<Tabs label="Controlled local views" items={items} value={value} onValueChange={setValue} />',
+      },
+    ],
+  },
   "description-list": {
     overview:
       "Native metadata semantics with wrapping for long values. Applications supply dt/dd pairs; no domain schema is inferred.",
