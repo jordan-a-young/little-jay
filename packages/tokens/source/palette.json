@@ -1,0 +1,27 @@
+{
+  "brand": {
+    "jayBlue": "#3276C3",
+    "ink": "#25344A",
+    "ivory": "#FAF7F0",
+    "honey": "#F2BF64",
+    "cloud": "#E8F1FB"
+  },
+  "light": {
+    "background": "#FAF7F0",
+    "surface": "#FFFFFF",
+    "primary": "#2463A6",
+    "onPrimary": "#FFFFFF",
+    "text": "#25344A",
+    "muted": "#58667A",
+    "controlBorder": "#7C8A9D"
+  },
+  "dark": {
+    "background": "#121C2B",
+    "surface": "#1C2A3D",
+    "primary": "#8ABBF2",
+    "onPrimary": "#142236",
+    "text": "#EDF3FA",
+    "muted": "#ADBBD0",
+    "controlBorder": "#7F91AB"
+  }
+}

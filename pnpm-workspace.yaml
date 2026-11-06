@@ -1,0 +1,12 @@
+packages:
+  - apps/*
+  - packages/*
+overrides:
+  vite: npm:@voidzero-dev/vite-plus-core@1.5.0
+peerDependencyRules:
+  allowedVersions:
+    vite: "*"
+# Native build tools used by Tailwind and the TypeScript development runner.
+allowBuilds:
+  "@parcel/watcher": true
+  esbuild: true

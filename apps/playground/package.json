@@ -1,0 +1,32 @@
+{
+  "name": "@ljay/playground",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vp dev",
+    "build": "vp build",
+    "typecheck": "tsc -p tsconfig.json",
+    "preview": "vp preview"
+  },
+  "dependencies": {
+    "@ljay/brand": "workspace:*",
+    "@ljay/http": "workspace:*",
+    "@ljay/tokens": "workspace:*",
+    "@ljay/ui": "workspace:*",
+    "@tanstack/react-query": "5.104.5",
+    "prism-react-renderer": "2.4.1",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "4.3.4",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.2.1",
+    "tailwindcss": "4.3.4",
+    "typescript": "7.0.2",
+    "vite": "npm:@voidzero-dev/vite-plus-core@1.5.0",
+    "vite-plus": "1.5.0"
+  }
+}

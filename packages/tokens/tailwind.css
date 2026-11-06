@@ -1,0 +1,20 @@
+@theme inline {
+  --color-brand: var(--lj-brand);
+  --color-ink: var(--lj-ink);
+  --color-ivory: var(--lj-ivory);
+  --color-honey: var(--lj-honey);
+  --color-cloud: var(--lj-cloud);
+  --color-primary: var(--lj-primary);
+  --color-on-primary: var(--lj-on-primary);
+  --color-surface: var(--lj-surface);
+  --color-background: var(--lj-background);
+  --color-content: var(--lj-content);
+  --color-border: var(--lj-border);
+  --color-muted: var(--lj-muted);
+  --color-info: var(--lj-info);
+  --color-success: var(--lj-success);
+  --color-warning: var(--lj-warning);
+  --color-danger: var(--lj-danger);
+  --radius-control: var(--lj-radius-control);
+  --font-sans: var(--lj-font-sans);
+}

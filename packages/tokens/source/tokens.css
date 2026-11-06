@@ -1,0 +1,22 @@
+:root {
+  --lj-brand: #3276c3;
+  --lj-honey: #f2bf64;
+  --lj-cloud: #e8f1fb;
+  --lj-background: #faf7f0;
+  --lj-surface: #ffffff;
+  --lj-primary: #2463a6;
+  --lj-on-primary: #ffffff;
+  --lj-content: #25344a;
+  --lj-muted: #58667a;
+  --lj-border: #7c8a9d;
+  --lj-radius-control: 0.75rem;
+}
+[data-theme="dark"] {
+  --lj-background: #121c2b;
+  --lj-surface: #1c2a3d;
+  --lj-primary: #8abbf2;
+  --lj-on-primary: #142236;
+  --lj-content: #edf3fa;
+  --lj-muted: #adbbd0;
+  --lj-border: #7f91ab;
+}

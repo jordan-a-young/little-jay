@@ -1,0 +1,34 @@
+{
+  "loading": {
+    "file": "pebble-loading.png",
+    "width": 1254,
+    "height": 1254,
+    "description": "Thoughtful seated pose with wing near cheek and three honey dots.",
+    "exampleLabel": "Loading\u2026",
+    "animated": false
+  },
+  "success": {
+    "file": "pebble-success.png",
+    "width": 1254,
+    "height": 1254,
+    "description": "Raised wings, smiling eyes, and honey sparkles.",
+    "exampleLabel": "All done!",
+    "animated": false
+  },
+  "error": {
+    "file": "pebble-error.png",
+    "width": 1254,
+    "height": 1254,
+    "description": "Puzzled head tilt, a gentle shrug, and a honey question mark.",
+    "exampleLabel": "Something went wrong. Please try again.",
+    "animated": false
+  },
+  "empty": {
+    "file": "pebble-empty.png",
+    "width": 1254,
+    "height": 1254,
+    "description": "Curious seated pose looking into a small empty cloud-blue box.",
+    "exampleLabel": "Nothing here yet.",
+    "animated": false
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "name": "little-jay",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "secrets:install": "sh scripts/install-gitleaks.sh",
+    "secrets:staged": "node scripts/check-secrets.mjs staged",
+    "secrets:scan": "node scripts/check-secrets.mjs history",
+    "dev": "pnpm --filter @ljay/tokens --filter @ljay/server --filter @ljay/http --filter @ljay/ui build && pnpm --parallel --filter @ljay/playground --filter @ljay/api dev",
+    "build": "vp run -r build",
+    "check": "node scripts/build-tokens.mjs --check && vp check",
+    "typecheck": "tsc -p tsconfig.json && pnpm -r typecheck",
+    "test": "vp test run",
+    "fmt": "vp fmt",
+    "test:packages": "node scripts/test-packages.mjs",
+    "ready": "pnpm check && pnpm build && pnpm typecheck && pnpm test && pnpm test:packages"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.6",
+    "jsdom": "29.0.1",
+    "typescript": "7.0.2",
+    "vite": "npm:@voidzero-dev/vite-plus-core@1.5.0",
+    "vite-plus": "1.5.0"
+  },
+  "engines": {
+    "node": "^26.13.0"
+  },
+  "packageManager": "pnpm@12.18.0"
+}

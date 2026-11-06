@@ -1,0 +1,28 @@
+import { defineConfig } from "vite-plus";
+export default defineConfig({
+  pack: {
+    entry: {
+      index: "src/index.ts",
+      button: "src/button/index.tsx",
+      alert: "src/alert/index.tsx",
+      "empty-state": "src/empty-state/index.tsx",
+      "pebble-state": "src/pebble-state/index.tsx",
+      "status-indicator": "src/status-indicator/index.tsx",
+      "error-boundary": "src/error-boundary/index.tsx",
+      field: "src/field/index.tsx",
+      input: "src/input/index.tsx",
+      textarea: "src/textarea/index.tsx",
+      "native-select": "src/native-select/index.tsx",
+      checkbox: "src/checkbox/index.tsx",
+      "description-list": "src/description-list/index.tsx",
+      disclosure: "src/disclosure/index.tsx",
+      "text-block": "src/text-block/index.tsx",
+      "icon-button": "src/icon-button/index.tsx",
+      dialog: "src/dialog/index.tsx",
+    },
+    format: ["esm"],
+    dts: { generator: "tsgo" },
+    clean: true,
+    outExtensions: () => ({ js: ".js" }),
+  },
+});

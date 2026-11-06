@@ -1,0 +1,22 @@
+{
+  "name": "@ljay/tokens",
+  "version": "0.0.0",
+  "private": true,
+  "files": [
+    "*.css",
+    "source/palette.json",
+    "source/tokens.css"
+  ],
+  "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "exports": {
+    "./theme.css": "./theme.css",
+    "./tailwind.css": "./tailwind.css",
+    "./palette.json": "./source/palette.json"
+  },
+  "scripts": {
+    "build": "node ../../scripts/build-tokens.mjs"
+  }
+}

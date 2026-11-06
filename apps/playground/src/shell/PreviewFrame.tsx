@@ -1,0 +1,20 @@
+import { createContext, useContext, type ReactNode } from "react";
+
+export type PreviewWidth = "fluid" | "640" | "320";
+export const PreviewContext = createContext<{ width: PreviewWidth; resetCount: number }>({
+  width: "fluid",
+  resetCount: 0,
+});
+
+export function PreviewFrame({ exampleId, children }: { exampleId: string; children: ReactNode }) {
+  const { width, resetCount } = useContext(PreviewContext);
+  return (
+    <div className="catalog-preview-track">
+      <div className="catalog-preview" style={{ width: width === "fluid" ? "100%" : `${width}px` }}>
+        <div key={`${exampleId}:${resetCount}`} className="min-w-0">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}

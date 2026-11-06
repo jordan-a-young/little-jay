@@ -1,0 +1,275 @@
+import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
+import { access, copyFile, mkdir, mkdtemp, readFile, readdir, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { build } from "vite-plus";
+
+const workspace = fileURLToPath(new URL("../", import.meta.url));
+const temporaryRoot = process.env.TMPDIR ?? tmpdir();
+const consumer = await mkdtemp(path.join(temporaryRoot, "little-jay-pack-"));
+const pnpm = process.env.npm_execpath;
+assert.ok(pnpm, "Run package checks with pnpm test:packages");
+const pnpmIsScript = /\.(?:cjs|mjs|js)$/i.test(pnpm);
+
+function run(arguments_, cwd) {
+  execFileSync(
+    pnpmIsScript ? process.execPath : pnpm,
+    pnpmIsScript ? [pnpm, ...arguments_] : arguments_,
+    {
+      cwd,
+      stdio: "inherit",
+    },
+  );
+}
+
+const dependencies = {
+  react: "19.3.1",
+  "react-dom": "19.3.1",
+  "@types/react": "19.3.0",
+  "@types/react-dom": "19.3.0",
+  "@types/node": "26.6.6",
+};
+
+for (const name of ["brand", "tokens", "ui", "server", "http"]) {
+  run(["pack", "--pack-destination", consumer], path.join(workspace, "packages", name));
+  dependencies[`@ljay/${name}`] = `file:./ljay-${name}-0.0.0.tgz`;
+}
+
+await writeFile(
+  path.join(consumer, "package.json"),
+  JSON.stringify({ name: "little-jay-consumer", private: true, type: "module", dependencies }),
+);
+await writeFile(
+  path.join(consumer, "pnpm-workspace.yaml"),
+  'overrides:\n  "@ljay/tokens": file:./ljay-tokens-0.0.0.tgz\n  "@ljay/brand": file:./ljay-brand-0.0.0.tgz\n',
+);
+run(["install", "--ignore-scripts"], consumer);
+const stateSource = path.join(consumer, "node_modules/@ljay/brand/states");
+const stateManifest = JSON.parse(await readFile(path.join(stateSource, "manifest.json"), "utf8"));
+const statePublic = path.join(consumer, "public/branding/states");
+await mkdir(statePublic, { recursive: true });
+for (const illustration of Object.values(stateManifest)) {
+  await copyFile(
+    path.join(stateSource, illustration.file),
+    path.join(statePublic, illustration.file),
+  );
+}
+
+async function checkExportTargets(directory, target) {
+  if (typeof target === "string") {
+    assert.ok(target.startsWith("./"), `Unexpected export target: ${target}`);
+    await access(path.join(directory, target));
+  } else {
+    for (const value of Object.values(target)) await checkExportTargets(directory, value);
+  }
+}
+
+for (const name of ["brand", "tokens", "ui", "server", "http"]) {
+  const directory = path.join(consumer, "node_modules", "@ljay", name);
+  const manifest = JSON.parse(await readFile(path.join(directory, "package.json"), "utf8"));
+  assert.equal(manifest.private, true);
+  await checkExportTargets(directory, manifest.exports);
+  assert.ok(!JSON.stringify(manifest).includes("workspace:"));
+  if (name === "brand") {
+    for (const excluded of [
+      "preview.png",
+      "mascot/pebble-original.png",
+      "little-jay-brand-kit.zip",
+    ])
+      await assert.rejects(access(path.join(directory, excluded)));
+  }
+  if (name === "ui") {
+    assert.equal(manifest.peerDependencies.react, "^19.0.0");
+    assert.equal(manifest.peerDependencies["react-dom"], "^19.0.0");
+    assert.equal(manifest.dependencies.react, undefined);
+    const outputFiles = await readdir(path.join(directory, "dist"));
+    const modules = await Promise.all(
+      outputFiles
+        .filter((file) => file.endsWith(".js"))
+        .map((file) => readFile(path.join(directory, "dist", file), "utf8")),
+    );
+    assert.match(modules.join("\n"), /from ["']react\/jsx-runtime["']/);
+  }
+}
+
+await writeFile(
+  path.join(consumer, "server.mjs"),
+  `import assert from "node:assert/strict";
+import { createServer, healthRoutes, safeErrorsPlugin } from "@ljay/server";
+import { fetchJson, HttpError } from "@ljay/http";
+const before = [process.listeners("SIGINT"), process.listeners("SIGTERM")];
+const server = createServer({ exposeHeadRoutes: false });
+try {
+  assert.deepEqual([process.listeners("SIGINT"), process.listeners("SIGTERM")], before);
+  server.get("/consumer", async () => ({ ok: true }));
+  server.register(safeErrorsPlugin);
+  server.register(healthRoutes, { prefix: "/probes", checks: [async () => false] });
+  server.get("/failure", async () => { throw new Error("private diagnostic"); });
+  assert.deepEqual((await server.inject("/consumer")).json(), { ok: true });
+  assert.equal((await server.inject({ method: "HEAD", url: "/consumer" })).statusCode, 404);
+  assert.equal(server.server.listening, false);
+  assert.deepEqual((await server.inject("/probes/health")).json(), { status: "ok" });
+  assert.equal((await server.inject("/probes/ready")).statusCode, 503);
+  assert.deepEqual((await server.inject("/failure")).json(), { statusCode: 500, error: { code: "INTERNAL_ERROR", message: "Internal server error" } });
+  assert.equal(await fetchJson("https://example.test", { fetch: async () => Response.json({ ok: true }), decode: (value) => value.ok }), true);
+  await assert.rejects(fetchJson("https://example.test/private", { fetch: async () => new Response("secret", { status: 500 }), decode: (value) => value }), (error) => error instanceof HttpError && error.code === "status" && !String(error).includes("secret"));
+} finally {
+  await server.close();
+}
+`,
+);
+execFileSync(process.execPath, ["server.mjs"], { cwd: consumer, stdio: "inherit" });
+
+await writeFile(
+  path.join(consumer, "index.html"),
+  '<!doctype html><html lang="en"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Little Jay package consumer</title><link rel="icon" href="data:,"><div id="root"></div><script type="module" src="/main.tsx"></script></html>',
+);
+await writeFile(
+  path.join(consumer, "main.tsx"),
+  `import { useActionState, useRef, useState } from "react";
+import { createRoot } from "react-dom/client";
+import { useFormStatus } from "react-dom";
+import { Button } from "@ljay/ui";
+import { Button as SubpathButton, type ButtonProps } from "@ljay/ui/button";
+import { Alert } from "@ljay/ui/alert";
+import { EmptyState } from "@ljay/ui/empty-state";
+import { PebbleState, type PebbleStateProps } from "@ljay/ui/pebble-state";
+import { StatusIndicator } from "@ljay/ui/status-indicator";
+import { ErrorBoundary } from "@ljay/ui/error-boundary";
+import { Field } from "@ljay/ui/field";
+import { Input, type InputProps } from "@ljay/ui/input";
+import { Textarea } from "@ljay/ui/textarea";
+import { NativeSelect } from "@ljay/ui/native-select";
+import { Checkbox } from "@ljay/ui/checkbox";
+import { DescriptionList, type DescriptionListProps } from "@ljay/ui/description-list";
+import { Disclosure, type DisclosureProps } from "@ljay/ui/disclosure";
+import { TextBlock, type TextBlockProps } from "@ljay/ui/text-block";
+import { IconButton, type IconButtonProps } from "@ljay/ui/icon-button";
+import { Dialog, DialogTrigger, DialogContent, DialogClose, type DialogProps, type DialogTriggerProps, type DialogContentProps, type DialogCloseProps } from "@ljay/ui/dialog";
+import { fetchJson, HttpError, type FetchJsonOptions, type HttpErrorCode } from "@ljay/http";
+import type { HealthRoutesOptions, SafeErrorResponse, healthRoutes, safeErrorsPlugin } from "@ljay/server";
+import logoLight from "@ljay/brand/logos/lockup-light.svg";
+import logoDark from "@ljay/brand/logos/lockup-dark.svg";
+import pebblePng from "@ljay/brand/mascot/pebble.png";
+import type { createServer, FastifyInstance } from "@ljay/server";
+import "@ljay/ui/styles.css";
+import "./overrides.css";
+type ServerResult = ReturnType<typeof createServer>;
+const serverTypecheck: ServerResult | FastifyInstance | undefined = undefined;
+void serverTypecheck;
+type Assert<Condition extends true> = Condition;
+type RequiredLabel = Assert<{} extends Pick<IconButtonProps, "label"> ? false : true>;
+type InertText = Assert<"dangerouslySetInnerHTML" extends keyof TextBlockProps ? false : true>;
+type PublicContracts = [DescriptionListProps, DisclosureProps, TextBlockProps, IconButtonProps, DialogProps, DialogTriggerProps, DialogContentProps, DialogCloseProps, FetchJsonOptions<boolean>, HttpErrorCode, HealthRoutesOptions, SafeErrorResponse, typeof healthRoutes, typeof safeErrorsPlugin, RequiredLabel, InertText];
+const publicContracts: PublicContracts | undefined = undefined;
+void publicContracts;
+void fetchJson;
+void HttpError;
+const nativeProps: ButtonProps = { name: "action", value: "save" };
+const inputProps: InputProps = { autoComplete: "off", maxLength: 80 };
+function SubmitFields() {
+  const { pending } = useFormStatus();
+  return <SubpathButton type="submit" disabled={pending}>{pending ? "Saving fields…" : "Save fields"}</SubpathButton>;
+}
+function NativeForm() {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [state, action] = useActionState(async (_previous: { name: string; prompt: string; mode: string; review: boolean; submitted: boolean }, data: FormData) => ({
+    name: String(data.get("name") ?? ""), prompt: String(data.get("prompt") ?? ""), mode: String(data.get("mode") ?? ""), review: data.get("review") === "yes", submitted: true,
+  }), { name: "Example", prompt: "Draft notes", mode: "plan", review: false, submitted: false });
+  return <section aria-label="External native form">
+    <form action={action}>
+      <Field id="consumer-name" label="External name" required description="Name help" error={state.submitted ? "Example validation error; draft preserved" : undefined}>
+        <Input {...inputProps} ref={inputRef} name="name" defaultValue={state.name} />
+      </Field>
+      <Field label="External prompt"><Textarea name="prompt" defaultValue={state.prompt} /></Field>
+      <Field label="External mode"><NativeSelect key={state.mode} name="mode" defaultValue={state.mode}><option value="plan">Plan</option><option value="review">Review</option></NativeSelect></Field>
+      <Field label="External review" orientation="horizontal"><Checkbox name="review" value="yes" defaultChecked={state.review} /></Field>
+      <Field label="External disabled" disabled><Input name="disabled" defaultValue="Unavailable" /></Field>
+      <SubmitFields />
+    </form>
+    <Button onClick={() => inputRef.current?.focus()}>Focus input ref</Button>
+    {state.submitted && <Alert tone="warning">External draft preserved</Alert>}
+    <div data-theme="dark"><Field label="Dark input"><Input defaultValue="Dark control" /></Field></div>
+    <div className="project"><Field label="Project input"><Input defaultValue="Project control" /></Field></div>
+  </section>;
+}
+function Panel({ broken }: { broken: boolean }) {
+  if (broken) throw new Error("Private external diagnostic");
+  return <EmptyState title="No checkpoints yet">Awaiting a workflow step.</EmptyState>;
+}
+function App() {
+  const ref = useRef<HTMLButtonElement>(null);
+  const [clicks, setClicks] = useState(0);
+  const [submits, setSubmits] = useState(0);
+  const [focused, setFocused] = useState(false);
+  const [broken, setBroken] = useState(false);
+  return <>
+    <h1>External package consumer</h1>
+    <img src={logoLight} alt="Little Jay" width={275} height={75} />
+    <div data-theme="dark"><img src={logoDark} alt="Little Jay on dark" width={275} height={75} /></div>
+    <img src={pebblePng} alt="" width={128} height={128} />
+    <PebbleState {...{ state: "empty", heading: "No projects yet.", assetBaseUrl: "/branding/" } satisfies PebbleStateProps} />
+    <form onSubmit={(event) => { event.preventDefault(); setSubmits(submits + 1); }}>
+      <Button {...nativeProps} ref={ref} onClick={() => setClicks(clicks + 1)}>Count</Button>
+      <SubpathButton type="submit">Submit</SubpathButton>
+      <Button disabled onClick={() => setClicks(999)}>Disabled</Button>
+      <button type="button" onClick={() => { ref.current?.focus(); setFocused(ref.current === document.activeElement); }}>Focus ref</button>
+    </form>
+    <p role="status">Clicks: {clicks}; submits: {submits}; ref: {String(focused)}</p>
+    <div data-theme="dark"><Button>Dark</Button><div data-theme="light"><Button>Nested light</Button></div></div>
+    <div className="project"><Button>Override</Button></div>
+    <NativeForm />
+    <section aria-label="External inspection components">
+      <Disclosure summary="Metadata"><DescriptionList><dt>State</dt><dd>Local preview</dd></DescriptionList></Disclosure>
+      <TextBlock aria-label="Inert output" text={'<script>alert("inert")</script>'} />
+      <IconButton label="Count local preview" onClick={() => setClicks(clicks + 1)}><span>+</span></IconButton>
+      <IconButton label="Unavailable action" disabled><span>+</span></IconButton>
+      <Dialog><DialogTrigger>Open external dialog</DialogTrigger><DialogContent title="External dialog" description="Local package fixture."><DialogClose>Done</DialogClose></DialogContent></Dialog>
+      <Dialog><DialogTrigger>Open external sheet</DialogTrigger><DialogContent title="External sheet" variant="sheet"><TextBlock text="Safe text" /></DialogContent></Dialog>
+    </section>
+    <section aria-label="External workflow feedback">
+      <StatusIndicator tone="warning">Awaiting review</StatusIndicator>
+      <Alert title="Connection lost" tone="danger">Viewing the last saved checkpoint.</Alert>
+      <div data-theme="dark"><Alert tone="warning">Dark feedback</Alert></div>
+      <div className="project"><Alert tone="danger">Project feedback</Alert></div>
+      <Button disabled={broken} onClick={() => setBroken(true)}>Break external panel</Button>
+      <ErrorBoundary onReset={() => setBroken(false)}><Panel broken={broken} /></ErrorBoundary>
+    </section>
+  </>;
+}
+createRoot(document.getElementById("root")!).render(<App />);
+`,
+);
+await writeFile(
+  path.join(consumer, "overrides.css"),
+  ".project { --lj-primary: #7c3aed; --lj-danger: #7c3aed; --lj-border: #7c3aed; --lj-radius-control: 0.25rem; }",
+);
+await writeFile(
+  path.join(consumer, "styles.d.ts"),
+  'declare module "*.css" {}\ndeclare module "*.svg" { const source: string; export default source; }\ndeclare module "*.png" { const source: string; export default source; }\n',
+);
+await writeFile(
+  path.join(consumer, "tsconfig.json"),
+  JSON.stringify({
+    compilerOptions: {
+      target: "ES2022",
+      module: "NodeNext",
+      moduleResolution: "NodeNext",
+      jsx: "react-jsx",
+      strict: true,
+      noEmit: true,
+      skipLibCheck: false,
+      types: ["node", "react", "react-dom"],
+    },
+    include: ["main.tsx", "styles.d.ts"],
+  }),
+);
+run(["exec", "tsc", "-p", path.join(consumer, "tsconfig.json")], workspace);
+await build({
+  root: consumer,
+  configFile: false,
+  build: { outDir: "dist" },
+});
+console.log(`Package checks passed. Tailwind-free browser fixture: ${consumer}`);
