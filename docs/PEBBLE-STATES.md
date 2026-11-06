@@ -34,7 +34,7 @@ No implicit alert, live region, busy state, or progress percentage is added. For
 
 Original, unmodified transparent **1254×1254 static PNGs** live at `packages/brand/states/pebble-{loading,success,error,empty}.png`. `states/README.md` and `states/manifest.json` preserve the pack's guidance and metadata. The original download remains untouched. These are not animated assets.
 
-The private `@littlejay/brand` package explicitly exports each PNG and `@littlejay/brand/states/manifest.json`. The manifest centralizes filenames and native dimensions for both UI rendering and public-file synchronization. There is no second artwork source.
+The `@littlejay/brand` package explicitly exports each PNG and `@littlejay/brand/states/manifest.json`. It is prepared for public npm distribution under the release runbook without granting additional artwork rights. The manifest centralizes filenames and native dimensions for both UI rendering and public-file synchronization. There is no second artwork source.
 
 The existing playground `branding.ts` plugin copies the four images and manifest to ignored `public/branding/states` before development and production builds, and watches canonical source changes. Generated copies are not maintained manually or linked with symlinks. Public URLs are `<app-base>/branding/states/pebble-<state>.png`. Vite's `BASE_URL` makes the component work at `/` and pathname prefixes such as `/little-jay/`.
 

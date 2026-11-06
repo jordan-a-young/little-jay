@@ -12,6 +12,25 @@ Track requested improvements, investigations, documentation, tooling, and potent
 
 ## Requested work
 
+### PKG-004: Initial npm bootstrap
+
+- **Status:** In progress; first publication not performed.
+- **Owner:** Release maintainer, npm organization settings and the release runbook.
+- **Request:** Begin working toward the documented npm bootstrap. The owner explicitly approved committing and pushing the verified release setup directly to `main`; this approval excludes npm authentication, publication, workflow dispatch and publishing activation.
+- **Readiness evidence:** Public registry reads returned 404 for all five `@littlejay` package names. This establishes no public listing, not name availability/reservation or organization permissions. All 181 non-documentation inputs matched the successful 253-test isolated release-check copy, and fresh formatting/lint checks passed before preparing the commit. Independent release/security review was already cleared.
+- **Next action:** Land the release setup after staged/history secret scans, then have the owner authenticate interactively to npm with 2FA and confirm `littlejay` organization publishing permissions. Obtain separate explicit approval for the first real 0.1.0 publication and subsequent trusted-publisher/activation settings. Do not ask for credentials or OTPs in agent messages.
+
+### PKG-003: Changesets release preparation and manual npm publishing
+
+- **Status:** Implemented; external bootstrap/activation not performed.
+- **Owner:** Root release tooling, `.changeset/`, `.github/workflows/` and library publication metadata.
+- **Request:** Implement the researched Changesets/Actions/pnpm setup and update agent guidance. The owner explicitly confirmed all five libraries, including branding, may be prepared for public npm distribution after considering and declining private branding.
+- **Acceptance:** Independent initial 0.1.0 versions/changelogs, public registry metadata with private root/apps, automated draft release PR plus explicit generated-PR validation, manual-only disabled-by-default publishing, same-commit verified tarballs, narrowly scoped OIDC, local scripts with guards, partial-failure reporting, version-aware consumer fixtures and durable maintainer/agent documentation. Preserve branding rights and notices.
+- **Boundaries:** No npm authentication, registry bootstrap, repository settings/activation, workflow dispatch, actual package publication, remote tags/releases, commits/pushes or visibility change are authorized by setup. External npm/GitHub operation remains unverified until separately performed.
+- **Implementation:** `.changeset/`, `scripts/release.mjs`, `scripts/package-artifacts.mjs`, `scripts/release.test.mjs`, `.github/workflows/release-pr.yml` and `publish.yml`; runbook `docs/RELEASING.md` and scoped/root `AGENTS.md` updates.
+- **Verification:** Changesets CLI 3.0.3 generated initial 0.1.0 versions/changelogs without publication. A disposable UI-only patch note generated UI 0.1.1 while leaving the other libraries and private apps unchanged; that trial stayed outside the source checkout. All 31 injected-boundary release tests pass, including a red-before-green regression for `apps/AGENTS.md` being mistaken for an app directory. Frozen installation passed. `TMPDIR=/tmp/opencode pnpm release:check` passed in an isolated current-source clone using the pinned toolchain and installed scanner: 37 files / 253 tests, coverage thresholds/inventory, lint/format/build/typecheck, five version-aware tarballs and isolated consumer checks, history secret scan and release archive hashes. Dirty artifacts correctly received a null commit marker. Workflows parsed as valid YAML and manual triggers/permissions/artifact handoff are regression-tested; 82 local documentation links/anchors were validated. Independent review found a private-origin Git-authentication gap; command-scoped credential handling and synthetic regressions fixed it, and re-review cleared all findings. Exact pinned Changesets action source was inspected for token handling, PR-number output and CLI git-tag event integration. No upstream action code or real authenticated publication was executed. Browser checks were not required: no runtime UI/rendering/style changes.
+- **Next action:** Owner review/commit of setup, then separately approved npm ownership/authentication/bootstrap, per-package OIDC trust configuration and publication activation per `docs/RELEASING.md`. Keep `NPM_PUBLISH_ENABLED` off until those steps are approved. These external steps are unverified, not failed local checks; nothing was published or pushed by this task.
+
 ### PKG-002: Rename packages to the littlejay npm organization
 
 - **Status:** Implemented.

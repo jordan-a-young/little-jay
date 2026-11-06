@@ -1,7 +1,13 @@
 {
   "name": "@littlejay/brand",
-  "version": "0.0.0",
-  "private": true,
+  "version": "0.1.0",
+  "private": false,
+  "license": "SEE LICENSE IN README.md",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jordan-a-young/little-jay.git",
+    "directory": "packages/brand"
+  },
   "files": [
     "logos",
     "mascot",
@@ -44,5 +50,9 @@
     "./banners/social-dark.png": "./banners/social-dark.png",
     "./site.webmanifest": "./site.webmanifest",
     "./FONT-NOTICES.txt": "./FONT-NOTICES.txt"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   }
 }

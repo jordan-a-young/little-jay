@@ -1,0 +1,10 @@
+# GitHub automation
+
+- Read `docs/RELEASING.md` before changing release workflows. Workflow definitions do not authorize dispatch, publication, repository settings, merges or visibility changes.
+- `release-pr.yml` only proposes version/changelog changes through Changesets v3/action v2. It never publishes. Its separate read-only job validates the generated PR explicitly because `GITHUB_TOKEN`-created PRs do not trigger ordinary PR CI automatically. Check that job before merging; a bot PR is not an automatic gate waiver.
+- `publish.yml` is manual-only, main-only and off unless repository variable `NPM_PUBLISH_ENABLED` is exactly `true`. Keep the exact commit input, origin/main checks, concurrency without cancellation, and same-run artifact-ID handoff. Do not turn ordinary pushes, PRs or arbitrary refs into publication triggers.
+- Only the publish job gets `id-token: write`; no npm token secret is configured. Build/test/secret-scan and pack in the read-only verify job; publish only its SHA-512-checked tarballs. Do not rebuild, run tests, enable install scripts or restore caches in the OIDC job.
+- Checkout credentials stay disabled. Changesets passes `GITHUB_TOKEN` to the custom publish script; authenticate its private-origin synchronization read through command-scoped Git environment only, never persisted config, token-bearing command arguments or logs. The action authenticates its own API operations separately.
+- Pin new actions by reviewed immutable commit SHA. Changesets CLI/action major versions must remain compatible. Root/apps remain private; only the five explicit library packages are releasable.
+- Bootstrap npm ownership/trusted publishers and configure allowed direct-publish permissions separately with owner approval. Trusted publishing does not give provenance to private-source repositories. Never add credentials to repository files or logs.
+- Changes to publishing/authentication boundaries require isolated nonpublishing tests and an independent final review. Never test these workflows by actually publishing or creating remote tags/releases without explicit authorization.

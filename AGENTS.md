@@ -53,6 +53,14 @@ Select browser checks using the matrix's risk policy: changed rendering/styles, 
 - Never hand-edit `dist/`, `.vite/`, `packages/tokens/theme.css`, or `apps/playground/public/branding/`. Change their sources and use the documented generator/build.
 - Keep TypeScript/JavaScript ESM and existing module conventions. Prefer descriptive names and async/await; add only editor documentation comments when comments are needed.
 
+## Library releases
+
+- Read `docs/RELEASING.md` before versioning or publishing work, plus `.changeset/AGENTS.md`, `scripts/AGENTS.md` and `.github/AGENTS.md` for their areas. The five libraries are publish-enabled at independent versions; root/apps remain private. Public distribution does not change branding rights.
+- Changesets v3 is the only version/changelog engine. Add a consumer-facing changeset for releasable changes, or explain why none is needed. `pnpm release:status` previews; `pnpm release:version` writes release files/lockfile without commits or publication; `pnpm release:check` runs gates/scans and packs without uploading.
+- `release-pr.yml` proposes and explicitly verifies a release PR; it never publishes. `publish.yml` is manual-only, exact-main-SHA-only and disabled unless the owner activates `NPM_PUBLISH_ENABLED`. Approval to edit setup/version files is not approval to authenticate, bootstrap npm, dispatch workflows, publish, create tags/releases, commit, push or change repository settings.
+- `pnpm release:publish --confirm <SHA>` requires separate publication authorization and `LITTLEJAY_PUBLISH_ENABLED=true`, clean synchronized main, expected origin, verification and exact artifacts. It creates local tags only after npm confirmations; it never commits or pushes. Never bypass guards or treat registry errors as missing versions. Record/reconcile partial publication, do not overwrite versions.
+- GitHub trusted publishing uses OIDC, no long-lived npm token. Bootstrap and per-package trust/permissions are owner actions. The private GitHub repository cannot produce npm provenance attestations. Release/security changes require nonpublishing regression tests and independent final review; don't test them with a real release.
+
 ## Fast development loop
 
 - After initial `pnpm dev` startup, ordinary playground and `packages/ui/src/` React/TypeScript, Tailwind-class, and component-CSS edits hot-reload. Do not rebuild packages or restart the server merely to see these edits. The UI package's `development` exports resolve component source, and the playground aliases `@littlejay/ui/styles.css` to source CSS during development. See `packages/ui/package.json` and `apps/playground/vite.config.ts`.

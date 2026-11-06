@@ -1,6 +1,6 @@
 # @littlejay/http
 
-Private ESM bounded JSON transport for browsers and Node with platform-compatible fetch, AbortController, and Web Streams. No React, CommonJS entry point, or CSS setup is required. The repository validates Node 26.13.0; other runtimes need consumer verification. Public exports and declarations are listed in [package.json](package.json).
+ESM bounded JSON transport for browsers and Node with platform-compatible fetch, AbortController, and Web Streams, prepared for public npm distribution. No React, CommonJS entry point, or CSS setup is required. The repository validates Node 26.13.0; other runtimes need consumer verification. Public exports and declarations are listed in [package.json](package.json).
 
 ## Imports
 

@@ -1,6 +1,6 @@
 # JSON transport
 
-`@littlejay/http` is a private ESM browser/Node package with one operation, `fetchJson`, and a structured `HttpError`. The playground's health query is its first consumer.
+`@littlejay/http` is an ESM browser/Node package prepared for public npm distribution, with one operation, `fetchJson`, and a structured `HttpError`. The playground's health query is its first consumer.
 
 ```ts
 import { fetchJson, HttpError } from "@littlejay/http";

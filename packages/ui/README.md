@@ -1,6 +1,6 @@
 # @littlejay/ui
 
-Private ESM React 19 components. React and React DOM `^19.0.0` are peer dependencies; use the same React installation as the application. Consume only the public exports in [package.json](package.json), not `src` or hashed build chunks. No CommonJS entry point is provided.
+ESM React 19 components prepared for public npm distribution. React and React DOM `^19.0.0` are peer dependencies; use the same React installation as the application. Consume only the public exports in [package.json](package.json), not `src` or hashed build chunks. No CommonJS entry point is provided.
 
 ## Imports
 

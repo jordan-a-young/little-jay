@@ -1,12 +1,12 @@
 # Little Jay roadmap
 
-Build small, useful pieces for Graph Workbench first. Other project consumers are evidence for reuse, not authorization to migrate them. Packages remain private.
+Build small, useful pieces for Graph Workbench first. Other project consumers are evidence for reuse, not authorization to migrate them. The five libraries are prepared for public npm publication; root/apps remain private. Release automation is manual and disabled until separately activated; see [the release runbook](RELEASING.md).
 
 ## Implemented
 
 - App-local component catalog with searchable navigation, lazy category pages, URL-addressable examples, usage/props/accessibility docs, theme/width controls, and isolated preview reset. No Storybook dependency.
 
-- Canonical private `@littlejay/brand` assets, approved Pebble palette, generated shared tokens, and document-level persisted/system appearance. Browser icons and manifest synchronize automatically for development and builds.
+- Canonical `@littlejay/brand` assets with reserved artwork rights, approved Pebble palette, generated shared tokens, and document-level persisted/system appearance. Browser icons and manifest synchronize automatically for development and builds.
 
 - Framework-independent light/dark tokens and semantic feedback colors.
 - Native Button; Alert, EmptyState, StatusIndicator, and resettable ErrorBoundary.

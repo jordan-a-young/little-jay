@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { build } from "vite-plus";
+import { tarballFilename } from "./package-artifacts.mjs";
 
 const workspace = fileURLToPath(new URL("../", import.meta.url));
 const temporaryRoot = process.env.TMPDIR ?? tmpdir();
@@ -33,8 +34,11 @@ const dependencies = {
 };
 
 for (const name of ["brand", "tokens", "ui", "server", "http"]) {
+  const manifest = JSON.parse(
+    await readFile(path.join(workspace, "packages", name, "package.json"), "utf8"),
+  );
   run(["pack", "--pack-destination", consumer], path.join(workspace, "packages", name));
-  dependencies[`@littlejay/${name}`] = `file:./littlejay-${name}-0.0.0.tgz`;
+  dependencies[manifest.name] = `file:./${tarballFilename(manifest.name, manifest.version)}`;
 }
 
 await writeFile(
@@ -43,7 +47,7 @@ await writeFile(
 );
 await writeFile(
   path.join(consumer, "pnpm-workspace.yaml"),
-  'overrides:\n  "@littlejay/tokens": file:./littlejay-tokens-0.0.0.tgz\n  "@littlejay/brand": file:./littlejay-brand-0.0.0.tgz\n',
+  `overrides:\n  "@littlejay/tokens": ${dependencies["@littlejay/tokens"]}\n  "@littlejay/brand": ${dependencies["@littlejay/brand"]}\n`,
 );
 run(["install", "--ignore-scripts"], consumer);
 
@@ -166,7 +170,13 @@ async function checkExportTargets(directory, target) {
 for (const name of ["brand", "tokens", "ui", "server", "http"]) {
   const directory = path.join(consumer, "node_modules", "@littlejay", name);
   const manifest = JSON.parse(await readFile(path.join(directory, "package.json"), "utf8"));
-  assert.equal(manifest.private, true);
+  const sourceManifest = JSON.parse(
+    await readFile(path.join(workspace, "packages", name, "package.json"), "utf8"),
+  );
+  assert.equal(manifest.private, false);
+  assert.equal(manifest.version, sourceManifest.version);
+  assert.equal(manifest.publishConfig.access, "public");
+  assert.equal(manifest.publishConfig.registry, "https://registry.npmjs.org/");
   await checkExportTargets(directory, manifest.exports);
   assert.ok(!JSON.stringify(manifest).includes("workspace:"));
   if (name === "brand") {

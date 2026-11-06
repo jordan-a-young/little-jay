@@ -1,6 +1,6 @@
 # @littlejay/brand
 
-Canonical, framework-independent Little Jay artwork from the approved Pebble kit. This package is private and has no runtime framework dependencies.
+Canonical, framework-independent Little Jay artwork from the approved Pebble kit. This package is prepared for public npm distribution and has no runtime framework dependencies. Public availability does not grant artwork/trademark reuse rights; see the rights section below.
 
 `states/` adds the four original transparent 1254×1254 static app-state PNGs, with their source README and manifest. Each image and the manifest have explicit exports. See `docs/PEBBLE-STATES.md` in the workspace for the `PebbleState` component and base-aware public URLs.
 

@@ -1,6 +1,6 @@
 # @littlejay/tokens
 
-Private, framework-independent CSS theme tokens. No React, JavaScript runtime entry point, or global reset is required. Public CSS/JSON subpaths are listed in [package.json](package.json); there is no root JavaScript import.
+Framework-independent CSS theme tokens prepared for public npm distribution. No React, JavaScript runtime entry point, or global reset is required. Public CSS/JSON subpaths are listed in [package.json](package.json); there is no root JavaScript import.
 
 ## Imports
 

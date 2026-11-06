@@ -4,7 +4,7 @@ Little Jay is the brand; Pebble is the cozy seated young blue jay. The original 
 
 ## Canonical files
 
-- `packages/brand`: selected SVG/PNG logos, Pebble, icons, banners, manifest, `FONT-NOTICES.txt`, and the original kit README for provenance. `@littlejay/brand` is private and framework-independent, with explicit asset exports and no React components.
+- `packages/brand`: selected SVG/PNG logos, Pebble, icons, banners, manifest, `FONT-NOTICES.txt`, and the original kit README for provenance. `@littlejay/brand` is framework-independent and prepared for public npm distribution, with explicit asset exports and no React components. Publication remains separately gated; artwork rights and notices are unchanged.
 - `packages/tokens/source/palette.json` and `source/tokens.css`: the approved kit's source of truth.
 - `packages/tokens/theme.css`: generated semantic theme, not a hand-maintained second palette. `scripts/build-tokens.mjs` validates agreement between the approved JSON and CSS, then preserves existing `--lj-*` names and accessible feedback extensions.
 - `packages/tokens/tailwind.css`: semantic utilities shared by UI and application code. UI's compiled stylesheet includes the generated theme; consumers need neither Tailwind nor a global reset.

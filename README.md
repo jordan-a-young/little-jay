@@ -4,7 +4,7 @@ A minimal monorepo for reusable React components, theme tokens, bounded JSON tra
 
 ## Package usage and coding agents
 
-Each private package ships a usage README with public imports, compatibility, setup, application-policy boundaries, verification, and licensing guidance. Start with `node_modules/@littlejay/<package>/README.md` in an installed consumer. See [consumer-agent setup](docs/CONSUMER-AGENTS.md) for an opt-in consumer `AGENTS.md` example and the isolated tarball discovery check. Dependency instructions are not assumed to load automatically; these guides do not authorize publication or artwork reuse.
+Each library ships a usage README with public imports, compatibility, setup, application-policy boundaries, verification, and licensing guidance. Start with `node_modules/@littlejay/<package>/README.md` in an installed consumer. See [consumer-agent setup](docs/CONSUMER-AGENTS.md) for an opt-in consumer `AGENTS.md` example and the isolated tarball discovery check. Dependency instructions are not assumed to load automatically; these guides do not authorize publication or artwork reuse.
 
 ## Run on your workstation
 
@@ -251,7 +251,7 @@ The Vite proxy is development-only. Production deployments need a matching rever
 
 pnpm workspaces link packages; Vite+ supplies build orchestration, formatting, linting, tests, and package builds. CI runs a frozen install and `pnpm ready`.
 
-The source is hosted in the private GitHub repository `jordan-a-young/little-jay`, with CI and secret-scanning workflows running on pushes and pull requests. Packages use the `@littlejay` scope for the owner's npm organization; the intended future destination is the public npm registry. They remain private at `0.0.0` and unpublished. Registry credentials, access settings, release versions, and publication are not configured or authorized by this scope choice. GitHub hosting and npm publication are separate decisions; `private: true` does not hide files if a repository is made public.
+The source is hosted in the private GitHub repository `jordan-a-young/little-jay`, with CI and secret-scanning workflows running on pushes and pull requests. The five `@littlejay` libraries are prepared for public npm publication at initial `0.1.0` versions; this setup has not published them. Root/apps remain private. [Library releases](docs/RELEASING.md) use Changesets for independent versions/changelogs, automated release PRs and a manually triggered publishing workflow that is off until separately activated. Local `release:version` and `release:check` scripts do not publish. npm authentication/bootstrap, trusted-publisher configuration and actual publication require separate approval. GitHub visibility remains unchanged; public package distribution does not grant artwork reuse rights.
 
 ## License and artwork
 

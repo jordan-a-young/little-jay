@@ -30,7 +30,7 @@ export default defineConfig({
           include: [
             "apps/*/src/**/*.test.ts",
             "packages/*/src/**/*.test.{ts,tsx}",
-            "scripts/check-coverage.test.ts",
+            "scripts/**/*.test.{ts,mjs}",
           ],
           exclude: ["**/*.component.test.tsx"],
         },

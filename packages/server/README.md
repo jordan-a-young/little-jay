@@ -1,6 +1,6 @@
 # @littlejay/server
 
-Private Node ESM Fastify foundations, currently using Fastify 5.12.8 and fastify-plugin 6.0.1. The repository validates Node 26.13.0; verify other supported Fastify runtimes in your application. No browser runtime, React, CSS, or CommonJS entry point is provided. See [package.json](package.json) and shipped declarations for public exports and Fastify types.
+Node ESM Fastify foundations prepared for public npm distribution, currently using Fastify 5.12.8 and fastify-plugin 6.0.1. The repository validates Node 26.13.0; verify other supported Fastify runtimes in your application. No browser runtime, React, CSS, or CommonJS entry point is provided. See [package.json](package.json) and shipped declarations for public exports and Fastify types.
 
 ## Imports
 
