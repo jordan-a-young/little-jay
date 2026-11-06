@@ -2,6 +2,10 @@
 
 A minimal monorepo for reusable React components, theme tokens, bounded JSON transport, and Fastify server foundations.
 
+## Package usage and coding agents
+
+Each private package ships a usage README with public imports, compatibility, setup, application-policy boundaries, verification, and licensing guidance. Start with `node_modules/@ljay/<package>/README.md` in an installed consumer. See [consumer-agent setup](docs/CONSUMER-AGENTS.md) for an opt-in consumer `AGENTS.md` example and the isolated tarball discovery check. Dependency instructions are not assumed to load automatically; these guides do not authorize publication or artwork reuse.
+
 ## Run on your workstation
 
 Open a terminal in the `little-jay` directory with Node 26.13.0 LTS (`.node-version`) and pnpm 12.18.0 available. The supported Node range is `^26.13.0`. With fnm, run `fnm install` and `fnm use` in this directory. No global Vite+ installation is needed:

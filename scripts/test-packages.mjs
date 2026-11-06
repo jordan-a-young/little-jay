@@ -46,6 +46,99 @@ await writeFile(
   'overrides:\n  "@ljay/tokens": file:./ljay-tokens-0.0.0.tgz\n  "@ljay/brand": file:./ljay-brand-0.0.0.tgz\n',
 );
 run(["install", "--ignore-scripts"], consumer);
+
+async function checkDocumentationLinks(directory, filename, visited = new Set()) {
+  const resolved = path.resolve(directory, filename);
+  const relative = path.relative(directory, resolved);
+  assert.ok(
+    !relative.startsWith(`..${path.sep}`) && relative !== ".." && !path.isAbsolute(relative),
+    `Documentation link escapes package: ${filename}`,
+  );
+  if (visited.has(resolved)) return;
+  visited.add(resolved);
+  const markdown = await readFile(resolved, "utf8");
+  const prose = markdown.replace(/^```[^\n]*\n[\s\S]*?^```\s*$/gm, "");
+  for (const match of prose.matchAll(/\[[^\]\n]*\]\(([^\s)]+)\)/g)) {
+    const target = match[1];
+    if (/^https?:\/\//.test(target) || target.startsWith("mailto:")) continue;
+    assert.ok(!/^[a-z][a-z\d+.-]*:/i.test(target), `Unsupported documentation URL: ${target}`);
+    const [pathname, fragment] = target.split("#");
+    const linked = pathname
+      ? path.resolve(path.dirname(resolved), decodeURIComponent(pathname))
+      : resolved;
+    const linkedRelative = path.relative(directory, linked);
+    assert.ok(
+      linkedRelative !== ".." &&
+        !linkedRelative.startsWith(`..${path.sep}`) &&
+        !path.isAbsolute(linkedRelative),
+      `Documentation link escapes package: ${target}`,
+    );
+    await access(linked);
+    if (fragment) {
+      assert.match(linked, /\.md$/i, `Fragment requires Markdown target: ${target}`);
+      const content = await readFile(linked, "utf8");
+      const headings = [...content.matchAll(/^#{1,6}\s+(.+)$/gm)].map((heading) =>
+        heading[1]
+          .toLowerCase()
+          .replace(/[^\p{L}\p{N}_\s-]/gu, "")
+          .replace(/\s/g, "-"),
+      );
+      assert.ok(headings.includes(decodeURIComponent(fragment)), `Missing heading: ${target}`);
+    }
+    if (/\.md$/i.test(linked)) {
+      await checkDocumentationLinks(directory, linkedRelative, visited);
+    }
+  }
+}
+
+const documentationFixture = path.join(consumer, "documentation-regression");
+await mkdir(documentationFixture);
+await assert.rejects(checkDocumentationLinks(documentationFixture, "README.md"), {
+  code: "ENOENT",
+});
+await writeFile(path.join(documentationFixture, "README.md"), "[missing](missing.md)");
+await assert.rejects(checkDocumentationLinks(documentationFixture, "README.md"), {
+  code: "ENOENT",
+});
+await writeFile(path.join(documentationFixture, "README.md"), "[escape](../package.json)");
+await assert.rejects(checkDocumentationLinks(documentationFixture, "README.md"), /escapes package/);
+await writeFile(path.join(documentationFixture, "README.md"), "# Present\n[missing](#absent)");
+await assert.rejects(checkDocumentationLinks(documentationFixture, "README.md"), /Missing heading/);
+await writeFile(path.join(documentationFixture, "README.md"), "# Present\n[valid](#present)");
+await checkDocumentationLinks(documentationFixture, "README.md");
+
+const consumerGuide = await readFile(path.join(workspace, "docs/CONSUMER-AGENTS.md"), "utf8");
+const consumerInstructions = consumerGuide.match(/```markdown\n([\s\S]*?)\n```/);
+assert.ok(consumerInstructions, "Consumer guide must contain an AGENTS.md example");
+await writeFile(path.join(consumer, "AGENTS.md"), consumerInstructions[1]);
+const installedInstructions = await readFile(path.join(consumer, "AGENTS.md"), "utf8");
+const discoveredGuides = [...installedInstructions.matchAll(/\]\((node_modules\/@ljay\/[^)]+)\)/g)];
+assert.deepEqual(
+  discoveredGuides.map((match) => match[1]).sort(),
+  ["brand", "http", "server", "tokens", "ui"].map((name) => `node_modules/@ljay/${name}/README.md`),
+  "Consumer instructions must lead to each installed package README",
+);
+for (const [, guide] of discoveredGuides) {
+  const directory = path.dirname(path.join(consumer, guide));
+  await checkDocumentationLinks(directory, "README.md");
+  const content = await readFile(path.join(consumer, guide), "utf8");
+  for (const heading of ["Imports", "Application policy", "Verification"]) {
+    assert.match(content, new RegExp(`^## .*${heading}`, "im"), `${guide}: missing ${heading}`);
+  }
+  assert.match(
+    content,
+    /^## (License|Provenance and rights)$/m,
+    `${guide}: missing rights guidance`,
+  );
+  for (const [index, snippet] of [...content.matchAll(/```(tsx|ts)\n([\s\S]*?)\n```/g)].entries()) {
+    await writeFile(
+      path.join(consumer, `documented-${path.basename(directory)}-${index}.${snippet[1]}`),
+      snippet[2],
+    );
+  }
+}
+console.log("Consumer AGENTS.md discovers all five installed READMEs; packaged links verified.");
+
 const stateSource = path.join(consumer, "node_modules/@ljay/brand/states");
 const stateManifest = JSON.parse(await readFile(path.join(stateSource, "manifest.json"), "utf8"));
 const statePublic = path.join(consumer, "public/branding/states");
@@ -303,7 +396,7 @@ await writeFile(
       skipLibCheck: false,
       types: ["node", "react", "react-dom"],
     },
-    include: ["main.tsx", "styles.d.ts"],
+    include: ["main.tsx", "styles.d.ts", "documented-*.tsx", "documented-*.ts"],
   }),
 );
 run(["exec", "tsc", "-p", path.join(consumer, "tsconfig.json")], workspace);
