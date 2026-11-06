@@ -8,6 +8,7 @@ export default defineConfig({
       "empty-state": "src/empty-state/index.tsx",
       "pebble-state": "src/pebble-state/index.tsx",
       "status-indicator": "src/status-indicator/index.tsx",
+      "loading-indicator": "src/loading-indicator/index.tsx",
       "error-boundary": "src/error-boundary/index.tsx",
       field: "src/field/index.tsx",
       input: "src/input/index.tsx",

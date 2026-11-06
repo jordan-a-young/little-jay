@@ -40,7 +40,7 @@ The `light` lockup has dark lettering; the `dark` lockup has light lettering. Lo
 
 The playground sets `data-theme="light"` or `data-theme="dark"` on `document.documentElement`, so future body portals inherit the same variables. A classic head initializer runs before styles and React. Settings come from the canonical palette, and it uses the same standalone theme-store source as the React adapter rather than serializing a transpiled function.
 
-Explicit light/dark preferences use `little-jay.theme` in local storage. Missing/invalid storage follows `prefers-color-scheme`; **Use system theme** removes the explicit preference. System changes apply only in system mode. Storage events synchronize tabs. Blocked persistence retains the in-memory selection. Stable snapshots use `useSyncExternalStore`, with one shared media/storage listener pair and cleanup. Theme changes do not key/remount the form. Browser `theme-color` follows the resolved background.
+Explicit light/dark preferences use `little-jay.theme` in local storage. Missing/invalid storage follows `prefers-color-scheme`; choosing **System** in the Settings popover's Theme selector removes the explicit preference. System changes apply only in system mode. Storage events synchronize tabs. Blocked persistence retains the in-memory selection. Stable snapshots use `useSyncExternalStore`, with one shared media/storage listener pair and cleanup. Theme changes do not key/remount the form. Browser `theme-color` follows the resolved background.
 
 Override variables after importing `@ljay/ui/styles.css` (or `@ljay/tokens/theme.css` for non-React use):
 

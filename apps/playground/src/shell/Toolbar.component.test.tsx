@@ -10,7 +10,7 @@ const appearance = vi.hoisted(() => ({
 }));
 vi.mock("../use-theme.js", () => ({ useTheme: () => appearance }));
 
-describe("theme action label", () => {
+describe("preview settings popover", () => {
   let container: HTMLDivElement;
   let root: Root;
   beforeEach(() => {
@@ -27,25 +27,66 @@ describe("theme action label", () => {
     container.remove();
     vi.unstubAllGlobals();
   });
-  async function renderToolbar() {
+  const onWidthChange = vi.fn();
+  const onReset = vi.fn();
+  async function renderToolbar(width: "fluid" | "640" | "320" = "fluid") {
     await act(() =>
-      root.render(<Toolbar width="fluid" onWidthChange={vi.fn()} onReset={vi.fn()} />),
+      root.render(<Toolbar width={width} onWidthChange={onWidthChange} onReset={onReset} />),
     );
   }
-  it("describes the next action and follows the resolved appearance, including system mode", async () => {
+  it("connects a quiet Settings button to a named, dismissible native popover", async () => {
     await renderToolbar();
     const button = container.querySelector("button")!;
-    expect(button.textContent).toBe("Switch to dark theme");
-    expect(button.hasAttribute("aria-pressed")).toBe(false);
-    await act(() => button.click());
-    expect(appearance.setPreference).toHaveBeenLastCalledWith("dark");
-    appearance.theme = "dark";
+    const popover = container.querySelector('[popover="auto"]')!;
+    expect(button.textContent).toBe("Settings");
+    expect(button.type).toBe("button");
+    expect(button.getAttribute("popovertarget")).toBe(popover.id);
+    expect(button.getAttribute("aria-haspopup")).toBe("dialog");
+    expect(popover.getAttribute("role")).toBe("dialog");
+    expect(document.getElementById(popover.getAttribute("aria-labelledby")!)?.textContent).toBe(
+      "Preview settings",
+    );
+    expect(popover.querySelector('button[popovertargetaction="hide"]')?.textContent).toBe("Close");
+  });
+  it("uses one theme selector for all preferences and follows external preference changes", async () => {
     await renderToolbar();
-    expect(button.textContent).toBe("Switch to light theme");
-    await act(() => button.click());
-    expect(appearance.setPreference).toHaveBeenLastCalledWith("light");
-    expect(container.querySelector('button[aria-pressed="true"]')?.textContent).toBe(
-      "Use system theme",
+    const theme = container.querySelector<HTMLSelectElement>('select[name="theme"]')!;
+    expect(theme.value).toBe("system");
+    expect(Array.from(theme.options, (option) => option.value)).toEqual([
+      "system",
+      "light",
+      "dark",
+    ]);
+    for (const preference of ["light", "dark", "system"]) {
+      await act(() => {
+        theme.value = preference;
+        theme.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+      expect(appearance.setPreference).toHaveBeenLastCalledWith(preference);
+    }
+    appearance.preference = "dark";
+    await renderToolbar();
+    expect(theme.value).toBe("dark");
+  });
+  it("preserves width selection and exposes reset without submitting a form", async () => {
+    onWidthChange.mockClear();
+    onReset.mockClear();
+    await renderToolbar("640");
+    const width = container.querySelector<HTMLSelectElement>('select[name="preview-width"]')!;
+    expect(width.value).toBe("640");
+    await act(() => {
+      width.value = "320";
+      width.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    expect(onWidthChange).toHaveBeenLastCalledWith("320");
+    const reset = Array.from(container.querySelectorAll("button")).find(
+      (button) => button.textContent === "Reset preview",
+    )!;
+    expect(reset.type).toBe("button");
+    await act(() => reset.click());
+    expect(onReset).toHaveBeenCalledOnce();
+    expect(container.querySelector(".catalog-toolbar-note")?.textContent).toContain(
+      "media queries follow the browser viewport",
     );
   });
 });

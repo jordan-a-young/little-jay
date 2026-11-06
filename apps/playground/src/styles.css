@@ -62,8 +62,16 @@ body {
   margin-inline: auto;
   padding: 2rem clamp(1rem, 3vw, 3rem);
 }
+.catalog-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
 .catalog-main h1 {
-  margin-bottom: 1.5rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
   font-size: clamp(1.75rem, 4vw, 2.5rem);
   font-weight: 700;
 }
@@ -71,18 +79,86 @@ body {
   outline-offset: 0.5rem;
 }
 .catalog-toolbar {
+  flex: none;
+}
+.catalog-settings-trigger,
+.catalog-settings-close,
+.catalog-settings-reset {
+  border: 1px solid var(--lj-border);
+  background: transparent;
+  color: var(--lj-muted);
+  font-size: 0.8125rem;
+}
+.catalog-settings-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.625rem;
+}
+.catalog-settings-trigger:hover,
+.catalog-settings-close:hover,
+.catalog-settings-reset:hover {
+  background: var(--lj-background);
+  color: var(--lj-content);
+}
+.catalog-settings-popover {
+  position: fixed;
+  inset: 5rem 1rem auto auto;
+  width: 20rem;
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100dvh - 2rem);
+  overflow: auto;
+  margin: 0;
+  padding: 1rem;
+  border: 1px solid var(--lj-border);
+  border-radius: var(--lj-radius-control);
+  background: var(--lj-surface);
+  color: var(--lj-content);
+  box-shadow: 0 0.5rem 2rem rgb(0 0 0 / 12%);
+  font-family: var(--lj-font-sans);
+}
+.catalog-settings-popover:popover-open {
+  display: grid;
+  gap: 1rem;
+}
+@supports (top: anchor(bottom)) {
+  .catalog-toolbar {
+    anchor-scope: --catalog-settings-trigger;
+  }
+  .catalog-settings-trigger {
+    anchor-name: --catalog-settings-trigger;
+  }
+  .catalog-settings-popover {
+    position-anchor: --catalog-settings-trigger;
+    inset: auto;
+    top: anchor(bottom);
+    right: anchor(right);
+    margin-top: 0.5rem;
+    position-try-fallbacks: flip-block, flip-inline;
+  }
+}
+.catalog-settings-heading {
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--lj-border);
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.catalog-settings-heading h2 {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.catalog-settings-close {
+  padding: 0.375rem 0.5rem;
+  border-color: transparent;
+}
+.catalog-settings-reset {
+  justify-self: start;
+  color: var(--lj-content);
 }
 .catalog-toolbar-note {
-  flex-basis: 100%;
   color: var(--lj-muted);
-  font-size: 0.875rem;
+  font-size: 0.75rem;
+  line-height: 1.5;
 }
 .catalog-document {
   margin-top: 1.5rem;

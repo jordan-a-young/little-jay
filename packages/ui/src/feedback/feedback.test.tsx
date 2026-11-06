@@ -6,6 +6,28 @@ import { EmptyState } from "../empty-state/index.js";
 import { StatusIndicator } from "../status-indicator/index.js";
 
 describe("workflow feedback", () => {
+  it.each(["success", "warning"] as const)(
+    "uses semantic %s styling and preserves announcement control",
+    (tone) => {
+      const markup = renderToStaticMarkup(
+        <Alert tone={tone} title="Example notice">
+          Local feedback
+        </Alert>,
+      );
+      expect(markup).toContain(`text-${tone}`);
+      expect(markup).toContain("border-current");
+      expect(markup).toContain('role="status"');
+      expect(markup).not.toContain(`tone="${tone}"`);
+      expect(markup).not.toContain("<button");
+      expect(
+        renderToStaticMarkup(
+          <Alert tone={tone} role="note">
+            Static example
+          </Alert>,
+        ),
+      ).toContain('role="note"');
+    },
+  );
   it("announces errors assertively and routine updates politely, with caller control", () => {
     expect(renderToStaticMarkup(<Alert tone="danger">Disconnected</Alert>)).toContain(
       'role="alert"',

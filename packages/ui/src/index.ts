@@ -1,8 +1,9 @@
-export { Button, type ButtonProps } from "./button/index.js";
+export { Button, type ButtonProps, type ButtonVariant } from "./button/index.js";
 export { Alert, type AlertProps } from "./alert/index.js";
 export { EmptyState, type EmptyStateProps } from "./empty-state/index.js";
 export { PebbleState, type PebbleStateProps, type PebbleStateKind } from "./pebble-state/index.js";
 export { StatusIndicator, type StatusIndicatorProps } from "./status-indicator/index.js";
+export { LoadingIndicator, type LoadingIndicatorProps } from "./loading-indicator/index.js";
 export {
   ErrorBoundary,
   type ErrorBoundaryProps,

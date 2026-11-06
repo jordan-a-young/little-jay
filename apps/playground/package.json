@@ -15,6 +15,7 @@
     "@ljay/tokens": "workspace:*",
     "@ljay/ui": "workspace:*",
     "@tanstack/react-query": "5.104.5",
+    "@tanstack/react-router": "1.170.46",
     "prism-react-renderer": "2.4.1",
     "react": "19.3.1",
     "react-dom": "19.3.1"

@@ -1,7 +1,8 @@
 import { Field, NativeSelect } from "@ljay/ui";
 import { CodeBlock } from "./CodeBlock.js";
 import { PreviewFrame } from "../shell/PreviewFrame.js";
-import { catalogHref } from "./registry.js";
+import { useNavigate } from "@tanstack/react-router";
+import { catalogRoutePath } from "./navigation.js";
 import type { CatalogDocument, CatalogPageProps } from "./types.js";
 
 export function DocumentationPage({
@@ -9,6 +10,7 @@ export function DocumentationPage({
   pageId,
   exampleId,
 }: CatalogPageProps & { document: CatalogDocument }) {
+  const navigate = useNavigate();
   const example = exampleId
     ? document.examples.find((candidate) => candidate.id === exampleId)
     : document.examples[0];
@@ -24,7 +26,10 @@ export function DocumentationPage({
           <NativeSelect
             value={example?.id ?? ""}
             onChange={(event) => {
-              window.location.hash = catalogHref(pageId, event.target.value);
+              void navigate({
+                to: catalogRoutePath,
+                params: { pageId, exampleId: event.target.value },
+              });
             }}
           >
             {!example && (

@@ -5,9 +5,10 @@
 - Read this file and the applicable `AGENTS.md` files along the path to files you change. Child files add area-specific guidance; do not treat them as permission to bypass repository-wide constraints.
 - `apps/` contains runnable examples; `packages/` contains reusable libraries. Read their guidance before editing. Keep application policy out of shared packages.
 - Start with `README.md` for setup and architecture. Consult only the relevant contract in `docs/`: `CATALOG.md`, `BRANDING.md`, `PEBBLE-STATES.md`, `HTTP.md`, or `SERVER.md`. `ROADMAP.md` describes future work, not implemented APIs.
+- Record requested improvements, investigations, and consumer-inspection gaps in `docs/BACKLOG.md`; distinguish confirmed requirements from deferred candidates. Backlog entries do not authorize implementation, adoption, or publication.
 - Use [the task-to-file map](docs/REPO-MAP.md) to locate likely owners, source entry points, contracts, and tests before broader searches. It is a starting point, not an exhaustive file inventory or a substitute for checking current code.
 - Maintain the map in the same change whenever you add/remove a workspace or task area, move/rename mapped paths, or change ownership, entry points, generators, or test locations. Update affected scoped `AGENTS.md` files too. Verify mapped paths still exist; ordinary implementation edits need no map rewrite when its guidance remains accurate.
-- Preserve unfamiliar changes. This directory may have no Git metadata; do not initialize Git, commit, push, publish, or deploy unless requested.
+- Preserve unfamiliar changes. The source is hosted in a private GitHub repository; do not commit, push, publish packages, change visibility, or deploy unless requested.
 
 ## Bounded troubleshooting
 
@@ -48,6 +49,13 @@ Use [the verification matrix](docs/VERIFICATION.md) to select checks for the cha
 - For source changes, build prerequisites before focused tests/typechecks. Use `pnpm ready` for final integration verification when practical; report exactly what ran and any failures or skipped checks. Documentation-only changes need formatting/link/command validation, not a full build or dependency install.
 - Never hand-edit `dist/`, `.vite/`, `packages/tokens/theme.css`, or `apps/playground/public/branding/`. Change their sources and use the documented generator/build.
 - Keep TypeScript/JavaScript ESM and existing module conventions. Prefer descriptive names and async/await; add only editor documentation comments when comments are needed.
+
+## Fast development loop
+
+- After initial `pnpm dev` startup, ordinary playground and `packages/ui/src/` React/TypeScript, Tailwind-class, and component-CSS edits hot-reload. Do not rebuild packages or restart the server merely to see these edits. The UI package's `development` exports resolve component source, and the playground aliases `@ljay/ui/styles.css` to source CSS during development. See `packages/ui/package.json` and `apps/playground/vite.config.ts`.
+- Keep browser iteration separate from artifact verification: hot reload does not regenerate `dist` JavaScript, TypeScript declarations, or tarballs. Tests/typechecks using built exports, production/preview builds, and package-consumer checks still need current build outputs under the verification matrix. A new public UI prop may work in the browser while stale declarations still cause a consumer type error.
+- For token sources, HTTP/server libraries, package metadata/dependencies, or build configuration, use the relevant generator/build and restart the affected task-owned services when needed. API app source uses `tsx watch` and restarts automatically; that does not make its built shared-library dependencies live source.
+- During implementation, run the smallest relevant `pnpm test <file-or-path>` and scoped typecheck after necessary prerequisites. Reuse unchanged build/check results; do not reinstall unchanged dependencies, rebuild for every UI tweak, or repeatedly run the full gate. Keep final `pnpm ready`, package-consumer, and browser checks required by the change type; development hot reload is not a substitute for them.
 
 ## Safety and local services
 

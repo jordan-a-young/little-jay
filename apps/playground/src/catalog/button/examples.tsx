@@ -1,5 +1,34 @@
 import { useState } from "react";
-import { Button, Field, NativeSelect } from "@ljay/ui";
+import { Button, Field, NativeSelect, type ButtonVariant } from "@ljay/ui";
+
+const variants: readonly ButtonVariant[] = ["primary", "secondary", "outline", "ghost", "danger"];
+
+export function ButtonVariants() {
+  const [message, setMessage] = useState("");
+  return (
+    <div className="space-y-5">
+      <div role="group" aria-label="Enabled button variants" className="flex flex-wrap gap-3">
+        {variants.map((variant) => (
+          <Button
+            key={variant}
+            variant={variant}
+            onClick={() => setMessage(`${variant} activated. Local demonstration only.`)}
+          >
+            {variant.charAt(0).toUpperCase() + variant.slice(1)}
+          </Button>
+        ))}
+      </div>
+      <div role="group" aria-label="Disabled button variants" className="flex flex-wrap gap-3">
+        {variants.map((variant) => (
+          <Button key={variant} variant={variant} disabled>
+            {variant.charAt(0).toUpperCase() + variant.slice(1)}
+          </Button>
+        ))}
+      </div>
+      <p role="status">{message}</p>
+    </div>
+  );
+}
 
 export function InteractiveButton() {
   const [clicks, setClicks] = useState(0);

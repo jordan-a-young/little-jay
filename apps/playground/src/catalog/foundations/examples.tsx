@@ -4,7 +4,7 @@ import logoDark from "@ljay/brand/logos/lockup-dark.svg";
 import palette from "@ljay/tokens/palette.json";
 import { Button, Field, Input } from "@ljay/ui";
 import { useTheme } from "../../use-theme.js";
-import { catalogHref } from "../registry.js";
+import { CatalogLink } from "../navigation.js";
 
 export function IntroductionExample() {
   return (
@@ -27,7 +27,7 @@ export function IntroductionExample() {
         Choose a component in the sidebar, select a named example, then read usage, props, and
         accessibility notes below.
       </p>
-      <a href={catalogHref("button")}>Explore Button</a>
+      <CatalogLink pageId="button">Explore Button</CatalogLink>
     </div>
   );
 }
@@ -79,7 +79,9 @@ export function BrandingExample() {
         Pebble is decorative here; the logo has meaningful alt text. Artwork retains its supplied
         proportions.
       </p>
-      <a href={catalogHref("pebble-state", "showcase")}>View app-state illustrations</a>
+      <CatalogLink pageId="pebble-state" exampleId="showcase">
+        View app-state illustrations
+      </CatalogLink>
     </div>
   );
 }

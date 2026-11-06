@@ -1,8 +1,10 @@
 import { DocumentationPage } from "../DocumentationPage.js";
 import type { CatalogDocument, CatalogPageProps } from "../types.js";
 import { BrandingExample, IntroductionExample, ThemeExample } from "./examples.js";
+import { hooksDocument } from "./hooks.js";
 
 const documents: Record<string, CatalogDocument> = {
+  hooks: hooksDocument,
   introduction: {
     overview:
       "Little Jay's lightweight component catalog: named examples, usage snippets, prop reference, and accessibility notes, built on the existing React/Vite playground without Storybook. Components remain framework-light and examples stay application-local.",

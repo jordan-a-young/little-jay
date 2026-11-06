@@ -66,6 +66,11 @@
       "development": "./src/status-indicator/index.tsx",
       "import": "./dist/status-indicator.js"
     },
+    "./loading-indicator": {
+      "types": "./dist/loading-indicator.d.ts",
+      "development": "./src/loading-indicator/index.tsx",
+      "import": "./dist/loading-indicator.js"
+    },
     "./error-boundary": {
       "types": "./dist/error-boundary.d.ts",
       "development": "./src/error-boundary/index.tsx",

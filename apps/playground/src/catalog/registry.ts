@@ -46,32 +46,49 @@ export const catalogPages: readonly CatalogRegistration[] = [
     component: foundations,
   },
   {
+    id: "hooks",
+    title: "Hooks & data fetching",
+    group: "Foundations",
+    keywords: "hooks query tanstack react fetching cancellation cache actions transport ownership",
+    component: foundations,
+  },
+  {
     id: "button",
     title: "Button",
     group: "Components / Actions",
     keywords: "click disabled submit",
     component: actions,
   },
-  ...["Field", "Input", "Textarea", "NativeSelect", "Checkbox"].map((title) => ({
+  ...[
+    "Alert",
+    "EmptyState",
+    "ErrorBoundary",
+    "LoadingIndicator",
+    "PebbleState",
+    "StatusIndicator",
+  ].map((title) => ({
+    id: title.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase(),
+    title,
+    group: "Components / Feedback" as const,
+    keywords:
+      title === "LoadingIndicator"
+        ? "status loading spinner activity feedback"
+        : "status loading success error empty feedback",
+    component: feedback,
+  })),
+  ...["Checkbox", "Field", "Input", "NativeSelect", "Textarea"].map((title) => ({
     id: title.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase(),
     title,
     group: "Components / Forms" as const,
     keywords: "label validation native form control",
     component: forms,
   })),
-  ...["DescriptionList", "Disclosure", "TextBlock", "IconButton", "Dialog"].map((title) => ({
+  ...["DescriptionList", "Dialog", "Disclosure", "IconButton", "TextBlock"].map((title) => ({
     id: title.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase(),
     title,
     group: "Components / Inspection" as const,
     keywords: "metadata inspector native text modal sheet",
     component: inspection,
-  })),
-  ...["Alert", "EmptyState", "PebbleState", "StatusIndicator", "ErrorBoundary"].map((title) => ({
-    id: title.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase(),
-    title,
-    group: "Components / Feedback" as const,
-    keywords: "status loading success error empty feedback",
-    component: feedback,
   })),
   {
     id: "workflow-form",
@@ -88,22 +105,6 @@ export const catalogPages: readonly CatalogRegistration[] = [
     component: patterns,
   },
 ];
-
-export function catalogHref(pageId: string, exampleId?: string) {
-  return `#/${encodeURIComponent(pageId)}${exampleId ? `/${encodeURIComponent(exampleId)}` : ""}`;
-}
-
-export function parseCatalogHash(hash: string): { pageId: string; exampleId?: string } {
-  if (hash === "#pebble-states") return { pageId: "pebble-state", exampleId: "showcase" };
-  if (!hash || hash === "#" || hash === "#/") return { pageId: "introduction" };
-  try {
-    const segments = hash.replace(/^#\/?/, "").split("/").map(decodeURIComponent);
-    if (segments.length > 2 || !segments[0]) return { pageId: "not-found" };
-    return { pageId: segments[0], ...(segments[1] ? { exampleId: segments[1] } : {}) };
-  } catch {
-    return { pageId: "not-found" };
-  }
-}
 
 export function filterCatalog(query: string) {
   const terms = query.toLowerCase().trim().split(/\s+/).filter(Boolean);

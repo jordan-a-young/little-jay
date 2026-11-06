@@ -9,9 +9,48 @@ const commonProps = {
   description: "Applications may supply labels, ARIA policy, and styling extensions.",
 };
 const documents: Record<string, CatalogDocument> = {
+  "loading-indicator": {
+    overview:
+      "Compact indeterminate activity with optional visible text. The application owns loading state, busy regions, and announcements. Motion stops when reduced motion is preferred.",
+    usage:
+      'import { LoadingIndicator } from "@ljay/ui/loading-indicator";\nimport "@ljay/ui/styles.css";\n\n<LoadingIndicator />\n<LoadingIndicator label="Checking…" />',
+    props: [
+      {
+        name: "label",
+        type: "string / optional",
+        description:
+          'Optional visible text. Omitted or blank labels show only the spinner visually and retain hidden "Loading" text for accessibility.',
+      },
+      {
+        name: "Native span props, ref, className",
+        type: 'ComponentProps<"span"> (without children or dangerouslySetInnerHTML)',
+        description:
+          "Application-owned role, ARIA attributes, ref, and styling. Size follows font size and color uses the primary theme token; override with application CSS if needed.",
+      },
+    ],
+    accessibility: [
+      'The spinner is decorative; the visible label or hidden "Loading" text conveys activity. No live role, aria-busy, focus change, or disabling behavior is added automatically.',
+      'Use a single app-owned role="status" region for an announced state change, as in the local example. If nearby accessible text already conveys loading, set aria-hidden="true" on a redundant indicator.',
+      "Reduced motion disables rotation without hiding the indicator or text. This is indeterminate activity, not measured progress; do not invent percentages or show active loading when a request is paused offline.",
+    ],
+    examples: [
+      {
+        id: "default",
+        title: "With and without visible text",
+        component: examples.LoadingIndicatorExamples,
+        code: '<LoadingIndicator />\n<LoadingIndicator label="Loading preview…" />',
+      },
+      {
+        id: "local",
+        title: "Caller-owned local activity",
+        component: examples.LocalLoadingExample,
+        code: 'const [loading, setLoading] = useState(false);\n\n<Button onClick={() => setLoading(active => !active)}>Toggle local loading</Button>\n<div role="status">\n  {loading ? <LoadingIndicator label="Loading local preview…" /> : "Local preview is idle."}\n</div>',
+      },
+    ],
+  },
   alert: {
     overview:
-      "Feedback with a semantic tone, optional title, and optional action. The application owns the meaning of the message. Static catalog examples explicitly use role=note rather than announcing on mount.",
+      "Feedback with a semantic tone, optional title/action, and opt-in dismissal. The application owns the message and visibility. Static catalog examples explicitly use role=note rather than announcing on mount.",
     usage:
       'import { Alert, Button } from "@ljay/ui";\nimport "@ljay/ui/styles.css";\n\n<Alert tone="danger" title="Connection lost" action={<Button onClick={reload}>Reload</Button>}>\n  Your last saved checkpoint is available.\n</Alert>',
     props: [
@@ -19,12 +58,25 @@ const documents: Record<string, CatalogDocument> = {
       {
         name: "tone",
         type: "neutral | info (default) | success | warning | danger",
-        description: "Semantic text and border tone.",
+        description:
+          "Semantic text and border tone. Success confirms a completed action; warning highlights a potential issue. Both follow the active color theme.",
       },
       {
         name: "title, children, action",
         type: "ReactNode",
         description: "Application-owned content and optional action.",
+      },
+      {
+        name: "onDismiss",
+        type: "(() => void) | undefined",
+        description:
+          "Opt in to a non-submit close control. Called once per activation with no arguments; does not hide the Alert. The application owns removal and focus restoration.",
+      },
+      {
+        name: "dismissLabel",
+        type: 'string / "Dismiss alert"',
+        description:
+          "Accessible name of the close control. Provide a nonblank label, especially when several alerts are present. Ignored without onDismiss; blank labels throw when dismissal is enabled.",
       },
       {
         name: "role",
@@ -37,6 +89,8 @@ const documents: Record<string, CatalogDocument> = {
       "Default roles are live feedback roles. Do not use them indiscriminately for initial static examples.",
       "Communicate state in text, never through color alone.",
       "Preserve existing data and drafts when showing a recoverable network failure.",
+      "Alerts remain non-dismissible unless onDismiss is supplied. Close uses a native button: Tab focuses it, and Enter/Space requests dismissal without submitting a surrounding form. No Escape shortcut is added.",
+      "The Alert does not manage focus or visibility. When removing focused content, the application must move focus to a meaningful surviving control; do not move focus if it is elsewhere. The local dismissal example returns focus to Show alert.",
     ],
     examples: [
       {
@@ -50,6 +104,24 @@ const documents: Record<string, CatalogDocument> = {
         title: "Error / static",
         component: examples.ErrorAlert,
         code: '<Alert role="note" tone="danger" title="Connection lost">The last saved checkpoint is still available.</Alert>',
+      },
+      {
+        id: "dismissible",
+        title: "Dismissible / caller-owned",
+        component: examples.DismissibleAlert,
+        code: 'const [visible, setVisible] = useState(true);\nconst showButton = useRef<HTMLButtonElement>(null);\n\n<Button ref={showButton} onClick={() => setVisible(true)}>Show alert</Button>\n{visible && (\n  <Alert role="note" title="Local preview notice"\n    dismissLabel="Dismiss local preview notice"\n    onDismiss={() => {\n      setVisible(false);\n      showButton.current?.focus();\n    }}>\n    Local notice only. No data or drafts are removed.\n  </Alert>\n)}',
+      },
+      {
+        id: "success",
+        title: "Success / static",
+        component: examples.SuccessAlert,
+        code: '<Alert role="note" tone="success" title="Example saved">This static example shows a successful result. No data was saved.</Alert>',
+      },
+      {
+        id: "warning",
+        title: "Warning / static",
+        component: examples.WarningAlert,
+        code: '<Alert role="note" tone="warning" title="Review before continuing">This static example highlights a potential issue. Review your changes before continuing.</Alert>',
       },
     ],
   },

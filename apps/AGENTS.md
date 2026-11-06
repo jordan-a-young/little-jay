@@ -6,6 +6,7 @@
 
 ## Isolated development
 
+- For an already-running development session, follow the [fast development loop](../AGENTS.md#fast-development-loop): playground and UI component source/styles hot-reload without manual builds or restarts. The setup commands below are for starting a session, not steps to repeat after every edit. API app source restarts through `tsx watch`.
 - Root `pnpm dev` builds libraries and starts both apps, but the default UI can silently fall back to another port. For agent sessions, select free ports and start the apps separately with strict UI binding.
 - Example assignments below use UI 5174 and API 5051; replace both if occupied. Inspect listeners (for example, `ss -ltnp`), record task ownership and commands, and verify the actual ready listeners. A free-port check is not a reservation.
 

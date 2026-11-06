@@ -83,7 +83,7 @@ describe("native inspection components", () => {
     await act(() =>
       root.render(
         <form onSubmit={submit}>
-          <IconButton ref={ref} label="Refresh preview" onClick={click}>
+          <IconButton ref={ref} label="Refresh preview" variant="outline" onClick={click}>
             <svg>
               <title>Wrong icon name</title>
             </svg>
@@ -100,6 +100,8 @@ describe("native inspection components", () => {
     expect(ref.current?.className).toContain("focus-visible:outline-2");
     expect(ref.current?.className).toContain("enabled:cursor-pointer");
     expect(ref.current?.className).toContain("disabled:cursor-not-allowed");
+    expect(ref.current?.className).toContain("inset-ring-primary");
+    expect(ref.current?.hasAttribute("variant")).toBe(false);
     await act(() => {
       ref.current?.click();
       container.querySelector<HTMLButtonElement>("button:disabled")!.click();

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Field, Input } from "@ljay/ui";
-import { catalogHref, filterCatalog } from "../catalog/registry.js";
+import { filterCatalog } from "../catalog/registry.js";
+import { CatalogLink } from "../catalog/navigation.js";
 
 export function Sidebar({ selectedPage }: { selectedPage: string }) {
   const [query, setQuery] = useState("");
@@ -25,12 +26,12 @@ export function Sidebar({ selectedPage }: { selectedPage: string }) {
                 .filter((page) => page.group === group)
                 .map((page) => (
                   <li key={page.id}>
-                    <a
-                      href={catalogHref(page.id)}
+                    <CatalogLink
+                      pageId={page.id}
                       aria-current={selectedPage === page.id ? "page" : undefined}
                     >
                       {page.title}
-                    </a>
+                    </CatalogLink>
                   </li>
                 ))}
             </ul>

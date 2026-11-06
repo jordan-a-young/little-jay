@@ -21,13 +21,41 @@ The secret-scanner installer downloads checksum-pinned Gitleaks into ignored `.t
 - Playground: http://localhost:5173
 - API: http://127.0.0.1:5050/api/health
 
-`pnpm dev` generates tokens and builds the UI, HTTP, and server packages first, then runs the React playground and API watcher. UI component source edits hot-reload, including their Tailwind classes and component CSS: the playground aliases the UI stylesheet to its workspace source during development only. Production builds still consume packaged compiled CSS. API app edits restart the backend. After editing token sources, HTTP/server libraries, or UI build configuration, restart `pnpm dev` to rebuild them. Branding browser files synchronize automatically on development and production startup.
+`pnpm dev` generates tokens and builds the UI, HTTP, and server packages first, then runs the React playground and API watcher. Playground and UI component source edits hot-reload, including their Tailwind classes and component CSS: UI `development` exports resolve component source, and the playground aliases the UI stylesheet to its workspace source during development only. No manual rebuild or restart is needed for ordinary UI edits. Production/preview builds still consume packaged output; hot reload does not regenerate `dist` declarations or tarballs for verification. API app edits restart the backend automatically. After editing token sources, HTTP/server libraries, or UI package/build configuration, restart `pnpm dev` to rebuild them. Branding browser files synchronize automatically on development and production startup.
 
 Stop development with Ctrl+C before running `pnpm build` or `pnpm ready`: clean library builds replace the generated files that the running apps consume.
 
 `pnpm ready` checks formatting/lint, builds packages in dependency order, checks TypeScript (including root tooling), runs tests, and verifies local tarballs. Build before running standalone `pnpm typecheck`, `pnpm test`, or `pnpm test:packages` on a fresh checkout: consumers use built package exports.
 
 Individual checks: `pnpm check`, `pnpm build`, `pnpm typecheck`, `pnpm test`, and `pnpm test:packages`. Check includes generated-token freshness. `pnpm fmt` formats files in place. The tarball check packs all five libraries, installs them into an isolated temporary consumer, checks every export target, exercises HTTP and server plugins, checks strict NodeNext declarations, and builds a React application with brand images and no Tailwind installed. It never publishes. Because the packages are unpublished, the consumer overrides the UI's local brand/tokens dependencies to their tarballs. The temporary consumer path is printed and retained for inspection; set `TMPDIR` to select its parent directory. Installation may need registry access or an existing pnpm store. To preserve running apps' dist files, run production/package checks in an isolated source copy with its own install and build outputs.
+
+## Dismissible Alert
+
+Alert is non-dismissible by default. Supply `onDismiss` to show a native non-submit close button; the callback requests dismissal but does not hide the Alert. The application owns visibility and restores focus when removing focused content. `dismissLabel` defaults to `"Dismiss alert"`; custom labels must be nonblank. Root and `@ljay/ui/alert` imports expose the same props.
+
+```tsx
+{
+  visible && (
+    <Alert onDismiss={() => setVisible(false)} dismissLabel="Dismiss saved notice">
+      Your draft is saved.
+    </Alert>
+  );
+}
+```
+
+If dismissal removes the focused close button, move focus to a meaningful surviving control. See `/#/alert/dismissible` for a complete local-state and focus-restoration example.
+
+## Loading indicator
+
+```tsx
+import { LoadingIndicator } from "@ljay/ui/loading-indicator";
+import "@ljay/ui/styles.css";
+
+<LoadingIndicator />
+<LoadingIndicator label="Checking…" />
+```
+
+Visible text is optional; icon-only rendering includes hidden “Loading” text. The spinner uses the primary theme color and follows font size. Reduced motion stops rotation. No live role, busy state, focus change, or disabling behavior is added automatically: use a single application-owned `role="status"` region for announcements, or `aria-hidden="true"` on a redundant indicator next to existing loading text. Loading state, requests, and paused/offline behavior remain application-owned. Root `@ljay/ui` imports are also supported. See `/#/loading-indicator/local` for a local-only state example.
 
 ## Layout
 
@@ -49,6 +77,8 @@ Layers are introduced only when they contain useful code. Radix Dialog supports 
 
 The [component catalog](docs/CATALOG.md) organizes Foundations, Components, and Patterns with searchable navigation, deep-linked examples, usage snippets, props, and accessibility notes. Run `pnpm dev`, then open the printed playground URL. For example, `/#/button/disabled` opens Button's disabled example.
 
+Navigation uses TanStack Router directly in the playground with hash history, preserving static-host deep links. The router's typed context shares the application's existing QueryClient for future loader/hook integration; no shared router package or extra query cache is introduced. See `apps/playground/src/router.tsx` and the [routing contract](docs/CATALOG.md#viewing-and-navigation).
+
 ```tsx
 import { Button } from "@ljay/ui/button";
 import "@ljay/ui/styles.css";
@@ -60,7 +90,17 @@ export function Example() {
 
 The root `@ljay/ui` export also works. Button forwards native React button props, including ref, disabled, aria attributes, and explicit submit type. Its default type is `button` so it does not accidentally submit forms. It includes keyboard focus and disabled styles. No interaction primitive dependency is needed for a native button.
 
-Compiled component CSS includes the default theme and does not include a global reset. Consumers do not need Tailwind to render the Button. `className` adds classes without resolving conflicts between competing utilities.
+Button's `variant` is `primary` (the default), `secondary`, `outline`, `ghost`, or `danger`. All variants use semantic colors from the active light/dark theme. Secondary is neutral with a border; outline uses a primary-colored edge; ghost has no resting fill or edge. Danger pairs `--lj-danger` with `--lj-background` text; recheck that pair's contrast when overriding either color. Visual variants do not add confirmation, authorization, or action behavior. `ButtonVariant` is exported from the root and `@ljay/ui/button`; IconButton inherits the same optional variant.
+
+```tsx
+<Button>Continue</Button>
+<Button variant="secondary">Back</Button>
+<Button variant="outline">View details</Button>
+<Button variant="ghost">Cancel</Button>
+<Button variant="danger">Delete draft</Button>
+```
+
+Compiled component CSS includes the default theme and does not include a global reset. Consumers do not need Tailwind to render any Button variant. `className` adds classes without resolving conflicts between competing utilities. The catalog's [theme variants example](http://localhost:5173/#/button/variants) shows enabled and disabled states.
 
 ## Workflow feedback
 
@@ -141,7 +181,7 @@ Prefer native controls and React 19 Actions, `useActionState`, and `useFormStatu
 
 Use `@ljay/http` for bounded decoded JSON over `fetch` on both client and server. TanStack React Query owns client request caching, invalidation, and query lifecycle. Existing OpenAPI clients and application-specific schemas stay in their owning applications. TypeBox now validates the local `/api/text-preview` example; it does not establish shared domain schemas.
 
-Next priorities are recorded in [the roadmap](docs/ROADMAP.md); these are not implemented packages or changes to Graph Workbench.
+Next priorities are recorded in [the roadmap](docs/ROADMAP.md). Track requested improvements, investigations, and potential additions in the [backlog](docs/BACKLOG.md); entries are planned work, not implemented features or changes to Graph Workbench.
 
 ## Themes
 
@@ -197,7 +237,7 @@ The Vite proxy is development-only. Production deployments need a matching rever
 
 pnpm workspaces link packages; Vite+ supplies build orchestration, formatting, linting, tests, and package builds. CI runs a frozen install and `pnpm ready`.
 
-The packages are local and private. `@ljay` remains provisional; nothing is published to npm or pushed to GitHub. Confirm scope ownership before any future npm publishing. This directory currently has no Git metadata; CI is configured but requires a GitHub repository to run remotely. A public GitHub repository does not publish npm packages, and `private: true` does not hide files in a public repository.
+The source is hosted in the private GitHub repository `jordan-a-young/little-jay`, with CI and secret-scanning workflows running on pushes and pull requests. The packages remain private and unpublished to npm, and `@ljay` remains provisional. Confirm scope ownership before any future npm publishing. GitHub hosting and npm publication are separate decisions; `private: true` does not hide files if a repository is made public.
 
 ## License and artwork
 

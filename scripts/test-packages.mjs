@@ -131,12 +131,13 @@ await writeFile(
   `import { useActionState, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { useFormStatus } from "react-dom";
-import { Button } from "@ljay/ui";
-import { Button as SubpathButton, type ButtonProps } from "@ljay/ui/button";
-import { Alert } from "@ljay/ui/alert";
+import { Button, Alert as RootAlert, LoadingIndicator as RootLoadingIndicator, type LoadingIndicatorProps as RootLoadingIndicatorProps, type AlertProps as RootAlertProps, type ButtonVariant as RootButtonVariant } from "@ljay/ui";
+import { Button as SubpathButton, type ButtonProps, type ButtonVariant } from "@ljay/ui/button";
+import { Alert, type AlertProps } from "@ljay/ui/alert";
 import { EmptyState } from "@ljay/ui/empty-state";
 import { PebbleState, type PebbleStateProps } from "@ljay/ui/pebble-state";
 import { StatusIndicator } from "@ljay/ui/status-indicator";
+import { LoadingIndicator, type LoadingIndicatorProps } from "@ljay/ui/loading-indicator";
 import { ErrorBoundary } from "@ljay/ui/error-boundary";
 import { Field } from "@ljay/ui/field";
 import { Input, type InputProps } from "@ljay/ui/input";
@@ -160,9 +161,17 @@ type ServerResult = ReturnType<typeof createServer>;
 const serverTypecheck: ServerResult | FastifyInstance | undefined = undefined;
 void serverTypecheck;
 type Assert<Condition extends true> = Condition;
+type MatchingButtonVariants = Assert<RootButtonVariant extends ButtonVariant ? ButtonVariant extends RootButtonVariant ? true : false : false>;
+type ValidButtonVariants = Assert<"unsupported" extends ButtonVariant ? false : true>;
+type AlertDismissContract = Assert<AlertProps["onDismiss"] extends (() => void) | undefined ? true : false>;
+type MatchingAlertProps = Assert<RootAlertProps extends AlertProps ? AlertProps extends RootAlertProps ? true : false : false>;
+type OptionalLoadingText = Assert<{} extends LoadingIndicatorProps ? true : false>;
+type MatchingLoadingProps = Assert<RootLoadingIndicatorProps extends LoadingIndicatorProps ? LoadingIndicatorProps extends RootLoadingIndicatorProps ? true : false : false>;
+const dismissibleAlertProps = { onDismiss: () => {}, dismissLabel: "Dismiss consumer notice" } satisfies AlertProps;
+const buttonVariants = ["primary", "secondary", "outline", "ghost", "danger"] as const satisfies readonly ButtonVariant[];
 type RequiredLabel = Assert<{} extends Pick<IconButtonProps, "label"> ? false : true>;
 type InertText = Assert<"dangerouslySetInnerHTML" extends keyof TextBlockProps ? false : true>;
-type PublicContracts = [DescriptionListProps, DisclosureProps, TextBlockProps, IconButtonProps, DialogProps, DialogTriggerProps, DialogContentProps, DialogCloseProps, FetchJsonOptions<boolean>, HttpErrorCode, HealthRoutesOptions, SafeErrorResponse, typeof healthRoutes, typeof safeErrorsPlugin, RequiredLabel, InertText];
+type PublicContracts = [DescriptionListProps, DisclosureProps, TextBlockProps, IconButtonProps, DialogProps, DialogTriggerProps, DialogContentProps, DialogCloseProps, FetchJsonOptions<boolean>, HttpErrorCode, HealthRoutesOptions, SafeErrorResponse, typeof healthRoutes, typeof safeErrorsPlugin, RequiredLabel, InertText, MatchingButtonVariants, ValidButtonVariants, AlertDismissContract, MatchingAlertProps, OptionalLoadingText, MatchingLoadingProps];
 const publicContracts: PublicContracts | undefined = undefined;
 void publicContracts;
 void fetchJson;
@@ -199,6 +208,20 @@ function Panel({ broken }: { broken: boolean }) {
   if (broken) throw new Error("Private external diagnostic");
   return <EmptyState title="No checkpoints yet">Awaiting a workflow step.</EmptyState>;
 }
+function ExternalDismissibleAlert({ theme }: { theme: "light" | "dark" }) {
+  const [visible, setVisible] = useState(true);
+  const [submits, setSubmits] = useState(0);
+  const showButton = useRef<HTMLButtonElement>(null);
+  return <section data-theme={theme} aria-label={"External " + theme + " dismissal"}>
+    <Button ref={showButton} onClick={() => setVisible(true)}>Show {theme} notice</Button>
+    <form onSubmit={event => { event.preventDefault(); setSubmits(count => count + 1); }}>
+      {visible && <Alert role="note" title="External dismissible notice" dismissLabel={"Dismiss external " + theme + " notice"} onDismiss={() => { setVisible(false); showButton.current?.focus(); }}>
+        Dismissal changes local state only; saved drafts remain available.
+      </Alert>}
+    </form>
+    <p role="status">Submits: {submits}; visible: {String(visible)}</p>
+  </section>;
+}
 function App() {
   const ref = useRef<HTMLButtonElement>(null);
   const [clicks, setClicks] = useState(0);
@@ -220,16 +243,33 @@ function App() {
     <p role="status">Clicks: {clicks}; submits: {submits}; ref: {String(focused)}</p>
     <div data-theme="dark"><Button>Dark</Button><div data-theme="light"><Button>Nested light</Button></div></div>
     <div className="project"><Button>Override</Button></div>
+    <section aria-label="External button variants">
+      {(["light", "dark"] as const).map(theme => <div key={theme} data-theme={theme}>
+        {buttonVariants.map(variant => <div key={variant}>
+          <Button variant={variant}>{variant}</Button>
+          <SubpathButton variant={variant} disabled>{variant} disabled</SubpathButton>
+        </div>)}
+      </div>)}
+    </section>
     <NativeForm />
     <section aria-label="External inspection components">
       <Disclosure summary="Metadata"><DescriptionList><dt>State</dt><dd>Local preview</dd></DescriptionList></Disclosure>
       <TextBlock aria-label="Inert output" text={'<script>alert("inert")</script>'} />
-      <IconButton label="Count local preview" onClick={() => setClicks(clicks + 1)}><span>+</span></IconButton>
+      <IconButton label="Count local preview" variant="ghost" onClick={() => setClicks(clicks + 1)}><span>+</span></IconButton>
       <IconButton label="Unavailable action" disabled><span>+</span></IconButton>
       <Dialog><DialogTrigger>Open external dialog</DialogTrigger><DialogContent title="External dialog" description="Local package fixture."><DialogClose>Done</DialogClose></DialogContent></Dialog>
       <Dialog><DialogTrigger>Open external sheet</DialogTrigger><DialogContent title="External sheet" variant="sheet"><TextBlock text="Safe text" /></DialogContent></Dialog>
     </section>
     <section aria-label="External workflow feedback">
+      <section aria-label="External loading indicators">
+        {(["light", "dark"] as const).map(theme => <div key={theme} data-theme={theme}>
+          <RootLoadingIndicator />
+          <LoadingIndicator label="Loading consumer preview…" />
+        </div>)}
+      </section>
+      <RootAlert role="note" {...dismissibleAlertProps}>Caller keeps this root-import Alert visible after dismissal.</RootAlert>
+      <ExternalDismissibleAlert theme="light" />
+      <ExternalDismissibleAlert theme="dark" />
       <StatusIndicator tone="warning">Awaiting review</StatusIndicator>
       <Alert title="Connection lost" tone="danger">Viewing the last saved checkpoint.</Alert>
       <div data-theme="dark"><Alert tone="warning">Dark feedback</Alert></div>

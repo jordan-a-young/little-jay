@@ -1,5 +1,40 @@
-import { useState } from "react";
-import { Alert, Button, EmptyState, ErrorBoundary, PebbleState, StatusIndicator } from "@ljay/ui";
+import { useRef, useState } from "react";
+import {
+  Alert,
+  Button,
+  EmptyState,
+  ErrorBoundary,
+  LoadingIndicator,
+  PebbleState,
+  StatusIndicator,
+} from "@ljay/ui";
+
+export function LoadingIndicatorExamples() {
+  return (
+    <div className="space-y-5">
+      <p>Presentational previews only. No request is running.</p>
+      <div className="flex flex-wrap items-center gap-5">
+        <LoadingIndicator />
+        <LoadingIndicator label="Loading preview…" />
+      </div>
+    </div>
+  );
+}
+
+export function LocalLoadingExample() {
+  const [loading, setLoading] = useState(false);
+  return (
+    <div className="space-y-5">
+      <p>Toggle simulated activity. No request or timer is running.</p>
+      <Button onClick={() => setLoading((active) => !active)}>
+        {loading ? "Stop local loading" : "Start local loading"}
+      </Button>
+      <div role="status">
+        {loading ? <LoadingIndicator label="Loading local preview…" /> : "Local preview is idle."}
+      </div>
+    </div>
+  );
+}
 
 export function InformationAlert() {
   return (
@@ -13,6 +48,48 @@ export function ErrorAlert() {
     <Alert role="note" tone="danger" title="Connection lost">
       The last saved checkpoint is still available. This is a static example, not a live error.
     </Alert>
+  );
+}
+
+export function SuccessAlert() {
+  return (
+    <Alert role="note" tone="success" title="Example saved">
+      This static example shows a successful result. No data was saved.
+    </Alert>
+  );
+}
+
+export function WarningAlert() {
+  return (
+    <Alert role="note" tone="warning" title="Review before continuing">
+      This static example highlights a potential issue. Review your changes before continuing.
+    </Alert>
+  );
+}
+
+export function DismissibleAlert() {
+  const [visible, setVisible] = useState(true);
+  const showButton = useRef<HTMLButtonElement>(null);
+  return (
+    <div className="space-y-5">
+      <Button ref={showButton} onClick={() => setVisible(true)}>
+        Show alert
+      </Button>
+      {visible && (
+        <Alert
+          role="note"
+          title="Local preview notice"
+          onDismiss={() => {
+            setVisible(false);
+            showButton.current?.focus();
+          }}
+          dismissLabel="Dismiss local preview notice"
+        >
+          Dismissing this notice changes local state only. No data or drafts are removed.
+        </Alert>
+      )}
+      <p role="status">{visible ? "" : "Notice dismissed. Focus returned to Show alert."}</p>
+    </div>
   );
 }
 export function EmptyExample() {

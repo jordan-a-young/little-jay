@@ -1,13 +1,19 @@
 import { DocumentationPage } from "../DocumentationPage.js";
 import type { CatalogDocument, CatalogPageProps } from "../types.js";
-import { DisabledButton, InteractiveButton, SubmitButton } from "./examples.js";
+import { ButtonVariants, DisabledButton, InteractiveButton, SubmitButton } from "./examples.js";
 
 const document: CatalogDocument = {
   overview:
-    "A native button for an explicit action. Use links for navigation. The preview controls demonstrate enabled and disabled behavior without changing the library API.",
+    "A native button for an explicit action. Choose primary, secondary, outline, ghost, or danger styling from the active color theme. Use links for navigation.",
   usage:
     'import { Button } from "@ljay/ui/button";\nimport "@ljay/ui/styles.css";\n\n<Button onClick={continueLocally}>Continue</Button>;',
   props: [
+    {
+      name: "variant",
+      type: '"primary" (default) | "secondary" | "outline" | "ghost" | "danger"',
+      description:
+        "Theme-based visual emphasis. Danger is for destructive actions; it does not add confirmation or permissions.",
+    },
     {
       name: "type",
       type: '"button" (default) | "submit" | "reset"',
@@ -29,6 +35,7 @@ const document: CatalogDocument = {
   accessibility: [
     "Keep a clear visible label; supply an accessible name for icon-only usage.",
     "Enter and Space activate enabled buttons. Disabled buttons are not keyboard-focusable.",
+    "All variants use semantic theme colors and the same focus indicator. Primary stays the default; secondary is neutral, outline adds a primary-colored edge, and ghost has no resting fill or edge. Danger uses the danger color with background-colored text; recheck foreground/background contrast when overriding either token.",
     "Theme and width changes preserve preview state. Reset preview remounts only the active example.",
   ],
   examples: [
@@ -37,6 +44,12 @@ const document: CatalogDocument = {
       title: "Default / interactive",
       component: InteractiveButton,
       code: "<Button disabled={disabled} onClick={() => setClicks((count) => count + 1)}>Continue</Button>",
+    },
+    {
+      id: "variants",
+      title: "Theme variants",
+      component: ButtonVariants,
+      code: '<Button>Primary</Button>\n<Button variant="secondary">Secondary</Button>\n<Button variant="outline">Outline</Button>\n<Button variant="ghost">Ghost</Button>\n<Button variant="danger">Danger</Button>\n<Button variant="danger" disabled>Unavailable</Button>',
     },
     {
       id: "disabled",
