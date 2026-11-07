@@ -12,7 +12,157 @@ import {
   Field,
   Input,
   Button,
+  Card,
+  CardHeader,
+  CardContent,
+  CardFooter,
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableRow,
+  TableHead,
+  TableCell,
+  TableCaption,
+  TableScroll,
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbSeparator,
+  BreadcrumbPage,
 } from "@littlejay/ui";
+import { CatalogAncestorLink } from "../navigation.js";
+
+export function BreadcrumbExample() {
+  return (
+    <Breadcrumb aria-label="Example breadcrumb">
+      <BreadcrumbList>
+        <BreadcrumbItem>
+          <CatalogAncestorLink pageId="introduction">Introduction</CatalogAncestorLink>
+        </BreadcrumbItem>
+        <BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbPage>Breadcrumb</BreadcrumbPage>
+        </BreadcrumbItem>
+      </BreadcrumbList>
+    </Breadcrumb>
+  );
+}
+
+export function LongBreadcrumbExample() {
+  return (
+    <Breadcrumb aria-label="Long-label example breadcrumb">
+      <BreadcrumbList>
+        <BreadcrumbItem>
+          <CatalogAncestorLink pageId="introduction">Introduction</CatalogAncestorLink>
+        </BreadcrumbItem>
+        <BreadcrumbItem>
+          <BreadcrumbSeparator>›</BreadcrumbSeparator>
+          <CatalogAncestorLink pageId="breadcrumb">Breadcrumb</CatalogAncestorLink>
+        </BreadcrumbItem>
+        <BreadcrumbItem>
+          <BreadcrumbSeparator>›</BreadcrumbSeparator>
+          <BreadcrumbPage>{"long-current-location-".repeat(10)}</BreadcrumbPage>
+        </BreadcrumbItem>
+      </BreadcrumbList>
+    </Breadcrumb>
+  );
+}
+
+export function TableExample() {
+  const [inspections, setInspections] = useState(0);
+  return (
+    <>
+      <TableScroll aria-label="Local draft table">
+        <Table style={{ minWidth: "36rem" }}>
+          <TableCaption>Local drafts. Nothing is saved or sent.</TableCaption>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Draft</TableHead>
+              <TableHead>State</TableHead>
+              <TableHead>Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow>
+              <TableHead scope="row">{"long-local-draft-name-".repeat(6)}</TableHead>
+              <TableCell>Unsaved</TableCell>
+              <TableCell>
+                <Button onClick={() => setInspections((count) => count + 1)}>
+                  Inspect locally
+                </Button>
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableHead scope="row">Notes</TableHead>
+              <TableCell>Local only</TableCell>
+              <TableCell>No action needed</TableCell>
+            </TableRow>
+          </TableBody>
+          <TableFooter>
+            <TableRow>
+              <TableCell colSpan={3}>2 local drafts</TableCell>
+            </TableRow>
+          </TableFooter>
+        </Table>
+      </TableScroll>
+      <p role="status">Local inspections: {inspections}</p>
+    </>
+  );
+}
+
+export function EmptyTableExample() {
+  return (
+    <TableScroll aria-label="Empty local draft table">
+      <Table>
+        <TableCaption>Caller-owned empty content</TableCaption>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Draft</TableHead>
+            <TableHead>State</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow>
+            <TableCell colSpan={2}>
+              No local drafts. This message belongs to the application.
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    </TableScroll>
+  );
+}
+
+export function CardExample() {
+  const [inspections, setInspections] = useState(0);
+  return (
+    <Card>
+      <CardHeader>
+        <h3 className="m-0 font-semibold">Local draft</h3>
+        <p>Composed content and actions. Nothing is saved or sent.</p>
+      </CardHeader>
+      <CardContent>
+        <Field label="Card draft">
+          <Input defaultValue="Keep these unsaved notes" />
+        </Field>
+        <p>{"long-draft-identifier-".repeat(8)}</p>
+      </CardContent>
+      <CardFooter>
+        <Button onClick={() => setInspections((count) => count + 1)}>Inspect locally</Button>
+        <p role="status">Local inspections: {inspections}</p>
+      </CardFooter>
+    </Card>
+  );
+}
+
+export function MinimalCardExample() {
+  return (
+    <Card>
+      <CardContent>A simple content surface. Sections and actions are optional.</CardContent>
+    </Card>
+  );
+}
 
 function LocalDraft() {
   const [count, setCount] = useState(0);

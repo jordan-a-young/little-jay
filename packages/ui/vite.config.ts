@@ -4,6 +4,9 @@ export default defineConfig({
     entry: {
       index: "src/index.ts",
       button: "src/button/index.tsx",
+      card: "src/card/index.tsx",
+      table: "src/table/index.tsx",
+      breadcrumb: "src/breadcrumb/index.tsx",
       alert: "src/alert/index.tsx",
       "empty-state": "src/empty-state/index.tsx",
       "pebble-state": "src/pebble-state/index.tsx",
@@ -12,6 +15,7 @@ export default defineConfig({
       "error-boundary": "src/error-boundary/index.tsx",
       field: "src/field/index.tsx",
       input: "src/input/index.tsx",
+      "password-field": "src/password-field/index.tsx",
       textarea: "src/textarea/index.tsx",
       "native-select": "src/native-select/index.tsx",
       checkbox: "src/checkbox/index.tsx",

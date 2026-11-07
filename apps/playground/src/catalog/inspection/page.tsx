@@ -3,6 +3,150 @@ import type { CatalogDocument, CatalogPageProps } from "../types.js";
 import * as examples from "./examples.js";
 
 const documents: Record<string, CatalogDocument> = {
+  breadcrumb: {
+    overview:
+      "Router-independent breadcrumb composition with a named navigation landmark, ordered list, decorative separators and plain current-location text. The application supplies real ancestor links and hierarchy.",
+    usage:
+      'import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbSeparator, BreadcrumbPage } from "@littlejay/ui/breadcrumb";\nimport "@littlejay/ui/styles.css";\n\n<Breadcrumb>\n  <BreadcrumbList>\n    <BreadcrumbItem><a href="#/introduction">Introduction</a></BreadcrumbItem>\n    <BreadcrumbItem><BreadcrumbSeparator /><BreadcrumbPage>Breadcrumb</BreadcrumbPage></BreadcrumbItem>\n  </BreadcrumbList>\n</Breadcrumb>',
+    props: [
+      {
+        name: "Breadcrumb",
+        type: 'Native nav props; aria-label="Breadcrumb"',
+        description:
+          "Named navigation wrapper. Override the label or supply aria-labelledby to distinguish multiple breadcrumb landmarks.",
+      },
+      {
+        name: "BreadcrumbList / BreadcrumbItem",
+        type: "Native ol / li props",
+        description:
+          "Ordered, wrapping composition. Place each ancestor link/current label inside its own item. List retains role=list without native markers.",
+      },
+      {
+        name: "BreadcrumbSeparator",
+        type: 'Native span props; children="/"',
+        description:
+          "Fixed aria-hidden=true. Put a noninteractive separator inside every item except the first, not in a separate list entry.",
+      },
+      {
+        name: "BreadcrumbPage",
+        type: "Native span props",
+        description:
+          'Fixed aria-current="page". Plain current text, without href, disabled-link semantics or an added focus stop. Compose exactly one per breadcrumb.',
+      },
+    ],
+    accessibility: [
+      "Use real native links or router-aware links for actual ancestors. The library adds no router dependency, click handler, menu, collapse behavior or focus management.",
+      "Supply exactly one current page and keep ancestor links free of current-page markers. Separators are decorative; do not put interactive or meaningful content inside them.",
+      "The catalog adopts Introduction → page → explicitly selected example below its page header. Introduction itself has no redundant home link; missing pages/examples use plain current labels. Categories without routes are omitted.",
+      "Long labels wrap rather than being hidden or truncated. Hierarchy, navigation, history, page/selector focus and preview state remain application-owned.",
+    ],
+    examples: [
+      {
+        id: "default",
+        title: "Native links and current location",
+        component: examples.BreadcrumbExample,
+        code: '<Breadcrumb>\n  <BreadcrumbList>\n    <BreadcrumbItem><a href="#/introduction">Introduction</a></BreadcrumbItem>\n    <BreadcrumbItem><BreadcrumbSeparator /><BreadcrumbPage>Breadcrumb</BreadcrumbPage></BreadcrumbItem>\n  </BreadcrumbList>\n</Breadcrumb>',
+      },
+      {
+        id: "long",
+        title: "Long labels and custom decorative separators",
+        component: examples.LongBreadcrumbExample,
+        code: "<BreadcrumbItem>\n  <BreadcrumbSeparator>›</BreadcrumbSeparator>\n  <BreadcrumbPage>Long current-location label that wraps</BreadcrumbPage>\n</BreadcrumbItem>",
+      },
+    ],
+  },
+  table: {
+    overview:
+      "Lightweight native table composition, with an optional named horizontal scroller. Data, empty/loading/error content and any sorting or filtering remain caller-owned.",
+    usage:
+      'import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell, TableCaption, TableScroll } from "@littlejay/ui/table";\nimport "@littlejay/ui/styles.css";\n\n<TableScroll aria-label="Draft summary">\n  <Table>\n    <TableCaption>Local drafts</TableCaption>\n    <TableHeader><TableRow><TableHead>Draft</TableHead><TableHead>State</TableHead></TableRow></TableHeader>\n    <TableBody><TableRow><TableHead scope="row">Notes</TableHead><TableCell>Unsaved</TableCell></TableRow></TableBody>\n  </Table>\n</TableScroll>',
+    props: [
+      {
+        name: "Table / TableHeader / TableBody / TableFooter",
+        type: "Native table / thead / tbody / tfoot props",
+        description:
+          "Native elements with forwarded refs/className. No generated data, implicit grid role or selection behavior.",
+      },
+      {
+        name: "TableRow / TableCell / TableCaption",
+        type: "Native tr / td / caption props",
+        description:
+          "Preserve spans, header associations and native child controls. A visible caption names the table.",
+      },
+      {
+        name: "TableHead",
+        type: 'Native th props; scope="col"',
+        description:
+          'A header cell, not the header section. Use scope="row" for row headers or explicit IDs/headers for complex relationships.',
+      },
+      {
+        name: "TableScroll",
+        type: "Native div props with required aria-label or aria-labelledby",
+        description:
+          'Optional separate overflow wrapper. Requires a nonblank name and supplies role="region", tabIndex=0 and a visible focus outline; role/tabIndex are fixed.',
+      },
+    ],
+    accessibility: [
+      "Use a real caption and column/row headers. TableHeader is the thead section; TableHead is a th cell. No ARIA grid, roving focus or keyboard sorting is added.",
+      "Name the optional TableScroll region. Its focus stop allows native horizontal keyboard scrolling; the table itself is not a tab stop. Use caller-owned widths when columns need more room.",
+      "Keep buttons and links native. Table does not own requests, pagination, selection, loading, error announcements or empty-state copy. No TanStack dependency is needed for this static primitive.",
+      "The catalog uses these same primitives for its props reference. Catalog-specific column sizing, routing, example state and preview reset remain app-owned.",
+    ],
+    examples: [
+      {
+        id: "default",
+        title: "Native content, headers and local action",
+        component: examples.TableExample,
+        code: '<TableScroll aria-label="Local draft table">\n  <Table style={{ minWidth: "36rem" }}>\n    <TableCaption>Local drafts</TableCaption>\n    <TableHeader><TableRow><TableHead>Draft</TableHead><TableHead>State</TableHead></TableRow></TableHeader>\n    <TableBody><TableRow><TableHead scope="row">Notes</TableHead><TableCell>Unsaved</TableCell></TableRow></TableBody>\n  </Table>\n</TableScroll>',
+      },
+      {
+        id: "empty",
+        title: "Caller-owned empty content",
+        component: examples.EmptyTableExample,
+        code: "<Table>\n  <TableCaption>Local drafts</TableCaption>\n  <TableHeader><TableRow><TableHead>Draft</TableHead><TableHead>State</TableHead></TableRow></TableHeader>\n  <TableBody><TableRow><TableCell colSpan={2}>No local drafts.</TableCell></TableRow></TableBody>\n</Table>",
+      },
+    ],
+  },
+  card: {
+    overview:
+      "A lightweight themed content surface. Optional header, content and footer helpers compose native divs without state, implicit landmarks or card-wide actions.",
+    usage:
+      'import { Card, CardHeader, CardContent, CardFooter } from "@littlejay/ui/card";\nimport { Button } from "@littlejay/ui/button";\nimport "@littlejay/ui/styles.css";\n\n<Card>\n  <CardHeader><h3>Draft notes</h3></CardHeader>\n  <CardContent>Local content</CardContent>\n  <CardFooter><Button>Inspect</Button></CardFooter>\n</Card>',
+    props: [
+      {
+        name: "Card",
+        type: "ComponentProps<div>",
+        description:
+          "Native root props/ref/className; supplies a semantic-token surface and border, but no padding, heading, landmark or focus stop.",
+      },
+      {
+        name: "CardHeader / CardContent / CardFooter",
+        type: "ComponentProps<div>",
+        description:
+          "Optional native divs with 1rem padding. Footer uses wrapping flex layout for caller-supplied actions. No provider or required nesting contract.",
+      },
+    ],
+    accessibility: [
+      "Supply the appropriate heading level and explicit landmark name/role only when the content needs one. Header and footer helpers do not render global header/footer landmarks.",
+      "Card is not a button or link. Put native actions inside it; do not add a click handler as a substitute for keyboard-accessible controls or nest controls in a card-wide link.",
+      "Children remain safely rendered React content. The caller owns data, loading, permissions, focus and state. Native props and refs are forwarded by every helper.",
+      "The catalog's outer preview uses the same Card/CardContent surface. Preview width and reset behavior stay app-owned; code and popover surfaces keep their own treatments.",
+    ],
+    examples: [
+      {
+        id: "default",
+        title: "Composed content and local actions",
+        component: examples.CardExample,
+        code: '<Card>\n  <CardHeader><h3>Local draft</h3></CardHeader>\n  <CardContent><Field label="Card draft"><Input defaultValue="Unsaved notes" /></Field></CardContent>\n  <CardFooter><Button onClick={inspectLocally}>Inspect locally</Button></CardFooter>\n</Card>',
+      },
+      {
+        id: "minimal",
+        title: "Minimal content surface",
+        component: examples.MinimalCardExample,
+        code: "<Card><CardContent>Sections and actions are optional.</CardContent></Card>",
+      },
+    ],
+  },
   tabs: {
     overview:
       "Horizontal, manually activated content tabs. Stable item values link native non-submit triggers to panels; workflow state and responsive layout stay application-owned.",

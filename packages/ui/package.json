@@ -37,6 +37,11 @@
       "development": "./src/input/index.tsx",
       "import": "./dist/input.js"
     },
+    "./password-field": {
+      "types": "./dist/password-field.d.ts",
+      "development": "./src/password-field/index.tsx",
+      "import": "./dist/password-field.js"
+    },
     "./textarea": {
       "types": "./dist/textarea.d.ts",
       "development": "./src/textarea/index.tsx",
@@ -91,6 +96,21 @@
       "types": "./dist/button.d.ts",
       "development": "./src/button/index.tsx",
       "import": "./dist/button.js"
+    },
+    "./breadcrumb": {
+      "types": "./dist/breadcrumb.d.ts",
+      "development": "./src/breadcrumb/index.tsx",
+      "import": "./dist/breadcrumb.js"
+    },
+    "./table": {
+      "types": "./dist/table.d.ts",
+      "development": "./src/table/index.tsx",
+      "import": "./dist/table.js"
+    },
+    "./card": {
+      "types": "./dist/card.d.ts",
+      "development": "./src/card/index.tsx",
+      "import": "./dist/card.js"
     },
     "./description-list": {
       "types": "./dist/description-list.d.ts",

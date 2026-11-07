@@ -422,9 +422,18 @@ it("keeps workflows manual-only for publication and isolates OIDC from verificat
   expect(workflow).toContain("workflow_dispatch:");
   expect(workflow).not.toMatch(/\n  (push|pull_request|workflow_run):/);
   expect(workflow).toContain("cancel-in-progress: false");
+  expect(verify).toContain("github.ref == 'refs/heads/main'");
+  expect(verify).toContain("github.actor == 'jordan-a-young'");
+  expect(verify).toContain("github.triggering_actor == 'jordan-a-young'");
+  expect(verify).not.toContain("environment:");
   expect(verify).not.toContain("id-token: write");
   expect(verify).toContain("pnpm release:check");
   expect(publish).toContain("id-token: write");
+  expect(publish).toContain("github.repository == 'jordan-a-young/little-jay'");
+  expect(publish).toContain("github.ref == 'refs/heads/main'");
+  expect(publish).toContain("github.actor == 'jordan-a-young'");
+  expect(publish).toContain("github.triggering_actor == 'jordan-a-young'");
+  expect(publish).toContain("\n    environment: npm-publish\n");
   expect(publish).toContain("artifact-ids: ${{ needs.verify.outputs.artifact-id }}");
   expect(publish).toContain("--frozen-lockfile --ignore-scripts");
   expect(publish).not.toContain("pnpm ready");

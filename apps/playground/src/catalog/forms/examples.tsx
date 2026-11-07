@@ -1,5 +1,91 @@
 import { useState } from "react";
-import { Checkbox, Field, Input, NativeSelect, Switch, Textarea } from "@littlejay/ui";
+import {
+  Button,
+  Checkbox,
+  Field,
+  Input,
+  NativeSelect,
+  PasswordField,
+  Switch,
+  Textarea,
+} from "@littlejay/ui";
+
+export function PasswordFieldExample() {
+  return (
+    <form onSubmit={(event) => event.preventDefault()} className="grid gap-4">
+      <Field
+        label="Example password"
+        description="Synthetic local example. Do not enter a real password."
+      >
+        <PasswordField
+          name="example-password"
+          autoComplete="current-password"
+          defaultValue="sample-only"
+        />
+      </Field>
+      <Button type="reset">Reset local password example</Button>
+    </form>
+  );
+}
+
+export function ControlledPasswordField() {
+  const [password, setPassword] = useState("");
+  return (
+    <form
+      onSubmit={(event) => event.preventDefault()}
+      onReset={() => setPassword("")}
+      className="grid gap-4"
+    >
+      <Field
+        label="New example password"
+        description="Controlled local-only input. Nothing is saved, logged or sent."
+      >
+        <PasswordField
+          name="new-example-password"
+          autoComplete="new-password"
+          value={password}
+          onChange={(event) => setPassword(event.currentTarget.value)}
+        />
+      </Field>
+      <Button type="reset">Clear local password example</Button>
+    </form>
+  );
+}
+
+export function PasswordFieldStates() {
+  return (
+    <div className="grid gap-4">
+      <fieldset disabled>
+        <legend>Disabled native fieldset</legend>
+        <Field label="Unavailable example password">
+          <PasswordField
+            defaultValue="sample-only"
+            showLabel="Show unavailable password"
+            hideLabel="Hide unavailable password"
+          />
+        </Field>
+      </fieldset>
+      <Field label="Read-only example password">
+        <PasswordField
+          readOnly
+          defaultValue="sample-only"
+          showLabel="Show read-only password"
+          hideLabel="Hide read-only password"
+        />
+      </Field>
+      <Field
+        label="Invalid example password"
+        error="Example validation message. Validation belongs to the application."
+      >
+        <PasswordField
+          defaultValue="sample-only"
+          showLabel="Show invalid password"
+          hideLabel="Hide invalid password"
+        />
+      </Field>
+    </div>
+  );
+}
 
 export function SwitchExample() {
   return (

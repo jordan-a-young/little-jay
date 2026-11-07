@@ -25,6 +25,21 @@ describe("catalog scroll layout contract", () => {
     expect(pane).toMatch(/scrollbar-gutter:\s*stable/);
   });
 
+  it("keeps the main scroll target full-width and bounds only its inner content", () => {
+    const main = rulesFor("catalog-main")[0]!;
+    expect(main).toMatch(/width:\s*100%/);
+    for (const rule of rulesFor("catalog-main")) {
+      expect(rule).not.toMatch(/max-width:|margin-inline:|padding:/);
+    }
+    const content = rulesFor("catalog-main-content")[0]!;
+    expect(content).toMatch(/width:\s*100%/);
+    expect(content).toMatch(/max-width:\s*80rem/);
+    expect(content).toMatch(/margin-inline:\s*auto/);
+    expect(content).toMatch(/padding:\s*2rem clamp\(1rem,\s*3vw,\s*3rem\)/);
+    expect(content).not.toMatch(/overflow:/);
+    expect(rulesFor("catalog-main-content")[1]).toMatch(/padding:\s*1rem 0\.75rem/);
+  });
+
   it("keeps the header sticky above both panes and never stacks the sidebar", () => {
     const header = rulesFor("catalog-header")[0]!;
     expect(header).toMatch(/position:\s*sticky/);

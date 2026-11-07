@@ -30,6 +30,15 @@ TanStack Router uses hash history, so a same-origin deployment prefix needs no e
 - `/#/dialog/sheet`
 - `/#/tabs`
 - `/#/tabs/controlled`
+- `/#/card`
+- `/#/card/minimal`
+- `/#/table`
+- `/#/table/empty`
+- `/#/breadcrumb`
+- `/#/breadcrumb/long`
+- `/#/password-field`
+- `/#/password-field/controlled`
+- `/#/password-field/states`
 - `/little-jay/#/pebble-state/empty` for a pathname-prefixed build
 
 The earlier `#pebble-states` URL remains an alias for the all-states showcase. Browser Back/Forward restores page/example selection. Missing pages and examples provide recovery UI instead of silently showing unrelated documentation. Preview-local state is not stored in the URL and resets when changing examples or leaving a page.
@@ -52,6 +61,8 @@ The sidebar uses router-aware native links and `aria-current`. A keyboard-visibl
 
 The shell occupies the dynamic viewport: a sticky full-width header sits above independently scrollable sidebar and documentation panes. Both panes are named and keyboard-focusable; scroll containment prevents chaining into the other pane/document at their boundaries. The sidebar stays on the left **at every viewport width**, as requested, with a narrower column and reduced padding on phones rather than stacked navigation or a drawer. The entire sidebar scrolls, including search; it has no second nested navigation scroller. Code and props tables retain their own bounded scrolling. Scrolling/resizing does not remount previews or reset drafts, theme, search or navigation state.
 
+The documentation scroll target fills its entire grid column, including the outer gutters on wide screens. Only the inner `.catalog-main-content` wrapper is centered and capped at 80rem; it owns desktop/narrow content padding but no scrolling or additional focus stop. Keep width constraints off `.catalog-main` so gutter input reaches the native scroll container without custom wheel/touch forwarding.
+
 Pane scrollbars are transparent at rest and reveal a thin semantic-color thumb on hover or focus within that pane. Their width and reserved gutters stay stable, so revealing them or filtering navigation down to non-scrolling results does not resize the search field. Its native clear X remains available. Empty search feedback is spaced 1.5rem below the field. Native scrolling remains enabled; forced-color mode retains system scrollbar colors. This affects the two shell panes, not shared components or nested code/props scrollers.
 
 ## Source organization
@@ -70,6 +81,7 @@ apps/playground/src/
     navigation.tsx               typed app-local links and route selection
     types.ts                    app-local document/example contracts
     DocumentationPage.tsx       shared docs, example selection, snippets, props
+    CatalogBreadcrumb.tsx       app-owned home/page/explicit-example hierarchy
     foundations/{page,examples}.tsx
     foundations/hooks.tsx          hook ownership and source-based Query guide
     button/{page,examples}.tsx
@@ -89,9 +101,19 @@ Alert's **Success / static** and **Warning / static** examples demonstrate the e
 
 LoadingIndicator's default example shows a spinner with and without visible text; neither static preview creates a live region. Omitted or blank `label` text retains hidden “Loading” text. The **Caller-owned local activity** example toggles an indicator inside one app-owned status region without making requests or starting a timer. Reduced-motion preferences stop rotation but retain the indicator/text. Query, Actions, offline pause handling, and form disabling/focus policy are unchanged.
 
+The catalog also uses LoadingIndicator while a lazy documentation page loads. Its visible label remains “Loading documentation…” inside the existing application-owned status region; the indicator adds no live role or focus behavior. The shell remains mounted and the fallback disappears when the page resolves. Syntax-highlighting Suspense keeps its separate plain-text fallback rather than replacing readable code with a spinner.
+
 Tabs lives alphabetically in Inspection. Its **Manual activation / preserved local draft** example contains an editable draft, local counter, preview and disabled tab. Left/Right/Home/End move focus without activation; native Enter/Space or click selects content. Content mounts on first selection and stays mounted while its item remains. The **Caller-owned selection** example also demonstrates an external selection button without automatic focus movement. Neither example makes requests, starts workflows or migrates Graph Workbench. The application remains responsible for responsive all-panels layouts, pausing hidden effects and canvas remeasurement. Reset preview unmounts the entire example and clears its local draft/counter.
 
+Card lives alphabetically in Inspection, with composed header/content/footer and minimal-content examples. Helpers render divs; the examples supply explicit headings and native actions. The outer preview frame also uses shared Card/CardContent rather than duplicate app-owned border/padding/background styling. Its width constraints, inner dashed preview boundary and keyed reset remain application-owned; resizing/settings preserve the local draft and action count, while Reset preview remounts them. No new landmark, focus stop or card-wide action is introduced, and code/popover surfaces keep their own styling.
+
+Table lives alphabetically in Inspection, with native caption/column/row-header composition, a local action, and caller-owned empty content. A separately named TableScroll region provides native keyboard horizontal scrolling; no grid role, sorting/filtering engine or request is added. DocumentationPage adopts the same primitives for its props reference while retaining its app-owned column minimums, named scroller and header relationships. Theme/viewport/settings changes preserve example state; Reset preview remains app-owned.
+
+Breadcrumb lives alphabetically in Inspection, with native/router-aware ancestor links and a long-label/custom-separator example. Real catalog adoption appears below the page header at the start of DocumentationPage: Introduction → current page, or Introduction → page link → explicit current example. Introduction itself is a single current item unless an example is explicit. Missing pages/examples keep real available ancestors and plain current labels, never raw invalid-path text. Category labels have no routes and are omitted. CatalogBreadcrumb owns hierarchy/labels; shared UI owns only native nav/ordered-list/item/current/separator presentation. Ordinary same-page ancestor activation focuses the existing page heading before its link becomes plain current text; modified clicks keep native behavior without focus movement. Existing hash/subpath navigation, history, page-heading/example-selector focus and preview state remain app-owned.
+
 Components stay in `packages/ui`, canonical artwork in `packages/brand`, and tokens in `packages/tokens`. Catalog docs, controls, preview state, and application patterns remain in the playground. Do not make a UI component import catalog code or add domain policy to the library.
+
+PasswordField lives alphabetically in Forms. Its synthetic local-only examples cover current-password visibility/native reset, caller-owned controlled new-password input/reset, and native disabled-fieldset/read-only/invalid presentation. The shared control owns only reveal state; Input/Field preserve the primary control's label/messages/native props, while the auxiliary action has its own changing name. Values are never echoed, logged, persisted or sent, and no authentication, password-strength policy or clipboard interception is added. Themes/preview width/viewport changes retain input/reveal state; explicit Reset preview remounts the example.
 
 ## Adding a page or example
 

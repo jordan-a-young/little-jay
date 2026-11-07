@@ -1,11 +1,12 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import { Outlet } from "@tanstack/react-router";
-import { ErrorBoundary } from "@littlejay/ui";
+import { ErrorBoundary, LoadingIndicator } from "@littlejay/ui";
 import logoLight from "@littlejay/brand/logos/lockup-light.svg";
 import logoDark from "@littlejay/brand/logos/lockup-dark.svg";
 import { useTheme } from "./use-theme.js";
 import { catalogPages } from "./catalog/registry.js";
 import { CatalogLink, useCatalogSelection } from "./catalog/navigation.js";
+import { CatalogBreadcrumb } from "./catalog/CatalogBreadcrumb.js";
 import { Sidebar } from "./shell/Sidebar.js";
 import { Toolbar } from "./shell/Toolbar.js";
 import { PreviewContext, type PreviewWidth } from "./shell/PreviewFrame.js";
@@ -63,25 +64,27 @@ export function CatalogApp() {
         aria-labelledby="catalog-page-title"
         className="catalog-main"
       >
-        <div className="catalog-page-header">
-          <h1 id="catalog-page-title" ref={heading} tabIndex={-1}>
-            {page?.title ?? "Page not found"}
-          </h1>
-          <Toolbar
-            width={width}
-            onWidthChange={setWidth}
-            onReset={() => {
-              setResetCount((count) => count + 1);
-              setResetMessage("Preview reset to its initial state.");
-            }}
-          />
+        <div className="catalog-main-content">
+          <div className="catalog-page-header">
+            <h1 id="catalog-page-title" ref={heading} tabIndex={-1}>
+              {page?.title ?? "Page not found"}
+            </h1>
+            <Toolbar
+              width={width}
+              onWidthChange={setWidth}
+              onReset={() => {
+                setResetCount((count) => count + 1);
+                setResetMessage("Preview reset to its initial state.");
+              }}
+            />
+          </div>
+          <p role="status" className="text-sm text-muted">
+            {resetMessage}
+          </p>
+          <PreviewContext value={{ width, resetCount }}>
+            <Outlet />
+          </PreviewContext>
         </div>
-        <p role="status" className="text-sm text-muted">
-          {resetMessage}
-        </p>
-        <PreviewContext value={{ width, resetCount }}>
-          <Outlet />
-        </PreviewContext>
       </main>
     </div>
   );
@@ -89,10 +92,13 @@ export function CatalogApp() {
 
 export function CatalogNotFound() {
   return (
-    <p>
-      That catalog link does not exist.{" "}
-      <CatalogLink pageId="introduction">Return to Introduction</CatalogLink>.
-    </p>
+    <>
+      <CatalogBreadcrumb pageId="not-found" />
+      <p>
+        That catalog link does not exist.{" "}
+        <CatalogLink pageId="introduction">Return to Introduction</CatalogLink>.
+      </p>
+    </>
   );
 }
 
@@ -106,7 +112,13 @@ export function CatalogPage() {
       resetKey={href}
       fallback={<p>This catalog page could not load. Reload the page to try again.</p>}
     >
-      <Suspense fallback={<p role="status">Loading documentation…</p>}>
+      <Suspense
+        fallback={
+          <p role="status">
+            <LoadingIndicator label="Loading documentation…" />
+          </p>
+        }
+      >
         <Page key={pageId} pageId={pageId} {...(exampleId ? { exampleId } : {})} />
       </Suspense>
     </ErrorBoundary>
