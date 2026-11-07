@@ -7,12 +7,14 @@ const documents: Record<string, CatalogDocument> = {
     overview:
       "The existing local workflow configuration form, preserved as a composition pattern. React 19 Actions validate locally and retain submitted drafts. No workflow is saved or started.",
     usage:
-      'import { Field, Input, Button } from "@littlejay/ui";\n\n<form action={validateLocally}>\n  <Field label="Workflow name" required>\n    <Input name="name" defaultValue={draft.name} />\n  </Field>\n  <Button type="submit">Validate configuration</Button>\n</form>',
+      'import { useFormStatus } from "react-dom";\nimport { Button, LoadingIndicator } from "@littlejay/ui";\n\nfunction SubmitExample() {\n  const { pending } = useFormStatus();\n  return (\n    <Button type="submit" disabled={pending}\n      aria-label={pending ? "Validating configuration" : "Validate configuration"}>\n      <span className="workflow-submit-labels" aria-hidden="true">\n        <span data-active={!pending || undefined}>Validate configuration</span>\n        <span data-active={pending || undefined}>\n          <LoadingIndicator label="Validating…" aria-hidden="true" style={{ color: "inherit" }} />\n        </span>\n      </span>\n    </Button>\n  );\n}',
     props: [],
     accessibility: [
       "Field connects each control to its label, description, and error.",
       "Editing a validated draft marks the result outdated and clears only that field's previous error. Validate again to check the current values.",
       "The affected form exposes aria-busy during validation; a disabled fieldset prevents pending edits from being lost.",
+      "SubmitExample composes the existing Button and LoadingIndicator inside the form. Its application-owned workflow-submit-labels CSS stacks both labels in one grid cell and hides only the inactive presentation, reserving both labels' width/height. Both visuals are aria-hidden; the button has one current accessible name, and the decorative indicator inherits its foreground color.",
+      "One persistent polite status region outside the busy form announces pending, result and outdated-draft messages; no nested live Alert duplicates those announcements. Real live-announcement delivery still depends on the browser/assistive technology. Reduced motion uses LoadingIndicator's existing static fallback.",
       "After a submission started within the form, focus moves to the first invalid control or returns to Submit after success, unless the user has moved focus elsewhere.",
       "React Actions reset uncontrolled fields after success. This pattern returns the submitted draft and restores defaults, remounting only the uncontrolled select when needed.",
       "Validation and pending state belong to this application pattern, not to the generic UI components.",
@@ -22,7 +24,7 @@ const documents: Record<string, CatalogDocument> = {
         id: "default",
         title: "Draft-preserving local validation",
         component: WorkflowForm,
-        code: 'const [state, action, pending] = useActionState(validateExample, initialState);\n\n<form action={action} aria-busy={pending}>\n  <fieldset disabled={pending}>\n    <Field label="Workflow name" error={state.errors.name}>\n      <Input name="name" defaultValue={state.draft.name} />\n    </Field>\n    <SubmitExample />\n  </fieldset>\n</form>',
+        code: 'const [state, action, pending] = useActionState(validateExample, initialState);\n\n<form action={action} aria-busy={pending}>\n  <fieldset disabled={pending}>\n    <Field label="Workflow name" error={state.errors.name}>\n      <Input name="name" defaultValue={state.draft.name} />\n    </Field>\n    <SubmitExample />\n  </fieldset>\n</form>\n<div role="status" aria-atomic="true">\n  {pending ? <span className="sr-only">Validating configuration locally…</span> : resultMessage}\n</div>',
       },
     ],
   },

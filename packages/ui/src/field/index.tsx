@@ -31,16 +31,17 @@ export function Field({
 }: FieldProps) {
   const generatedId = useId();
   const controlId = id ?? `lj-field-${generatedId}`;
+  const labelId = `${controlId}-label`;
   const hasDescription = hasMessage(description);
   const invalid = hasMessage(error);
   const descriptionId = hasDescription ? `${controlId}-description` : undefined;
   const errorId = invalid ? `${controlId}-error` : undefined;
   const context = useMemo<FieldContextValue>(
-    () => ({ controlId, descriptionId, errorId, invalid, required, disabled }),
-    [controlId, descriptionId, errorId, invalid, required, disabled],
+    () => ({ controlId, labelId, descriptionId, errorId, invalid, required, disabled }),
+    [controlId, labelId, descriptionId, errorId, invalid, required, disabled],
   );
   const fieldLabel = (
-    <label htmlFor={controlId} className="block text-sm font-medium text-content">
+    <label id={labelId} htmlFor={controlId} className="block text-sm font-medium text-content">
       {label}
       {required && <span aria-hidden="true"> *</span>}
     </label>

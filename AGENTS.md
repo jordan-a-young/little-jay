@@ -9,6 +9,7 @@
 - Use [the task-to-file map](docs/REPO-MAP.md) to locate likely owners, source entry points, contracts, and tests before broader searches. It is a starting point, not an exhaustive file inventory or a substitute for checking current code.
 - Maintain the map in the same change whenever you add/remove a workspace or task area, move/rename mapped paths, or change ownership, entry points, generators, or test locations. Update affected scoped `AGENTS.md` files too. Verify mapped paths still exist; ordinary implementation edits need no map rewrite when its guidance remains accurate.
 - Preserve unfamiliar changes. The source is hosted on GitHub; do not commit, push, publish packages, change visibility, or deploy unless requested.
+- Serena is optional maintainer tooling: version `.serena/project.yml` and `.serena/.gitignore`, keeping shared settings portable. Keep cache and `project.local.yml` ignored; put machine-specific overrides there. Review project memories before including them in a commit: retain only durable, non-sensitive knowledge and link to authoritative `AGENTS.md`/`docs/` guidance instead of duplicating it. Do not bulk-stage `.serena/` or treat its configuration as consumer-package setup.
 
 ## Bounded troubleshooting
 

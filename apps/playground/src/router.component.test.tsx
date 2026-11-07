@@ -59,8 +59,8 @@ describe("catalog routing compatibility", () => {
     ["/button/default/extra", "Page not found", undefined],
     ["/button//extra", "Page not found", undefined],
     ["/%25", "Page not found", undefined],
-    ["/button/%25", "Button", "Unknown example"],
-    ["/button/%2F", "Button", "Unknown example"],
+    ["/button/%25", "Button", "Example not found"],
+    ["/button/%2F", "Button", "Example not found"],
     ["/missing", "Page not found", undefined],
   ])("handles entry %s without starting requests", async (path, title, example) => {
     router = createCatalogRouter(client, createMemoryHistory({ initialEntries: [path] }));
@@ -68,8 +68,15 @@ describe("catalog routing compatibility", () => {
     await vi.waitFor(() => expect(container.querySelector("h1")?.textContent).toBe(title));
     if (example) {
       await vi.waitFor(() => {
-        const selector = container.querySelector<HTMLSelectElement>(".catalog-document select");
-        expect(selector?.selectedOptions[0]?.textContent).toBe(example);
+        if (example === "Example not found") {
+          expect(container.querySelector('[role="tab"][aria-selected="true"]')).toBeNull();
+          expect(container.querySelector(".catalog-preview")).toBeNull();
+          expect(container.textContent).toContain(example);
+        } else {
+          expect(
+            container.querySelector('.catalog-example-tabs [aria-selected="true"]')?.textContent,
+          ).toBe(example);
+        }
       });
     }
     expect(fetch).not.toHaveBeenCalled();

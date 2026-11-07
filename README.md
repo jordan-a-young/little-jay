@@ -4,7 +4,7 @@ A minimal monorepo for reusable React components, theme tokens, bounded JSON tra
 
 ## Package usage and coding agents
 
-Each library ships a usage README with public imports, compatibility, setup, application-policy boundaries, verification, and licensing guidance. Start with `node_modules/@littlejay/<package>/README.md` in an installed consumer. See [consumer-agent setup](docs/CONSUMER-AGENTS.md) for an opt-in consumer `AGENTS.md` example and the isolated tarball discovery check. Dependency instructions are not assumed to load automatically; these guides do not authorize publication or artwork reuse.
+Each library ships a usage README with public imports, compatibility, setup, optimization guidance, application-policy boundaries, verification, and licensing. Start with `node_modules/@littlejay/<package>/README.md` in an installed consumer. For **OpenCode and Codex**, merge the shared [consumer `AGENTS.md` template](docs/CONSUMER-AGENTS.md#opt-in-consumer-agentsmd) into your application's own instructions, then use the [discovery prompt](docs/CONSUMER-AGENTS.md#opencode-and-codex-setup) to confirm the agent reads the installed guides. Guidance covers CSS/bundle reuse, React state/effects, request cancellation/cache ownership, bounded server resources, and measurement before performance claims. Dependency instructions are not assumed to load automatically; these guides do not authorize publication or artwork reuse.
 
 ## Run on your workstation
 

@@ -2,6 +2,8 @@
 
 Canonical, framework-independent Little Jay artwork from the approved Pebble kit. This package is prepared for public npm distribution and has no runtime framework dependencies. Public availability does not grant artwork/trademark reuse rights; see the rights section below.
 
+OpenCode and Codex: have the consuming project's `AGENTS.md` explicitly request this installed README before asset reuse. See the [shared setup/template](https://github.com/jordan-a-young/little-jay/blob/main/docs/CONSUMER-AGENTS.md); installation alone does not activate agent instructions or grant artwork rights.
+
 `states/` adds the four original transparent 1254×1254 static app-state PNGs, with their source README and manifest. Each image and the manifest have explicit exports. See `docs/PEBBLE-STATES.md` in the workspace for the `PebbleState` component and base-aware public URLs.
 
 - `logos/lockup-light.*` and `wordmark-light.*`: dark Ink lettering for light backgrounds.
@@ -21,7 +23,7 @@ The wordmarks are outlined from Ubuntu Sans Bold and need no web font. Retain [F
 
 ## Imports and compatibility
 
-Use the explicit asset exports in [package.json](package.json), for example `import logo from "@littlejay/brand/logos/lockup-light.svg"` in a bundler that handles asset URLs. There is no root JavaScript API, React peer dependency, or CommonJS entry point. Static files need no CSS or theme runtime. The workspace documentation paths mentioned above are private source-repository references, not files installed with this package.
+Use the explicit asset exports in [package.json](package.json), for example `import logo from "@littlejay/brand/logos/lockup-light.svg"` in a bundler that handles asset URLs. There is no root JavaScript API, React peer dependency, or CommonJS entry point. Static files need no CSS or theme runtime. The workspace documentation paths mentioned above are source-repository references, not files installed with this package.
 
 ## Accessibility and deployment
 
@@ -30,6 +32,12 @@ Match logo variants to their backgrounds; preserve proportions and check both th
 ## Application policy and verification
 
 Your application/bundler owns copying exported assets, deployment-base URLs, and public manifest paths; installing this package performs no public-directory synchronization. Check production asset URLs under the real deployment prefix, dimensions, alt text, and light/dark backgrounds. Do not infer offline support, network policy, publication permission, or an artwork license from the package. Use your consumer's documented build/check commands, not dependency-maintainer workflows.
+
+## Optimization guidance
+
+- Confirm reuse permission first. Import/copy only the exported assets the application actually uses, not the whole package, both banner sets, or every state illustration by default. Keep required notices with distributions.
+- Supply explicit proportional image dimensions to reserve layout space. Let the application's bundler resolve/cache asset URLs and verify them under the deployment prefix; do not inline large PNGs, reconstruct artwork in JSX/CSS, or preload every image as an assumed optimization.
+- Measure transferred bytes and layout shifts for the affected page. Lazy-load noncritical offscreen illustrations when appropriate, not the page's critical visible image. Preserve canonical artwork, meaningful/decorative alt behavior and theme contrast; do not modify assets or strip notices without authorization.
 
 ## Provenance and rights
 

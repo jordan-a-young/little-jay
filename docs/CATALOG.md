@@ -39,6 +39,9 @@ TanStack Router uses hash history, so a same-origin deployment prefix needs no e
 - `/#/password-field`
 - `/#/password-field/controlled`
 - `/#/password-field/states`
+- `/#/combobox`
+- `/#/combobox/controlled`
+- `/#/combobox/states`
 - `/little-jay/#/pebble-state/empty` for a pathname-prefixed build
 
 The earlier `#pebble-states` URL remains an alias for the all-states showcase. Browser Back/Forward restores page/example selection. Missing pages and examples provide recovery UI instead of silently showing unrelated documentation. Preview-local state is not stored in the URL and resets when changing examples or leaving a page.
@@ -55,9 +58,11 @@ One stable QueryClient is passed to QueryClientProvider and the router's typed c
 - **Theme:** one System / Light / Dark selector reuses the existing persisted document-level preference and browser theme-color behavior. Theme changes and opening/closing Settings do not remount the active example.
 - **Preview width:** inside Settings, choose available width, 640 px, or 320 px, constrained by the actual available space. This resizes a content box, **not an iframe viewport**; CSS media queries still follow the browser. Its explanation stays inside the popover. Use a real narrow browser viewport for responsive checks.
 - **Reset preview:** remounts only the active preview, restoring local demo state. It leaves theme, selected page/example, search, and documentation intact. It does not clear the shared Query cache; use Refresh API for fresh health data.
-- **Example:** chooses a named, URL-addressable example. Button also demonstrates an explicit local state control rather than a generic automatic props editor.
+- **Example:** an underline tab strip chooses a named, URL-addressable example. ArrowLeft/ArrowRight (RTL-aware), Home and End move focus without navigating; native Enter/Space or a click activates the focused tab. Tab leaves the strip for the active named panel. Only the active preview and example code are mounted, so switching away and back resets local example state just as before. Clicking the already-selected tab does not navigate or reset it. Button also demonstrates an explicit local state control rather than a generic automatic props editor.
 
-The sidebar uses router-aware native links and `aria-current`. A keyboard-visible skip link moves focus to documentation without changing the route. Changing catalog pages focuses the new page heading; changing examples preserves the example selector. Page links explicitly clear an optional example parameter rather than inheriting it from the previous route.
+The example strip scrolls horizontally rather than wrapping tabs into multiple rows. Individual long labels may wrap within a bounded tab; focus remains visibly inset and native focus scrolling exposes offscreen tabs. Selected tabs use a semantic-color underline as well as color, and the same behavior is retained in both themes. Missing example routes show the existing recovery message with no selected tab or mounted preview; the first tab remains keyboard-reachable. This is app-owned route presentation in `catalog/ExampleTabs.tsx`, not an extension of the shared Tabs API: shared Tabs intentionally preserves visited panels, while catalog examples must unmount when inactive. No dependency, shared API or URL format change is included.
+
+The sidebar uses router-aware native links and `aria-current`. A keyboard-visible skip link moves focus to documentation without changing the route. Changing catalog pages focuses the new page heading; changing examples retains the tab buttons and their focus. Back/Forward restores the selected example without taking focus from a surviving control. Page links explicitly clear an optional example parameter rather than inheriting it from the previous route.
 
 The shell occupies the dynamic viewport: a sticky full-width header sits above independently scrollable sidebar and documentation panes. Both panes are named and keyboard-focusable; scroll containment prevents chaining into the other pane/document at their boundaries. The sidebar stays on the left **at every viewport width**, as requested, with a narrower column and reduced padding on phones rather than stacked navigation or a drawer. The entire sidebar scrolls, including search; it has no second nested navigation scroller. Code and props tables retain their own bounded scrolling. Scrolling/resizing does not remount previews or reset drafts, theme, search or navigation state.
 
@@ -81,6 +86,7 @@ apps/playground/src/
     navigation.tsx               typed app-local links and route selection
     types.ts                    app-local document/example contracts
     DocumentationPage.tsx       shared docs, example selection, snippets, props
+    ExampleTabs.tsx              manual route-controlled underline tabs, active-only preview
     CatalogBreadcrumb.tsx       app-owned home/page/explicit-example hierarchy
     foundations/{page,examples}.tsx
     foundations/hooks.tsx          hook ownership and source-based Query guide
@@ -103,6 +109,8 @@ LoadingIndicator's default example shows a spinner with and without visible text
 
 The catalog also uses LoadingIndicator while a lazy documentation page loads. Its visible label remains “Loading documentation…” inside the existing application-owned status region; the indicator adds no live role or focus behavior. The shell remains mounted and the fallback disappears when the page resolves. Syntax-highlighting Suspense keeps its separate plain-text fallback rather than replacing readable code with a spinner.
 
+Workflow form's pending validation composes Button with the same LoadingIndicator, not a new shared pending-button API. Application CSS stacks ready/pending labels in one grid cell so both reserve space, while hiding inactive presentation and giving the button one current accessible name. The decorative indicator inherits the button foreground and retains its reduced-motion fallback. One persistent polite status outside the busy form announces pending/result/outdated-draft text without nesting live Alerts. React Actions, busy/disabled policy, draft preservation and conditional focus restoration remain app-owned. The existing local-validation delay is unchanged; no new timer, request, fabricated percentage, Skeleton or Progress primitive is added.
+
 Tabs lives alphabetically in Inspection. Its **Manual activation / preserved local draft** example contains an editable draft, local counter, preview and disabled tab. Left/Right/Home/End move focus without activation; native Enter/Space or click selects content. Content mounts on first selection and stays mounted while its item remains. The **Caller-owned selection** example also demonstrates an external selection button without automatic focus movement. Neither example makes requests, starts workflows or migrates Graph Workbench. The application remains responsible for responsive all-panels layouts, pausing hidden effects and canvas remeasurement. Reset preview unmounts the entire example and clears its local draft/counter.
 
 Card lives alphabetically in Inspection, with composed header/content/footer and minimal-content examples. Helpers render divs; the examples supply explicit headings and native actions. The outer preview frame also uses shared Card/CardContent rather than duplicate app-owned border/padding/background styling. Its width constraints, inner dashed preview boundary and keyed reset remain application-owned; resizing/settings preserve the local draft and action count, while Reset preview remounts them. No new landmark, focus stop or card-wide action is introduced, and code/popover surfaces keep their own styling.
@@ -116,6 +124,8 @@ Components stay in `packages/ui`, canonical artwork in `packages/brand`, and tok
 PasswordField lives alphabetically in Forms. Its synthetic local-only examples cover current-password visibility/native reset, caller-owned controlled new-password input/reset, and native disabled-fieldset/read-only/invalid presentation. The shared control owns only reveal state; Input/Field preserve the primary control's label/messages/native props, while the auxiliary action has its own changing name. Values are never echoed, logged, persisted or sent, and no authentication, password-strength policy or clipboard interception is added. Themes/preview width/viewport changes retain input/reveal state; explicit Reset preview remounts the example.
 
 ## Adding a page or example
+
+Combobox lives alphabetically in Forms with a fictional local “Choose a project” list, caller-owned controlled selection/reset, and disabled/read-only/invalid/empty states. The default form inspects only local selected-ID FormData and makes no request. Query text is internal and never submitted. Clear/caret controls sit inside one input border. Field labels/messages, required selection validity and cancellation-aware native reset remain covered; remote loading, freeform/multiple selection and virtualization are not included. NativeSelect remains in the small Theme/Width settings.
 
 1. Add a stable page ID/title/group/search keywords to `catalog/registry.ts` and point its component to an appropriate lazy module.
 2. In that module's `page.tsx`, author a `CatalogDocument` with overview, usage, props, accessibility notes, and at least one named example. Use stable example IDs for links.

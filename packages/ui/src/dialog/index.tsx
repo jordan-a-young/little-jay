@@ -44,6 +44,7 @@ export function DialogContent({
   portalContainer,
   children,
   className = "",
+  onEscapeKeyDown,
   ...props
 }: DialogContentProps) {
   if (typeof title !== "string" || !title.trim())
@@ -54,6 +55,16 @@ export function DialogContent({
       <Primitive.Overlay className="lj-dialog-overlay" />
       <Primitive.Content
         {...props}
+        onEscapeKeyDown={(event) => {
+          onEscapeKeyDown?.(event);
+          const target = event.target;
+          if (
+            target instanceof Element &&
+            target.closest('[role="combobox"][aria-expanded="true"]')
+          ) {
+            event.preventDefault();
+          }
+        }}
         className={`lj-dialog-content lj-dialog-${variant} ${className}`}
         {...(!hasDescription ? { "aria-describedby": undefined } : {})}
       >

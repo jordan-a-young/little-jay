@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
   Button,
   Checkbox,
+  Combobox,
   Field,
   Input,
   NativeSelect,
@@ -9,6 +10,110 @@ import {
   Switch,
   Textarea,
 } from "@littlejay/ui";
+
+const projectOptions = [
+  { value: "atlas", label: "Atlas" },
+  { value: "beacon", label: "Beacon" },
+  { value: "cedar", label: "Cedar" },
+  { value: "delta", label: "Delta" },
+  { value: "ember", label: "Ember" },
+  { value: "forest", label: "Forest" },
+  { value: "grove", label: "Grove" },
+  { value: "harbor", label: "Harbor (unavailable)", disabled: true },
+  { value: "iris", label: "Iris" },
+  { value: "juniper", label: "Juniper" },
+  { value: "kite", label: "Kite" },
+  {
+    value: "long",
+    label: "A deliberately long fictional project name that wraps without widening the page",
+  },
+];
+
+export function ComboboxExample() {
+  const [submitted, setSubmitted] = useState<string>();
+  return (
+    <form
+      className="grid gap-4"
+      onSubmit={(event) => {
+        event.preventDefault();
+        setSubmitted(String(new FormData(event.currentTarget).get("project") ?? ""));
+      }}
+      onReset={() => setSubmitted(undefined)}
+    >
+      <Field
+        label="Choose a project"
+        description="Fictional local options only; nothing is saved or sent."
+        required
+      >
+        <Combobox
+          name="project"
+          options={projectOptions}
+          defaultValue="cedar"
+          placeholder="Search projects"
+        />
+      </Field>
+      <div className="flex flex-wrap gap-2">
+        <Button type="submit">Inspect local FormData</Button>
+        <Button type="reset">Reset local choice</Button>
+      </div>
+      <p role="status">
+        {submitted === undefined
+          ? "No local submission yet."
+          : `Submitted project ID: ${submitted || "(none)"}`}
+      </p>
+    </form>
+  );
+}
+
+export function ControlledCombobox() {
+  const [project, setProject] = useState<string | null>("atlas");
+  return (
+    <form
+      className="grid gap-4"
+      onSubmit={(event) => event.preventDefault()}
+      onReset={() => setProject("atlas")}
+    >
+      <Field
+        label="Controlled project"
+        description="The app owns the selected ID and reset policy."
+      >
+        <Combobox
+          name="controlled-project"
+          options={projectOptions}
+          value={project}
+          onValueChange={setProject}
+        />
+      </Field>
+      <div className="flex flex-wrap gap-2">
+        <Button onClick={() => setProject("beacon")}>Select Beacon externally</Button>
+        <Button type="reset">Reset controlled choice</Button>
+      </div>
+      <p>Selected ID: {project ?? "(none)"}</p>
+    </form>
+  );
+}
+
+export function ComboboxStates() {
+  return (
+    <div className="grid gap-4">
+      <fieldset disabled>
+        <legend>Disabled native fieldset</legend>
+        <Field label="Unavailable project">
+          <Combobox options={projectOptions} defaultValue="cedar" />
+        </Field>
+      </fieldset>
+      <Field label="Read-only project">
+        <Combobox options={projectOptions} defaultValue="atlas" readOnly />
+      </Field>
+      <Field label="Invalid project" error="Example validation belongs to the application.">
+        <Combobox options={projectOptions} />
+      </Field>
+      <Field label="Empty option collection">
+        <Combobox options={[]} />
+      </Field>
+    </div>
+  );
+}
 
 export function PasswordFieldExample() {
   return (

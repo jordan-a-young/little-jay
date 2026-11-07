@@ -76,20 +76,29 @@ export const catalogPages: readonly CatalogRegistration[] = [
         : "status loading success error empty feedback",
     component: feedback,
   })),
-  ...["Checkbox", "Field", "Input", "NativeSelect", "PasswordField", "Switch", "Textarea"].map(
-    (title) => ({
-      id: title.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase(),
-      title,
-      group: "Components / Forms" as const,
-      keywords:
-        title === "PasswordField"
+  ...[
+    "Checkbox",
+    "Combobox",
+    "Field",
+    "Input",
+    "NativeSelect",
+    "PasswordField",
+    "Switch",
+    "Textarea",
+  ].map((title) => ({
+    id: title.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase(),
+    title,
+    group: "Components / Forms" as const,
+    keywords:
+      title === "Combobox"
+        ? "search selection options filter local form"
+        : title === "PasswordField"
           ? "password reveal show hide current new native form control"
           : title === "Switch"
             ? "toggle on off boolean native form control"
             : "label validation native form control",
-      component: forms,
-    }),
-  ),
+    component: forms,
+  })),
   ...[
     "Breadcrumb",
     "Card",

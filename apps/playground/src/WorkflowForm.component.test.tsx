@@ -80,6 +80,34 @@ describe("workflow validation feedback", () => {
     }
   });
 
+  it("composes pending activity with one status outside the busy form while retaining drafts", async () => {
+    await edit("name", "Pending draft");
+    const form = container.querySelector("form")!;
+    const submit = container.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    const status = container.querySelector('[role="status"]')!;
+    expect(status).not.toBeNull();
+    expect(status.closest("form")).toBeNull();
+    expect(status.textContent).toBe("");
+    await act(() => form.requestSubmit());
+    expect(form.getAttribute("aria-busy")).toBe("true");
+    expect(submit.disabled).toBe(true);
+    expect(submit.getAttribute("aria-label")).toBe("Validating configuration");
+    expect(submit.querySelector(".lj-loading-indicator")?.getAttribute("aria-hidden")).toBe("true");
+    expect(container.querySelectorAll('[role="status"], [role="alert"]')).toHaveLength(1);
+    expect(status.textContent).toBe("Validating configuration locally…");
+    expect(container.querySelector<HTMLInputElement>('[name="name"]')?.value).toBe("Pending draft");
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 450));
+    });
+    expect(form.getAttribute("aria-busy")).toBe("false");
+    expect(submit.disabled).toBe(false);
+    expect(submit.getAttribute("aria-label")).toBe("Validate configuration");
+    expect(container.querySelector('[role="status"]')).toBe(status);
+    expect(container.querySelectorAll('[role="status"], [role="alert"]')).toHaveLength(1);
+    expect(status.textContent).toContain("Configuration validated locally.");
+    expect(container.querySelector<HTMLInputElement>('[name="name"]')?.value).toBe("Pending draft");
+  });
+
   it("marks a successful validation outdated after edits and refreshes it on revalidation", async () => {
     await validate();
     expect(container.textContent).toContain("Configuration validated locally.");

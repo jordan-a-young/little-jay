@@ -54,6 +54,15 @@ describe("catalog scroll layout contract", () => {
     expect(rulesFor("catalog-search-empty")[0]).toMatch(/margin-block-start:\s*1\.5rem/);
   });
 
+  it("applies inset example-tab focus after the shell focus defaults", () => {
+    const defaults = stylesheet.indexOf(".catalog-shell :where");
+    const tabFocus = stylesheet.lastIndexOf(".catalog-example-tab:focus-visible");
+    expect(tabFocus).toBeGreaterThan(defaults);
+    expect(stylesheet.slice(tabFocus).match(/^[^{]*\{([^}]+)\}/)?.[1]).toMatch(
+      /outline-offset:\s*-3px/,
+    );
+  });
+
   it.each(["catalog-sidebar", "catalog-main"])(
     "hides %s scrollbars at rest without changing their width",
     (name) => {

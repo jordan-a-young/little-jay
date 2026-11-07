@@ -54,6 +54,7 @@ export {
 export type { FeedbackTone } from "./feedback/tone.js";
 export { Field, type FieldProps } from "./field/index.js";
 export { Input, type InputProps } from "./input/index.js";
+export { Combobox, type ComboboxProps, type ComboboxOption } from "./combobox/index.js";
 export { PasswordField, type PasswordFieldProps } from "./password-field/index.js";
 export { Textarea, type TextareaProps } from "./textarea/index.js";
 export { NativeSelect, type NativeSelectProps } from "./native-select/index.js";
