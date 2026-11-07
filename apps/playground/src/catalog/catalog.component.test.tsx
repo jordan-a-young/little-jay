@@ -307,7 +307,16 @@ describe("component catalog", () => {
         "PebbleState",
         "StatusIndicator",
       ],
-      ["Checkbox", "Field", "Input", "NativeSelect", "PasswordField", "Switch", "Textarea"],
+      [
+        "Checkbox",
+        "Combobox",
+        "Field",
+        "Input",
+        "NativeSelect",
+        "PasswordField",
+        "Switch",
+        "Textarea",
+      ],
       [
         "Breadcrumb",
         "Card",
@@ -370,6 +379,20 @@ describe("component catalog", () => {
       expect(fetch).not.toHaveBeenCalled();
     },
   );
+
+  it("renders the local Combobox example with a selected ID in native FormData", async () => {
+    await renderApp("#/combobox/default");
+    await vi.waitFor(() =>
+      expect(container.querySelector('.catalog-preview [role="combobox"]')).not.toBeNull(),
+    );
+    expect(container.querySelector("h1")?.textContent).toBe("Combobox");
+    const input = container.querySelector<HTMLInputElement>('.catalog-preview [role="combobox"]')!;
+    expect(input.value).toBe("Cedar");
+    expect(input.labels?.[0]?.textContent).toContain("Choose a project");
+    const form = container.querySelector<HTMLFormElement>(".catalog-preview form")!;
+    expect(new FormData(form).get("project")).toBe("cedar");
+    expect(fetch).not.toHaveBeenCalled();
+  });
 
   it("renders the local PasswordField example with a non-submit show/hide action and native reset", async () => {
     await renderApp("#/password-field/default");
@@ -681,10 +704,42 @@ describe("component catalog", () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 
-  it("preserves the selector, search, width and shell when changing examples and using history", async () => {
+  it("uses underline example tabs with named panels and no cached inactive previews", async () => {
     await renderApp("#/button");
     await vi.waitFor(() => expect(container.textContent).toContain("Clicks: 0"));
-    const selector = container.querySelector<HTMLSelectElement>(".catalog-document select")!;
+    const tablist = container.querySelector('[role="tablist"][aria-label="Examples"]');
+    expect(tablist).not.toBeNull();
+    const selected = tablist!.querySelector('[role="tab"][aria-selected="true"]')!;
+    expect(selected.textContent).toBe("Default / interactive");
+    const panel = document.getElementById(selected.getAttribute("aria-controls")!)!;
+    expect(panel.getAttribute("role")).toBe("tabpanel");
+    expect(panel.getAttribute("aria-labelledby")).toBe(selected.id);
+    expect(panel.querySelector(".catalog-preview")).not.toBeNull();
+    expect(panel.querySelector(".catalog-code")).not.toBeNull();
+    expect(container.querySelectorAll(".catalog-preview")).toHaveLength(1);
+    expect(
+      [...container.querySelectorAll("label")].map((label) => label.textContent),
+    ).not.toContain("Example");
+    await act(() => container.querySelector<HTMLButtonElement>(".catalog-preview button")!.click());
+    expect(container.textContent).toContain("Clicks: 1");
+    const tabs = [...tablist!.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    await act(() => tabs[1]!.click());
+    await vi.waitFor(() => expect(router.state.location.pathname).toBe("/button/variants"));
+    expect(panel.querySelector(".catalog-preview")).toBeNull();
+    expect(panel.hidden).toBe(true);
+    await act(() => tabs[0]!.click());
+    await vi.waitFor(() => expect(container.textContent).toContain("Clicks: 0"));
+    expect(container.querySelectorAll(".catalog-preview")).toHaveLength(1);
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("preserves example tabs, search, width and shell when changing examples and using history", async () => {
+    await renderApp("#/button");
+    await vi.waitFor(() => expect(container.textContent).toContain("Clicks: 0"));
+    const tablist = container.querySelector('[role="tablist"][aria-label="Examples"]')!;
+    const variants = [...tablist.querySelectorAll<HTMLButtonElement>('[role="tab"]')].find(
+      (tab) => tab.textContent === "Theme variants",
+    )!;
     const search = container.querySelector<HTMLInputElement>('input[type="search"]')!;
     await act(() => {
       Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(
@@ -693,14 +748,12 @@ describe("component catalog", () => {
       );
       search.dispatchEvent(new Event("input", { bubbles: true }));
     });
-    selector.focus();
-    await act(() => {
-      selector.value = "variants";
-      selector.dispatchEvent(new Event("change", { bubbles: true }));
-    });
+    await act(() => variants.focus());
+    await act(() => variants.click());
     await vi.waitFor(() => expect(router.state.location.pathname).toBe("/button/variants"));
-    expect(container.querySelector(".catalog-document select")).toBe(selector);
-    expect(document.activeElement).toBe(selector);
+    expect(container.querySelector('[role="tablist"][aria-label="Examples"]')).toBe(tablist);
+    expect(document.activeElement).toBe(variants);
+    expect(variants.getAttribute("aria-selected")).toBe("true");
     expect(search.value).toBe("button");
     await act(() =>
       router.navigate({ to: catalogRoutePath, params: { pageId: "input", exampleId: undefined } }),
@@ -711,6 +764,9 @@ describe("component catalog", () => {
     await act(() => router.history.back());
     await vi.waitFor(() => expect(container.querySelector("h1")?.textContent).toBe("Button"));
     expect(router.state.location.pathname).toBe("/button/variants");
+    expect(container.querySelector('[role="tab"][aria-selected="true"]')?.textContent).toBe(
+      "Theme variants",
+    );
     await act(() => router.history.forward());
     await vi.waitFor(() => expect(container.querySelector("h1")?.textContent).toBe("Input"));
     expect(fetch).not.toHaveBeenCalled();

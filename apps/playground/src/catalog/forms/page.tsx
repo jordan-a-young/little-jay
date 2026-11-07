@@ -14,6 +14,70 @@ const controlAccessibility = [
   "Use name for FormData. Disabled controls are omitted; preserve submitted drafts when using React Actions.",
 ];
 const documents: Record<string, CatalogDocument> = {
+  combobox: {
+    overview:
+      "Search a longer local option list and select one known value. React Aria supplies the interaction model; Little Jay supplies the input, Field integration and themed presentation. Requests, option data and selection policy stay application-owned.",
+    usage:
+      'import { Combobox, Field } from "@littlejay/ui";\nimport "@littlejay/ui/styles.css";\n\nconst projects = [{ value: "atlas", label: "Atlas" }, { value: "cedar", label: "Cedar" }];\n<Field label="Choose a project">\n  <Combobox name="project" options={projects} defaultValue="cedar" />\n</Field>',
+    props: [
+      {
+        name: "options",
+        type: "readonly ComboboxOption[]",
+        description:
+          "Known local options with string value/label and optional disabled. The query filters labels; no remote loading, freeform creation, grouping, multiple selection or virtualization is included.",
+      },
+      {
+        name: "value / defaultValue / onValueChange",
+        type: "string | null / (value: string | null) => void",
+        description:
+          "Selection is an option ID, not typed search text. Use value/onValueChange for controlled selection or defaultValue for an uncontrolled initial choice. Clearing selects null; uncommitted text is not a submitted choice.",
+      },
+      {
+        name: "Native input props, ref and Field",
+        type: "ComboboxProps",
+        description:
+          "Ref/className/style target the editable input. Field owns its ID, messages and default disabled/required/invalid flags. Name/form submit the selected ID rather than the visible label or query.",
+      },
+      {
+        name: "triggerLabel / clearLabel / emptyMessage",
+        type: "string",
+        description:
+          "Names for the built-in popup and clear controls, plus local no-results text. Values and labels are rendered as text, not HTML.",
+      },
+      {
+        name: "portalContainer",
+        type: "HTMLElement | null",
+        description:
+          "Optional popup portal destination for scoped themes or enclosing modal containers. Document-level themes inherit normally.",
+      },
+    ],
+    accessibility: [
+      "Use Field or explicit aria-label/aria-labelledby for the input's accessible name. The input controls a named listbox, retains DOM focus and exposes the active option without adding option tab stops.",
+      "Typing filters known options; arrows explore without committing, Enter selects, Escape dismisses and Tab leaves normally. Preserve native text editing, clipboard and IME composition behavior. Disabled options cannot be selected.",
+      "Uncontrolled native reset restores the initial selection; controlled reset remains app-owned. Cancelled/unrelated resets must not change selection. Disabled fieldsets keep the complete control inert and omitted from FormData.",
+      "Popup/empty/selected presentation is not authorization or server validation. NativeSelect remains preferable for sufficient small lists; existing Theme/Width controls are unchanged.",
+    ],
+    examples: [
+      {
+        id: "default",
+        title: "Local project search and native reset",
+        component: examples.ComboboxExample,
+        code: '<Field label="Choose a project" required>\n  <Combobox name="project" options={projects} defaultValue="cedar" />\n</Field>',
+      },
+      {
+        id: "controlled",
+        title: "Caller-owned selection and reset",
+        component: examples.ControlledCombobox,
+        code: 'const [project, setProject] = useState<string | null>("atlas");\n<Combobox aria-label="Controlled project" options={projects} value={project} onValueChange={setProject} />',
+      },
+      {
+        id: "states",
+        title: "Disabled, read-only, invalid and empty",
+        component: examples.ComboboxStates,
+        code: '<Field label="Unavailable project" disabled><Combobox options={projects} /></Field>\n<Field label="Read-only project"><Combobox options={projects} defaultValue="atlas" readOnly /></Field>\n<Field label="Invalid project" error="Example validation"><Combobox options={projects} /></Field>\n<Field label="Empty options"><Combobox options={[]} /></Field>',
+      },
+    ],
+  },
   "password-field": {
     overview:
       "A native password input composed from Input and a non-submit show/hide action. Only visibility is component-owned; values, validation, authentication and password policy remain application-owned.",

@@ -1,6 +1,15 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { Alert, Button, Checkbox, Field, Input, NativeSelect, Textarea } from "@littlejay/ui";
+import {
+  Alert,
+  Button,
+  Checkbox,
+  Field,
+  Input,
+  LoadingIndicator,
+  NativeSelect,
+  Textarea,
+} from "@littlejay/ui";
 import {
   initialWorkflowFormState,
   validateWorkflowForm,
@@ -15,8 +24,18 @@ async function validateExample(_previous: WorkflowFormState, data: FormData) {
 function SubmitExample() {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" disabled={pending}>
-      {pending ? "Validating…" : "Validate configuration"}
+    <Button
+      type="submit"
+      disabled={pending}
+      aria-label={pending ? "Validating configuration" : "Validate configuration"}
+      className="max-w-full"
+    >
+      <span className="workflow-submit-labels" aria-hidden="true">
+        <span data-active={!pending || undefined}>Validate configuration</span>
+        <span data-active={pending || undefined}>
+          <LoadingIndicator label="Validating…" aria-hidden="true" style={{ color: "inherit" }} />
+        </span>
+      </span>
     </Button>
   );
 }
@@ -128,20 +147,25 @@ export function WorkflowForm() {
         className="space-y-5"
       >
         <WorkflowFields state={state} editedFields={editedFields} />
-        {!pending &&
+      </form>
+      <div role="status" aria-atomic="true">
+        {pending ? (
+          <span className="sr-only">Validating configuration locally…</span>
+        ) : (
           state.status !== "idle" &&
           (editedFields.length > 0 ? (
-            <p role="status" className="text-sm text-muted">
+            <p className="text-sm text-muted">
               Configuration changed. Validate again to check the current draft.
             </p>
           ) : (
-            <Alert tone={state.status === "valid" ? "success" : "danger"}>
+            <Alert role="note" tone={state.status === "valid" ? "success" : "danger"}>
               {state.status === "valid"
                 ? "Configuration validated locally. No workflow was saved or started."
                 : "Check the highlighted fields. Your draft has been preserved."}
             </Alert>
-          ))}
-      </form>
+          ))
+        )}
+      </div>
     </section>
   );
 }

@@ -1,6 +1,4 @@
 import {
-  Field,
-  NativeSelect,
   Table,
   TableHeader,
   TableBody,
@@ -15,6 +13,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { catalogRoutePath } from "./navigation.js";
 import type { CatalogDocument, CatalogPageProps } from "./types.js";
 import { CatalogBreadcrumb } from "./CatalogBreadcrumb.js";
+import { ExampleTabs } from "./ExampleTabs.js";
 
 export function DocumentationPage({
   document,
@@ -37,43 +36,31 @@ export function DocumentationPage({
       </section>
       <section aria-labelledby="catalog-examples-title">
         <h2 id="catalog-examples-title">Examples</h2>
-        <Field label="Example">
-          <NativeSelect
-            value={example?.id ?? ""}
-            onChange={(event) => {
-              void navigate({
-                to: catalogRoutePath,
-                params: { pageId, exampleId: event.target.value },
-              });
-            }}
-          >
-            {!example && (
-              <option value="" disabled>
-                Unknown example
-              </option>
-            )}
-            {document.examples.map((candidate) => (
-              <option key={candidate.id} value={candidate.id}>
-                {candidate.title}
-              </option>
-            ))}
-          </NativeSelect>
-        </Field>
-        {Example && example ? (
-          <>
-            <PreviewFrame exampleId={example.id}>
-              <Example />
-            </PreviewFrame>
-            <CodeBlock
-              key={example.id}
-              code={example.code}
-              label="Example code"
-              language={example.language}
-            />
-          </>
-        ) : (
-          <p role="status">Example not found. Choose a named example above.</p>
-        )}
+        <ExampleTabs
+          examples={document.examples}
+          selectedId={example?.id}
+          onSelect={(nextId) => {
+            void navigate({
+              to: catalogRoutePath,
+              params: { pageId, exampleId: nextId },
+            });
+          }}
+        >
+          {Example && example ? (
+            <>
+              <PreviewFrame exampleId={example.id}>
+                <Example />
+              </PreviewFrame>
+              <CodeBlock
+                key={example.id}
+                code={example.code}
+                label="Example code"
+                language={example.language}
+              />
+            </>
+          ) : null}
+        </ExampleTabs>
+        {!example && <p role="status">Example not found. Choose a named example above.</p>}
       </section>
       <section aria-labelledby="catalog-usage-title">
         <h2 id="catalog-usage-title">Usage</h2>

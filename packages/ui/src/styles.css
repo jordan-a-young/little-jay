@@ -7,6 +7,7 @@
 @source "./button";
 @source "./alert";
 @source "./empty-state";
+@source "./pebble-state";
 @source "./status-indicator";
 @source "./feedback";
 @source "./field";
@@ -15,8 +16,110 @@
 @source "./textarea";
 @source "./native-select";
 @source "./checkbox";
+@source "./combobox";
 
 @layer components {
+  .lj-combobox {
+    min-width: 0;
+    position: relative;
+  }
+  .lj-combobox-group {
+    min-width: 0;
+    align-items: stretch;
+  }
+  .lj-combobox-group:not([hidden]) {
+    display: flex;
+  }
+  .lj-combobox-input {
+    flex: 0 1 auto;
+    min-height: 46px;
+  }
+  .lj-combobox-button {
+    box-sizing: border-box;
+    width: 44px;
+    flex: 0 0 44px;
+    margin-block: 1px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    border-radius: var(--lj-radius-control);
+    background: transparent;
+    color: var(--lj-primary);
+    font: inherit;
+    cursor: pointer;
+  }
+  .lj-combobox-clear {
+    margin-inline-start: -89px;
+  }
+  .lj-combobox-trigger {
+    margin-inline-end: 1px;
+  }
+  .lj-combobox-button:not([hidden]) {
+    display: inline-flex;
+  }
+  .lj-combobox-button:focus-visible {
+    outline: 2px solid var(--lj-primary);
+    outline-offset: -3px;
+  }
+  .lj-combobox-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+  .lj-combobox-popover {
+    box-sizing: border-box;
+    z-index: 60;
+    width: var(--trigger-width);
+    max-width: calc(100vw - 1rem);
+    border: 1px solid var(--lj-border);
+    border-radius: var(--lj-radius-control);
+    background: var(--lj-surface);
+    color: var(--lj-content);
+    font-family: var(--lj-font-sans);
+    box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 15%);
+  }
+  .lj-combobox-list {
+    box-sizing: border-box;
+    max-height: min(18rem, var(--available-height));
+    overflow: auto;
+    overscroll-behavior: contain;
+    margin: 0;
+    padding: 0.25rem;
+    outline: none;
+  }
+  .lj-combobox-option {
+    box-sizing: border-box;
+    min-height: 44px;
+    padding: 0.625rem 0.75rem;
+    border-radius: var(--lj-radius-control);
+    color: var(--lj-content);
+    overflow-wrap: anywhere;
+    cursor: default;
+    outline: none;
+  }
+  .lj-combobox-option[data-selected] {
+    font-weight: 600;
+    box-shadow: inset 3px 0 var(--lj-primary);
+  }
+  .lj-combobox-option[data-focused] {
+    background: var(--lj-primary);
+    color: var(--lj-on-primary);
+  }
+  .lj-combobox-option[data-disabled] {
+    opacity: 0.5;
+  }
+  .lj-combobox-empty {
+    display: block;
+    padding: 0.75rem;
+    color: var(--lj-muted);
+    overflow-wrap: anywhere;
+  }
+  .lj-form-control:not([hidden]) {
+    display: block;
+  }
+  .lj-status-indicator:not([hidden]) {
+    display: inline-flex;
+  }
   .lj-password-field {
     min-width: 0;
     flex-wrap: wrap;
@@ -138,7 +241,6 @@
   .lj-switch {
     appearance: none;
     box-sizing: border-box;
-    display: inline-block;
     vertical-align: middle;
     flex-shrink: 0;
     width: 2.75rem;
@@ -150,6 +252,9 @@
     background: var(--lj-surface);
     color: var(--lj-muted);
     cursor: pointer;
+  }
+  .lj-switch:not([hidden]) {
+    display: inline-block;
   }
   .lj-switch::before {
     content: "";
@@ -233,12 +338,14 @@
     display: none;
   }
   .lj-loading-indicator {
-    display: inline-flex;
     align-items: center;
     gap: 0.5rem;
     max-width: 100%;
     vertical-align: middle;
     color: var(--lj-primary);
+  }
+  .lj-loading-indicator:not([hidden]) {
+    display: inline-flex;
   }
   .lj-loading-indicator-spinner {
     box-sizing: border-box;
@@ -319,13 +426,15 @@
     border-radius: var(--lj-radius-control);
   }
   .lj-icon-button {
-    display: inline-flex;
     align-items: center;
     justify-content: center;
     box-sizing: border-box;
     width: 2.75rem;
     height: 2.75rem;
     flex-shrink: 0;
+  }
+  .lj-icon-button:not([hidden]) {
+    display: inline-flex;
   }
   .lj-icon-button > span {
     display: inline-flex;

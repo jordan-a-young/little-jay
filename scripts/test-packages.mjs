@@ -198,6 +198,36 @@ for (const name of ["brand", "tokens", "ui", "server", "http"]) {
         .map((file) => readFile(path.join(directory, "dist", file), "utf8")),
     );
     assert.match(modules.join("\n"), /from ["']react\/jsx-runtime["']/);
+    const stylesheet = await readFile(path.join(directory, "dist/styles.css"), "utf8");
+    const stylesheetRules = [...stylesheet.matchAll(/([^{}]+)\{([^{}]+)\}/g)];
+    for (const [className, display] of [
+      ["lj-form-control", "block"],
+      ["lj-switch", "inline-block"],
+      ["lj-loading-indicator", "inline-flex"],
+      ["lj-icon-button", "inline-flex"],
+      ["lj-status-indicator", "inline-flex"],
+    ]) {
+      assert.ok(
+        stylesheetRules.some(
+          ([, selectors, declarations]) =>
+            selectors
+              .split(",")
+              .some((selector) => selector.trim() === `.${className}:not([hidden])`) &&
+            new RegExp(`(?:^|;)\\s*display:\\s*${display}\\s*(?:;|$)`).test(declarations),
+        ),
+        `${className} must restore its default display only when shown`,
+      );
+    }
+    assert.ok(
+      stylesheetRules.some(
+        ([, selectors, declarations]) =>
+          selectors.split(",").some((selector) => selector.trim() === ".mb-3") &&
+          /(?:^|;)\s*margin-bottom:\s*calc\(var\(--spacing\)\s*\*\s*3\)\s*(?:;|$)/.test(
+            declarations,
+          ),
+      ),
+      "PebbleState illustration spacing must be included in packaged CSS",
+    );
   }
 }
 
@@ -248,6 +278,8 @@ import { LoadingIndicator, type LoadingIndicatorProps } from "@littlejay/ui/load
 import { ErrorBoundary } from "@littlejay/ui/error-boundary";
 import { Field } from "@littlejay/ui/field";
 import { Input, type InputProps } from "@littlejay/ui/input";
+import { Combobox, type ComboboxProps, type ComboboxOption } from "@littlejay/ui/combobox";
+import { Combobox as RootCombobox, type ComboboxProps as RootComboboxProps, type ComboboxOption as RootComboboxOption } from "@littlejay/ui";
 import { PasswordField, type PasswordFieldProps } from "@littlejay/ui/password-field";
 import { PasswordField as RootPasswordField, type PasswordFieldProps as RootPasswordFieldProps } from "@littlejay/ui";
 import { Textarea } from "@littlejay/ui/textarea";
@@ -280,6 +312,11 @@ type ServerResult = ReturnType<typeof createServer>;
 const serverTypecheck: ServerResult | FastifyInstance | undefined = undefined;
 void serverTypecheck;
 type Assert<Condition extends true> = Condition;
+type MatchingComboboxProps = Assert<RootComboboxProps extends ComboboxProps ? ComboboxProps extends RootComboboxProps ? true : false : false>;
+type MatchingComboboxOption = Assert<RootComboboxOption extends ComboboxOption ? ComboboxOption extends RootComboboxOption ? true : false : false>;
+type FixedComboboxInput = Assert<Extract<"type" | "role" | "onChange", keyof ComboboxProps> extends never ? true : false>;
+const comboboxContracts: [MatchingComboboxProps, MatchingComboboxOption, FixedComboboxInput] = [true, true, true];
+void comboboxContracts;
 type MatchingPasswordFieldProps = Assert<RootPasswordFieldProps extends PasswordFieldProps ? PasswordFieldProps extends RootPasswordFieldProps ? true : false : false>;
 type FixedPasswordType = Assert<Extract<"type", keyof PasswordFieldProps> extends never ? true : false>;
 const passwordFieldContracts: [MatchingPasswordFieldProps, FixedPasswordType] = [true, true];
@@ -333,6 +370,81 @@ const inputProps: InputProps = { autoComplete: "off", maxLength: 80 };
 function SubmitFields() {
   const { pending } = useFormStatus();
   return <SubpathButton type="submit" disabled={pending}>{pending ? "Saving fields…" : "Save fields"}</SubpathButton>;
+}
+function ExternalHiddenComponents() {
+  const [hidden, setHidden] = useState(true);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [actions, setActions] = useState(0);
+  return <section aria-label="External native hidden components" data-consumer-hidden data-theme={theme}>
+    <Button data-hidden-toggle onClick={() => setHidden(value => !value)}>{hidden ? "Show optional components" : "Hide optional components"}</Button>
+    <Button data-hidden-theme onClick={() => setTheme(value => value === "light" ? "dark" : "light")}>Use {theme === "light" ? "dark" : "light"} optional theme</Button>
+    <Button data-hidden-before>Before optional components</Button>
+    <Input data-hidden-component="input" hidden={hidden} aria-label="Optional name" defaultValue="Preserved optional draft" />
+    <Textarea data-hidden-component="textarea" hidden={hidden} aria-label="Optional notes" defaultValue="Local notes" />
+    <NativeSelect data-hidden-component="select" hidden={hidden} aria-label="Optional mode"><option>Plan</option><option>Review</option></NativeSelect>
+    <Switch data-hidden-component="switch" hidden={hidden} aria-label="Optional notifications" onChange={() => setActions(value => value + 1)} />
+    <IconButton data-hidden-component="icon" hidden={hidden} label="Optional action" onClick={() => setActions(value => value + 1)}>+</IconButton>
+    <LoadingIndicator data-hidden-component="loading" hidden={hidden} label="Optional activity" />
+    <StatusIndicator data-hidden-component="status" hidden={hidden}>Optional status</StatusIndicator>
+    <Button data-hidden-after>After optional components</Button>
+    <p role="status">Optional actions: {actions}</p>
+  </section>;
+}
+const validationProjectOptions: readonly ComboboxOption[] = [{value:"cedar",label:"Cedar"}];
+function ExternalComboboxValidation() {
+  const reference = useRef<HTMLInputElement>(null);
+  const [restriction, setRestriction] = useState("prop");
+  const [barred, setBarred] = useState(false);
+  const [selected, setSelected] = useState<string | null>(null);
+  return <section aria-label="External combobox validation">
+    <label htmlFor="validation-restriction">Validation restriction</label>
+    <select id="validation-restriction" value={restriction} onChange={event => setRestriction(event.target.value)}>
+      <option value="prop">Disabled prop</option><option value="fieldset">Disabled fieldset</option><option value="readonly">Read-only</option>
+    </select>
+    <form onSubmit={event => event.preventDefault()}>
+      <fieldset disabled={barred && restriction === "fieldset"}>
+        <Field label="Required validation project" required><Combobox ref={reference} options={validationProjectOptions} name="project" value={selected} onValueChange={setSelected} disabled={barred && restriction === "prop"} readOnly={barred && restriction === "readonly"} /></Field>
+      </fieldset>
+    </form>
+    <Button onClick={() => setBarred(true)}>Restrict validation</Button>
+    <Button onClick={() => setSelected("cedar")}>Set valid selection externally</Button>
+    <Button onClick={() => setBarred(false)}>Allow validation</Button>
+    <Button onClick={() => reference.current?.setCustomValidity("Application rejected this choice.")}>Set application validation error</Button>
+    <Button onClick={() => { reference.current?.setCustomValidity(""); setBarred(false); setSelected(null); }}>Reset validation scenario</Button>
+  </section>;
+}
+function ExternalComboboxes() {
+  const reference = useRef<HTMLInputElement>(null);
+  const [darkContainer, setDarkContainer] = useState<HTMLDivElement | null>(null);
+  const [modalContainer, setModalContainer] = useState<HTMLDivElement | null>(null);
+  const [selected, setSelected] = useState<string | null>("cedar");
+  const options: readonly ComboboxOption[] = [
+    {value: "atlas", label: "Atlas"},
+    {value: "beacon", label: "Beacon"},
+    {value: "cedar", label: "Cedar"},
+    {value: "disabled", label: "Unavailable project", disabled: true},
+    {value: "long", label: "A deliberately long fictional project label that wraps without overflowing the popup"},
+  ];
+  return <section aria-label="External comboboxes">
+    <form data-theme="light" data-consumer-combobox="light" onSubmit={event => event.preventDefault()}>
+      <Field label="Light local project" description="Fictional local options only."><Combobox ref={reference} name="project" options={options} defaultValue="cedar" /></Field>
+      <Button type="reset">Reset light project</Button>
+    </form>
+    <div data-theme="dark" data-consumer-combobox="dark" ref={setDarkContainer}>
+      <form onSubmit={event => event.preventDefault()} onReset={() => setSelected("cedar")}>
+        <Field label="Dark controlled project" error="Example message"><RootCombobox name="project" options={options} value={selected} onValueChange={setSelected} portalContainer={darkContainer} /></Field>
+        <Button type="reset">Reset dark project</Button>
+      </form>
+    </div>
+    <Button onClick={() => reference.current?.focus()}>Focus combobox ref</Button>
+    <div data-consumer-combobox="constrained"><Field label="Constrained project"><Combobox options={options} defaultValue="cedar" style={{ maxWidth: "24rem" }} /></Field></div>
+    <div data-consumer-combobox="fixed-rtl" dir="rtl"><Field label="RTL fixed-width project"><Combobox options={options} defaultValue="atlas" style={{ width: "18rem" }} /></Field></div>
+    <Dialog><DialogTrigger>Choose project in dialog</DialogTrigger><DialogContent title="Modal project choice" description="Local options; Escape dismisses suggestions before the dialog.">
+      <div ref={setModalContainer}><Field label="Modal project"><Combobox options={options} defaultValue="cedar" portalContainer={modalContainer} /></Field></div>
+    </DialogContent></Dialog>
+    <Field label="Disabled external project" disabled><Combobox options={options} defaultValue="atlas" /></Field>
+    <Combobox aria-label="Hidden external project" options={options} defaultValue="atlas" hidden />
+  </section>;
 }
 function ExternalPasswordFields() {
   const passwordReference = useRef<HTMLInputElement>(null);
@@ -404,7 +516,9 @@ function App() {
     <img src={logoLight} alt="Little Jay" width={275} height={75} />
     <div data-theme="dark"><img src={logoDark} alt="Little Jay on dark" width={275} height={75} /></div>
     <img src={pebblePng} alt="" width={128} height={128} />
-    <PebbleState {...{ state: "empty", heading: "No projects yet.", assetBaseUrl: "/branding/" } satisfies PebbleStateProps} />
+    {(["light", "dark"] as const).map(theme => <div key={theme} data-theme={theme} data-consumer-pebble={theme}>
+      <PebbleState {...{ state: "empty", heading: "No projects yet.", assetBaseUrl: "/branding/" } satisfies PebbleStateProps} />
+    </div>)}
     <form onSubmit={(event) => { event.preventDefault(); setSubmits(submits + 1); }}>
       <Button {...nativeProps} ref={ref} onClick={() => setClicks(clicks + 1)}>Count</Button>
       <SubpathButton type="submit">Submit</SubpathButton>
@@ -423,7 +537,10 @@ function App() {
       </div>)}
     </section>
     <NativeForm />
+    <ExternalHiddenComponents />
     <ExternalPasswordFields />
+    <ExternalComboboxes />
+    <ExternalComboboxValidation />
     <section aria-label="External breadcrumbs">
       {(["light", "dark"] as const).map(theme => {
         const Navigation = theme === "light" ? Breadcrumb : RootBreadcrumb;

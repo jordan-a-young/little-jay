@@ -15,6 +15,7 @@ export default defineConfig({
       "error-boundary": "src/error-boundary/index.tsx",
       field: "src/field/index.tsx",
       input: "src/input/index.tsx",
+      combobox: "src/combobox/index.tsx",
       "password-field": "src/password-field/index.tsx",
       textarea: "src/textarea/index.tsx",
       "native-select": "src/native-select/index.tsx",

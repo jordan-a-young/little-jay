@@ -2,6 +2,8 @@
 
 ESM React 19 components prepared for public npm distribution. React and React DOM `^19.0.0` are peer dependencies; use the same React installation as the application. Consume only the public exports in [package.json](package.json), not `src` or hashed build chunks. No CommonJS entry point is provided.
 
+OpenCode and Codex: have the consuming project's `AGENTS.md` explicitly request this installed README for UI tasks. See the [shared setup/template](https://github.com/jordan-a-young/little-jay/blob/main/docs/CONSUMER-AGENTS.md); installation alone does not activate agent instructions. Read [Optimization guidance](#optimization-guidance) before tuning application usage.
+
 ## Imports
 
 Root and component subpath imports expose the same components and types:
@@ -45,6 +47,39 @@ PebbleState needs application-served assets. Copy the state PNGs from the instal
 ## Application policy
 
 These components own presentation, not authentication, authorization, workflow transitions, network calls, caches, validation schemas, or routing. Disabled controls and accessibility attributes are not security boundaries. The application owns pending state, retries, draft preservation, reset behavior, and safe error reporting; ErrorBoundary is not a catch-all for asynchronous/event-handler failures.
+
+## Combobox
+
+`Combobox`, `ComboboxProps` and `ComboboxOption` are available from the root and `@littlejay/ui/combobox`. It is a searchable local single-select backed by React Aria Components. Keep NativeSelect for small lists that do not need search. Load the compiled stylesheet once:
+
+```tsx
+import { Combobox, Field } from "@littlejay/ui";
+import "@littlejay/ui/styles.css";
+
+const projects = [
+  { value: "atlas", label: "Atlas" },
+  { value: "cedar", label: "Cedar" },
+  { value: "unavailable", label: "Unavailable", disabled: true },
+];
+
+<Field label="Choose a project" required>
+  <Combobox name="project" options={projects} defaultValue="cedar" />
+</Field>;
+```
+
+Options are `readonly { value: string; label: string; disabled?: boolean }[]`. Values must be unique; labels must be nonblank. Duplicate labels are allowed. An empty string ID is distinct from no selection (`null`), although both serialize as an empty form value. Use `value` and `onValueChange: (value: string | null) => void` for caller-owned selection, or `defaultValue` for uncontrolled selection. The editable query is internal: it filters labels, never creates an option or becomes the submitted value. Unknown/removed IDs display no selection and serialize as empty; a disabled selected option stays visible but is omitted from FormData. No first-option fallback is added.
+
+The input, clear action and caret share one field border; input text reserves space for both icons. Typing filters, arrows explore, Enter selects, Escape restores the selected label and dismisses, and Tab commits a focused option or restores the label while leaving normally. The input retains focus during option navigation. Native editing, clipboard and IME handling remain available. Clear selects `null` and returns focus to the input; emptying the input also requests `null`. Only actual selection changes call `onValueChange`, not queries or native resets.
+
+Field owns the input ID, label, messages and default required/invalid/disabled flags; explicit flags override those defaults. Without Field, provide `aria-label` or `aria-labelledby`. Native input props, `ref`, `className` and `style` target the input, not the wrapper; selection/query/combobox ARIA attributes are reserved. Built-in non-submit actions have independent nonblank `triggerLabel` / `clearLabel` names (defaults “Show options” / “Clear selection”). `emptyMessage` defaults to “No matching options.” and `requiredMessage` to “Choose an available option.” Disabled controls/fieldsets are inert and omitted from FormData; read-only choices remain submitted but cannot be edited or cleared. `hidden` hides the complete composition and closes its popup.
+
+`name` and optional native `form` associate one hidden selected-ID input with the form; the visible label/query is not named. Required validation requires an available selection, not merely nonempty search text. Field errors remain accessibility/presentation flags rather than native custom errors. An uncancelled current-form reset restores the uncontrolled default and closes the popup without calling `onValueChange`; cancelled/unrelated resets retain selection/query. Controlled reset policy remains application-owned. Reset settles after event dispatch in a microtask and React's update: do not read FormData synchronously immediately after `form.reset()`; wait for the rendered reset state. Application/server validation remains necessary.
+
+The popup portals to the document by default. For subtree themes or an enclosing Dialog, pass an element inside that theme/modal as `portalContainer`; keep it mounted while the popup is open. Document-root themes inherit normally. Remote search, freeform creation, multi-select, grouping and virtualization are not included; option data, requests, announcements beyond the control's accessibility behavior and workflow policy remain caller-owned.
+
+When a controlled selection changes externally, its new label replaces any old search query. Ordinary rerenders with the same selection preserve typing. Input width/maxWidth constraints retain embedded icon alignment and determine popup width; use a shrinkable parent on narrow layouts.
+
+Inside the shared Dialog, the first Escape dismisses an open Combobox and restores its selected label while keeping modal focus and local drafts. A subsequent Escape follows normal Dialog dismissal; caller `onEscapeKeyDown` vetoes remain supported. Keep the popup's `portalContainer` inside the modal content.
 
 ## PasswordField
 
@@ -216,9 +251,18 @@ Horizontal Left/Right arrows wrap through enabled tabs (mirrored in RTL); Home/E
 
 Content mounts on first activation and stays mounted, hidden when inactive, while its item remains. Hidden content is removed from the keyboard/accessibility flow, but effects keep running: applications own pausing requests/timers and remeasuring canvases on visibility changes. Removing an item unmounts its content. No URL routing, graph-node selection, automatic activation, or responsive breakpoint policy is added. Styling requires the same compiled stylesheet and semantic theme as other components.
 
+## Optimization guidance
+
+- Reuse the public components before introducing another control/modal library. Root and subpath imports are supported; subpaths make dependencies explicit but do not guarantee a smaller bundle. Compare the consuming application's production output before claiming tree-shaking or size improvements. Preserve CSS side effects.
+- Import compiled `styles.css` once at the app entry. It already includes the default theme; do not install Tailwind, scan this package's source, add a second theme import, or rebuild the dependency just to render components. Change application styling through semantic tokens and app-owned CSS, not installed files.
+- Keep controlled state close to the affected controls; prefer native uncontrolled inputs when the application does not need per-keystroke state. Avoid copying props into state, effects for derived values, and blanket memoization. Profile a real interaction before adding memo/useMemo/useCallback or a global store; preserve form resets and drafts.
+- Tabs mounts each panel on first activation and retains visited panels. Hidden panels still run effects: pause application subscriptions, timers, queries and expensive visualizations when inactive, and remeasure on visibility changes. Do not assume hidden means unmounted or discard user state merely to reduce renders.
+- Scope data subscriptions and ErrorBoundary reset keys to the owning view, not a frequently changing event cursor. For large tables, measure rendering and use application-owned pagination/windowing only when justified; preserve native table semantics, names and keyboard access.
+- Compare production bundle/CSS size, React commit/render behavior, or interaction latency under the same workload as relevant. Optimization must retain accessible labels, focus/restoration, announcements, both themes, narrow layouts and reduced motion; disabled UI is never authorization.
+
 ## Verification
 
-Use your consuming application's checks. Exercise affected keyboard/focus flows, form behavior, both themes, narrow layouts, and reduced motion where relevant. Verify production CSS and asset base paths, not just a workspace preview. Do not rebuild this dependency merely to iterate on application UI. Source-checkout maintainer commands and catalog examples live in the private source repository (`AGENTS.md`, `apps/playground`, and `docs/`); they are not installed-package instructions.
+Use your consuming application's checks. Exercise affected keyboard/focus flows, form behavior, both themes, narrow layouts, and reduced motion where relevant. Verify production CSS and asset base paths, not just a workspace preview. Do not rebuild this dependency merely to iterate on application UI. Source-checkout maintainer commands and catalog examples live in the source repository (`AGENTS.md`, `apps/playground`, and `docs/`); they are not installed-package instructions.
 
 ## License
 

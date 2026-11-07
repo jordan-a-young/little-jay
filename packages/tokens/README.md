@@ -2,6 +2,8 @@
 
 Framework-independent CSS theme tokens prepared for public npm distribution. No React, JavaScript runtime entry point, or global reset is required. Public CSS/JSON subpaths are listed in [package.json](package.json); there is no root JavaScript import.
 
+OpenCode and Codex: have the consuming project's `AGENTS.md` explicitly request this installed README for theme tasks. See the [shared setup/template](https://github.com/jordan-a-young/little-jay/blob/main/docs/CONSUMER-AGENTS.md); installation alone does not activate agent instructions.
+
 ## Imports
 
 ```css
@@ -26,9 +28,15 @@ Use a bundler that resolves package CSS imports, or copy the exported stylesheet
 
 Preserve foreground/background pairs and verify contrast in both themes after overrides. Tokens alone do not guarantee accessible names, focus behavior, semantics, reduced motion, or contrast for arbitrary combinations. Do not communicate status only by color.
 
+## Optimization guidance
+
+- Use CSS custom properties and `data-theme` scopes rather than duplicating palette values in JavaScript state or generating per-component inline themes. Keep preference selection/persistence app-owned; changing a theme does not require rerendering every component to pass color props.
+- Load the theme once: standalone apps use `theme.css`, while `@littlejay/ui/styles.css` already includes it. Add the Tailwind mapping only to an existing Tailwind 4 build that needs those utilities. Do not add React, Tailwind or a runtime styling library just to consume tokens.
+- Override semantic properties in application CSS instead of forking the palette or editing installed/generated files. Compare production CSS size and theme-switch rendering when optimizing; preserve nested scopes and foreground/background contrast in both themes.
+
 ## Application policy and verification
 
-Tokens own presentation values, not theme preference storage, routing, network calls, or application policy. Use your application's production CSS build and test actual themed/nested layouts, keyboard focus, contrast, and narrow viewports. Do not hand-edit installed/generated token files to change application behavior. The private source repository's `docs/BRANDING.md` describes maintainer generation; it is not shipped here.
+Tokens own presentation values, not theme preference storage, routing, network calls, or application policy. Use your application's production CSS build and test actual themed/nested layouts, keyboard focus, contrast, and narrow viewports. Do not hand-edit installed/generated token files to change application behavior. The source repository's `docs/BRANDING.md` describes maintainer generation; it is not shipped here.
 
 ## License
 

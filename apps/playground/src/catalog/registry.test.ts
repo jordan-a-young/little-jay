@@ -24,6 +24,7 @@ describe("catalog registry and links", () => {
       "pebble-state",
       "status-indicator",
       "checkbox",
+      "combobox",
       "field",
       "input",
       "native-select",
@@ -55,7 +56,7 @@ describe("catalog registry and links", () => {
     ]);
   });
   it("has stable unique pages for all foundations, components, and patterns", () => {
-    expect(catalogPages).toHaveLength(29);
+    expect(catalogPages).toHaveLength(30);
     expect(new Set(catalogPages.map((page) => page.id)).size).toBe(catalogPages.length);
     expect(catalogPages.some((page) => page.id === "native-select")).toBe(true);
   });
@@ -70,6 +71,7 @@ describe("catalog registry and links", () => {
     expect(filterCatalog("columns").map((page) => page.id)).toEqual(["table"]);
     expect(filterCatalog("ancestors").map((page) => page.id)).toEqual(["breadcrumb"]);
     expect(filterCatalog("reveal").map((page) => page.id)).toEqual(["password-field"]);
+    expect(filterCatalog("filter local").map((page) => page.id)).toEqual(["combobox"]);
     expect(filterCatalog("no such component")).toEqual([]);
     expect(filterCatalog("")).toHaveLength(catalogPages.length);
   });

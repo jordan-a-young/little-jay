@@ -37,6 +37,11 @@
       "development": "./src/input/index.tsx",
       "import": "./dist/input.js"
     },
+    "./combobox": {
+      "types": "./dist/combobox.d.ts",
+      "development": "./src/combobox/index.tsx",
+      "import": "./dist/combobox.js"
+    },
     "./password-field": {
       "types": "./dist/password-field.d.ts",
       "development": "./src/password-field/index.tsx",
@@ -154,7 +159,8 @@
   "dependencies": {
     "@littlejay/brand": "workspace:*",
     "@littlejay/tokens": "workspace:*",
-    "@radix-ui/react-dialog": "1.3.1"
+    "@radix-ui/react-dialog": "1.3.1",
+    "react-aria-components": "1.22.1"
   },
   "devDependencies": {
     "@tailwindcss/cli": "4.3.4",

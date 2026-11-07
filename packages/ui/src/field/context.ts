@@ -2,6 +2,7 @@ import { createContext, use, type AriaAttributes } from "react";
 
 export interface FieldContextValue {
   controlId: string;
+  labelId: string;
   descriptionId?: string;
   errorId?: string;
   invalid: boolean;
