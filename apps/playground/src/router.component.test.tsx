@@ -89,6 +89,14 @@ describe("catalog routing compatibility", () => {
     expect(container.querySelector('a[aria-current="page"]')?.getAttribute("href")).toBe(
       "/little-jay/?preview=1#/pebble-state",
     );
+    await vi.waitFor(() =>
+      expect(container.querySelector('nav[aria-label="Breadcrumb"]')).not.toBeNull(),
+    );
+    expect(
+      Array.from(container.querySelectorAll('nav[aria-label="Breadcrumb"] a'), (link) =>
+        link.getAttribute("href"),
+      ),
+    ).toEqual(["/little-jay/?preview=1#/introduction", "/little-jay/?preview=1#/pebble-state"]);
     await act(async () => {
       window.location.hash = "#/button/disabled";
     });

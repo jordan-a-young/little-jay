@@ -1,5 +1,37 @@
 export { Button, type ButtonProps, type ButtonVariant } from "./button/index.js";
 export {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbSeparator,
+  BreadcrumbPage,
+  type BreadcrumbProps,
+  type BreadcrumbListProps,
+  type BreadcrumbItemProps,
+  type BreadcrumbSeparatorProps,
+  type BreadcrumbPageProps,
+} from "./breadcrumb/index.js";
+export {
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableRow,
+  TableHead,
+  TableCell,
+  TableCaption,
+  TableScroll,
+  type TableProps,
+  type TableHeaderProps,
+  type TableBodyProps,
+  type TableFooterProps,
+  type TableRowProps,
+  type TableHeadProps,
+  type TableCellProps,
+  type TableCaptionProps,
+  type TableScrollProps,
+} from "./table/index.js";
+export {
   Card,
   CardHeader,
   CardContent,
@@ -22,6 +54,7 @@ export {
 export type { FeedbackTone } from "./feedback/tone.js";
 export { Field, type FieldProps } from "./field/index.js";
 export { Input, type InputProps } from "./input/index.js";
+export { PasswordField, type PasswordFieldProps } from "./password-field/index.js";
 export { Textarea, type TextareaProps } from "./textarea/index.js";
 export { NativeSelect, type NativeSelectProps } from "./native-select/index.js";
 export { Checkbox, type CheckboxProps } from "./checkbox/index.js";

@@ -1,9 +1,20 @@
-import { Field, NativeSelect } from "@littlejay/ui";
+import {
+  Field,
+  NativeSelect,
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+  TableScroll,
+} from "@littlejay/ui";
 import { CodeBlock } from "./CodeBlock.js";
 import { PreviewFrame } from "../shell/PreviewFrame.js";
 import { useNavigate } from "@tanstack/react-router";
 import { catalogRoutePath } from "./navigation.js";
 import type { CatalogDocument, CatalogPageProps } from "./types.js";
+import { CatalogBreadcrumb } from "./CatalogBreadcrumb.js";
 
 export function DocumentationPage({
   document,
@@ -17,6 +28,10 @@ export function DocumentationPage({
   const Example = example?.component;
   return (
     <div className="catalog-document">
+      <CatalogBreadcrumb
+        pageId={pageId}
+        {...(exampleId ? { exampleTitle: example?.title ?? "Example not found" } : {})}
+      />
       <section aria-label="Overview">
         <p>{document.overview}</p>
       </section>
@@ -72,30 +87,30 @@ export function DocumentationPage({
       <section aria-labelledby="catalog-props-title">
         <h2 id="catalog-props-title">{document.props.length ? "Props" : "Notes"}</h2>
         {document.props.length ? (
-          <div className="catalog-table-scroll" tabIndex={0} role="region" aria-label="Props table">
-            <table>
-              <thead>
-                <tr>
-                  <th scope="col">Prop</th>
-                  <th scope="col">Type / default</th>
-                  <th scope="col">Description</th>
-                </tr>
-              </thead>
-              <tbody>
+          <TableScroll aria-label="Props table">
+            <Table className="catalog-props-table">
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Prop</TableHead>
+                  <TableHead>Type / default</TableHead>
+                  <TableHead>Description</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {document.props.map((prop) => (
-                  <tr key={prop.name}>
-                    <th scope="row">
+                  <TableRow key={prop.name}>
+                    <TableHead scope="row">
                       <code>{prop.name}</code>
-                    </th>
-                    <td>
+                    </TableHead>
+                    <TableCell>
                       <code>{prop.type}</code>
-                    </td>
-                    <td>{prop.description}</td>
-                  </tr>
+                    </TableCell>
+                    <TableCell>{prop.description}</TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </TableBody>
+            </Table>
+          </TableScroll>
         ) : (
           <p>This is an application guide or pattern, not a separate library component.</p>
         )}

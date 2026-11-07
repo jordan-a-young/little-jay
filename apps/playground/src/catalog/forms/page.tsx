@@ -14,6 +14,65 @@ const controlAccessibility = [
   "Use name for FormData. Disabled controls are omitted; preserve submitted drafts when using React Actions.",
 ];
 const documents: Record<string, CatalogDocument> = {
+  "password-field": {
+    overview:
+      "A native password input composed from Input and a non-submit show/hide action. Only visibility is component-owned; values, validation, authentication and password policy remain application-owned.",
+    usage:
+      'import { Field, PasswordField } from "@littlejay/ui";\nimport "@littlejay/ui/styles.css";\n\n<Field label="Password">\n  <PasswordField name="password" autoComplete="current-password" />\n</Field>',
+    props: [
+      nativeProps,
+      {
+        name: "type",
+        type: 'Fixed: "password" or "text" from local visibility',
+        description:
+          "Starts masked. The same input node, value, name and Field associations survive toggling. Native type override is not accepted.",
+      },
+      {
+        name: "showLabel / hideLabel",
+        type: 'string / "Show password" / "Hide password"',
+        description:
+          "Nonblank visible action labels. The changing action name and aria-controls identify the toggle; it does not combine changing text with aria-pressed.",
+      },
+      {
+        name: "autoComplete",
+        type: 'Native string; caller chooses "current-password" or "new-password"',
+        description:
+          "Password-manager/autofill intent is app-owned. No default, blocking of paste, logging, persistence, strength scoring or authentication request is added.",
+      },
+      {
+        name: "ref / className / hidden",
+        type: "Native input props",
+        description:
+          "Ref and className target the input. Hidden hides the entire composed control. Disabled defaults follow Field; disabled fieldsets keep both controls natively inert.",
+      },
+    ],
+    accessibility: [
+      "Provide a label using Field or a native label. Field labels/IDs/messages/required/invalid state belong to the input; the auxiliary button has its own action name.",
+      "Tab reaches the input and enabled reveal button. Native Enter/Space on the button changes visibility without submitting. Read-only inputs may still be revealed. There is no automatic focus movement; selection is retained across type changes.",
+      "An uncancelled native form reset restores uncontrolled defaults and re-masks the field. Controlled value/reset handling remains app-owned; cancelling reset preserves visibility. Explicit external form association is supported.",
+      ...controlAccessibility,
+    ],
+    examples: [
+      {
+        id: "default",
+        title: "Local password visibility and native reset",
+        component: examples.PasswordFieldExample,
+        code: '<form onSubmit={(event) => event.preventDefault()}>\n  <Field label="Example password"><PasswordField name="example-password" autoComplete="current-password" /></Field>\n  <Button type="reset">Reset local example</Button>\n</form>',
+      },
+      {
+        id: "controlled",
+        title: "Caller-owned new-password value",
+        component: examples.ControlledPasswordField,
+        code: 'const [password, setPassword] = useState("");\n<PasswordField aria-label="New example password" autoComplete="new-password" value={password} onChange={(event) => setPassword(event.currentTarget.value)} />',
+      },
+      {
+        id: "states",
+        title: "Disabled, read-only and invalid",
+        component: examples.PasswordFieldStates,
+        code: '<Field label="Unavailable example password" disabled><PasswordField /></Field>\n<Field label="Read-only example password"><PasswordField readOnly /></Field>\n<Field label="Invalid example password" error="Example validation message"><PasswordField /></Field>',
+      },
+    ],
+  },
   switch: {
     overview:
       "An on/off control with switch semantics and native checkbox behavior. State changes are local unless the application connects them to an action.",

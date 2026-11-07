@@ -248,6 +248,8 @@ import { LoadingIndicator, type LoadingIndicatorProps } from "@littlejay/ui/load
 import { ErrorBoundary } from "@littlejay/ui/error-boundary";
 import { Field } from "@littlejay/ui/field";
 import { Input, type InputProps } from "@littlejay/ui/input";
+import { PasswordField, type PasswordFieldProps } from "@littlejay/ui/password-field";
+import { PasswordField as RootPasswordField, type PasswordFieldProps as RootPasswordFieldProps } from "@littlejay/ui";
 import { Textarea } from "@littlejay/ui/textarea";
 import { NativeSelect } from "@littlejay/ui/native-select";
 import { Checkbox } from "@littlejay/ui/checkbox";
@@ -261,7 +263,11 @@ import { Dialog, DialogTrigger, DialogContent, DialogClose, type DialogProps, ty
 import { Tabs, type TabsProps, type TabsItem } from "@littlejay/ui/tabs";
 import { Tabs as RootTabs, type TabsProps as RootTabsProps, type TabsItem as RootTabsItem } from "@littlejay/ui";
 import { Card, CardHeader, CardContent, CardFooter, type CardProps, type CardHeaderProps, type CardContentProps, type CardFooterProps } from "@littlejay/ui/card";
+import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbSeparator, BreadcrumbPage, type BreadcrumbProps, type BreadcrumbListProps, type BreadcrumbItemProps, type BreadcrumbSeparatorProps, type BreadcrumbPageProps } from "@littlejay/ui/breadcrumb";
+import { Breadcrumb as RootBreadcrumb, BreadcrumbList as RootBreadcrumbList, BreadcrumbItem as RootBreadcrumbItem, BreadcrumbSeparator as RootBreadcrumbSeparator, BreadcrumbPage as RootBreadcrumbPage, type BreadcrumbProps as RootBreadcrumbProps, type BreadcrumbListProps as RootBreadcrumbListProps, type BreadcrumbItemProps as RootBreadcrumbItemProps, type BreadcrumbSeparatorProps as RootBreadcrumbSeparatorProps, type BreadcrumbPageProps as RootBreadcrumbPageProps } from "@littlejay/ui";
 import { Card as RootCard, CardHeader as RootCardHeader, CardContent as RootCardContent, CardFooter as RootCardFooter, type CardProps as RootCardProps, type CardHeaderProps as RootCardHeaderProps, type CardContentProps as RootCardContentProps, type CardFooterProps as RootCardFooterProps } from "@littlejay/ui";
+import { Table, TableHeader, TableBody, TableFooter, TableRow, TableHead, TableCell, TableCaption, TableScroll, type TableProps, type TableHeaderProps, type TableBodyProps, type TableFooterProps, type TableRowProps, type TableHeadProps, type TableCellProps, type TableCaptionProps, type TableScrollProps } from "@littlejay/ui/table";
+import { Table as RootTable, TableHeader as RootTableHeader, TableBody as RootTableBody, TableFooter as RootTableFooter, TableRow as RootTableRow, TableHead as RootTableHead, TableCell as RootTableCell, TableCaption as RootTableCaption, TableScroll as RootTableScroll, type TableProps as RootTableProps, type TableHeaderProps as RootTableHeaderProps, type TableBodyProps as RootTableBodyProps, type TableFooterProps as RootTableFooterProps, type TableRowProps as RootTableRowProps, type TableHeadProps as RootTableHeadProps, type TableCellProps as RootTableCellProps, type TableCaptionProps as RootTableCaptionProps, type TableScrollProps as RootTableScrollProps } from "@littlejay/ui";
 import { fetchJson, HttpError, type FetchJsonOptions, type HttpErrorCode } from "@littlejay/http";
 import type { HealthRoutesOptions, SafeErrorResponse, healthRoutes, safeErrorsPlugin } from "@littlejay/server";
 import logoLight from "@littlejay/brand/logos/lockup-light.svg";
@@ -274,6 +280,23 @@ type ServerResult = ReturnType<typeof createServer>;
 const serverTypecheck: ServerResult | FastifyInstance | undefined = undefined;
 void serverTypecheck;
 type Assert<Condition extends true> = Condition;
+type MatchingPasswordFieldProps = Assert<RootPasswordFieldProps extends PasswordFieldProps ? PasswordFieldProps extends RootPasswordFieldProps ? true : false : false>;
+type FixedPasswordType = Assert<Extract<"type", keyof PasswordFieldProps> extends never ? true : false>;
+const passwordFieldContracts: [MatchingPasswordFieldProps, FixedPasswordType] = [true, true];
+void passwordFieldContracts;
+type SubpathBreadcrumbContracts = [BreadcrumbProps, BreadcrumbListProps, BreadcrumbItemProps, BreadcrumbSeparatorProps, BreadcrumbPageProps];
+type RootBreadcrumbContracts = [RootBreadcrumbProps, RootBreadcrumbListProps, RootBreadcrumbItemProps, RootBreadcrumbSeparatorProps, RootBreadcrumbPageProps];
+type MatchingBreadcrumbContracts = Assert<RootBreadcrumbContracts extends SubpathBreadcrumbContracts ? SubpathBreadcrumbContracts extends RootBreadcrumbContracts ? true : false : false>;
+type FixedBreadcrumbSemantics = Assert<Extract<"aria-hidden", keyof BreadcrumbSeparatorProps> | Extract<"aria-current", keyof BreadcrumbPageProps> extends never ? true : false>;
+const breadcrumbContracts: [MatchingBreadcrumbContracts, FixedBreadcrumbSemantics] = [true, true];
+void breadcrumbContracts;
+type SubpathTableContracts = [TableProps, TableHeaderProps, TableBodyProps, TableFooterProps, TableRowProps, TableHeadProps, TableCellProps, TableCaptionProps, TableScrollProps];
+type RootTableContracts = [RootTableProps, RootTableHeaderProps, RootTableBodyProps, RootTableFooterProps, RootTableRowProps, RootTableHeadProps, RootTableCellProps, RootTableCaptionProps, RootTableScrollProps];
+type MatchingTableContracts = Assert<RootTableContracts extends SubpathTableContracts ? SubpathTableContracts extends RootTableContracts ? true : false : false>;
+type NamedTableScroll = Assert<{} extends TableScrollProps ? false : true>;
+type FixedTableScrollSemantics = Assert<Extract<"role" | "tabIndex", keyof TableScrollProps> extends never ? true : false>;
+const tableContracts: [MatchingTableContracts, NamedTableScroll, FixedTableScrollSemantics] = [true, true, true];
+void tableContracts;
 type MatchingCardContracts = Assert<[RootCardProps, RootCardHeaderProps, RootCardContentProps, RootCardFooterProps] extends [CardProps, CardHeaderProps, CardContentProps, CardFooterProps] ? [CardProps, CardHeaderProps, CardContentProps, CardFooterProps] extends [RootCardProps, RootCardHeaderProps, RootCardContentProps, RootCardFooterProps] ? true : false : false>;
 const matchingCardContracts: MatchingCardContracts = true;
 void matchingCardContracts;
@@ -310,6 +333,23 @@ const inputProps: InputProps = { autoComplete: "off", maxLength: 80 };
 function SubmitFields() {
   const { pending } = useFormStatus();
   return <SubpathButton type="submit" disabled={pending}>{pending ? "Saving fields…" : "Save fields"}</SubpathButton>;
+}
+function ExternalPasswordFields() {
+  const passwordReference = useRef<HTMLInputElement>(null);
+  return <section aria-label="External password fields">
+    {(["light", "dark"] as const).map(theme => {
+      const PasswordInput = theme === "light" ? PasswordField : RootPasswordField;
+      return <form key={theme} data-theme={theme} data-consumer-password={theme} onSubmit={event => event.preventDefault()}>
+        <Field label={theme + " example password"} description="Synthetic only; do not enter real credentials." error={theme === "dark" ? "Example validation message" : undefined}>
+          <PasswordInput ref={theme === "light" ? passwordReference : undefined} name="password" autoComplete="current-password" defaultValue="sample-only" showLabel={theme === "dark" ? "Show this synthetic password with a deliberately long action label" : "Show light password"} hideLabel={theme === "dark" ? "Hide this synthetic password with a deliberately long action label" : "Hide light password"} />
+        </Field>
+        <Button type="reset">Reset {theme} password example</Button>
+      </form>;
+    })}
+    <Button onClick={() => passwordReference.current?.focus()}>Focus password ref</Button>
+    <Field label="Disabled external password" disabled><PasswordField defaultValue="sample-only" /></Field>
+    <PasswordField aria-label="Hidden external password" defaultValue="sample-only" hidden />
+  </section>;
 }
 function NativeForm() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -360,7 +400,7 @@ function App() {
   const [focused, setFocused] = useState(false);
   const [broken, setBroken] = useState(false);
   return <>
-    <h1>External package consumer</h1>
+    <h1 id="consumer-home">External package consumer</h1>
     <img src={logoLight} alt="Little Jay" width={275} height={75} />
     <div data-theme="dark"><img src={logoDark} alt="Little Jay on dark" width={275} height={75} /></div>
     <img src={pebblePng} alt="" width={128} height={128} />
@@ -383,6 +423,48 @@ function App() {
       </div>)}
     </section>
     <NativeForm />
+    <ExternalPasswordFields />
+    <section aria-label="External breadcrumbs">
+      {(["light", "dark"] as const).map(theme => {
+        const Navigation = theme === "light" ? Breadcrumb : RootBreadcrumb;
+        const List = theme === "light" ? BreadcrumbList : RootBreadcrumbList;
+        const Item = theme === "light" ? BreadcrumbItem : RootBreadcrumbItem;
+        const Separator = theme === "light" ? BreadcrumbSeparator : RootBreadcrumbSeparator;
+        const Page = theme === "light" ? BreadcrumbPage : RootBreadcrumbPage;
+        return <div key={theme} data-theme={theme}>
+          <Navigation aria-label={theme + " consumer breadcrumb"} data-consumer-breadcrumb={theme}>
+            <List>
+              <Item><a href="#consumer-home">Consumer home</a></Item>
+              <Item hidden data-consumer-hidden-crumb><Separator /><a href="#consumer-home">Hidden ancestor</a></Item>
+              <Item><Separator /><Page>{"long-current-consumer-location-".repeat(10)}</Page></Item>
+            </List>
+          </Navigation>
+        </div>;
+      })}
+    </section>
+    <section aria-label="External tables">
+      {(["light", "dark"] as const).map(theme => {
+        const NativeTable = theme === "light" ? Table : RootTable;
+        const Header = theme === "light" ? TableHeader : RootTableHeader;
+        const Body = theme === "light" ? TableBody : RootTableBody;
+        const Footer = theme === "light" ? TableFooter : RootTableFooter;
+        const Row = theme === "light" ? TableRow : RootTableRow;
+        const Head = theme === "light" ? TableHead : RootTableHead;
+        const Cell = theme === "light" ? TableCell : RootTableCell;
+        const Caption = theme === "light" ? TableCaption : RootTableCaption;
+        const Scroll = theme === "light" ? TableScroll : RootTableScroll;
+        return <div key={theme} data-theme={theme}>
+          <Scroll aria-label={theme + " draft table"} data-consumer-table={theme}>
+            <NativeTable style={{ minWidth: "36rem" }}>
+              <Caption>External {theme} drafts</Caption>
+              <Header><Row><Head>Draft</Head><Head>State</Head><Head>Action</Head></Row></Header>
+              <Body><Row><Head scope="row">{"long-consumer-table-value-".repeat(8)}</Head><Cell>Local only</Cell><Cell><Button onClick={() => setClicks(count => count + 1)}>Count inside {theme} Table</Button></Cell></Row></Body>
+              <Footer><Row><Cell colSpan={3}>1 local draft</Cell></Row></Footer>
+            </NativeTable>
+          </Scroll>
+        </div>;
+      })}
+    </section>
     <section aria-label="External cards">
       {(["light", "dark"] as const).map(theme => {
         const Surface = theme === "light" ? Card : RootCard;

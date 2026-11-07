@@ -81,6 +81,9 @@ body {
   scrollbar-gutter: stable;
   scrollbar-color: transparent transparent;
   width: 100%;
+}
+.catalog-main-content {
+  width: 100%;
   max-width: 80rem;
   margin-inline: auto;
   padding: 2rem clamp(1rem, 3vw, 3rem);
@@ -231,7 +234,7 @@ body {
   padding-left: 1.25rem;
   list-style: disc;
 }
-.catalog-document li + li {
+.catalog-document > section > ul > li + li {
   margin-top: 0.5rem;
 }
 .catalog-preview-track {
@@ -340,25 +343,9 @@ body {
   border-top: 1px solid var(--lj-border);
   font-size: 0.8125rem;
 }
-.catalog-table-scroll {
-  max-width: 100%;
-  overflow-x: auto;
-  border: 1px solid var(--lj-border);
-  border-radius: var(--lj-radius-control);
-}
-.catalog-document table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.875rem;
-  text-align: left;
-}
-.catalog-document th,
-.catalog-document td {
+.catalog-props-table .lj-table-head,
+.catalog-props-table .lj-table-cell {
   min-width: 9rem;
-  padding: 0.75rem;
-  border-bottom: 1px solid var(--lj-border);
-  vertical-align: top;
-  overflow-wrap: anywhere;
 }
 .catalog-document a {
   color: var(--lj-primary);
@@ -418,7 +405,7 @@ body {
     padding: 1rem 0.5rem;
     font-size: 0.875rem;
   }
-  .catalog-main {
+  .catalog-main-content {
     padding: 1rem 0.75rem;
   }
   .catalog-preview-track,

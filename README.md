@@ -195,7 +195,7 @@ Prefer native controls and React 19 Actions, `useActionState`, and `useFormStatu
 
 Use `@littlejay/http` for bounded decoded JSON over `fetch` on both client and server. TanStack React Query owns client request caching, invalidation, and query lifecycle. Existing OpenAPI clients and application-specific schemas stay in their owning applications. TypeBox now validates the local `/api/text-preview` example; it does not establish shared domain schemas.
 
-Next priorities are recorded in [the roadmap](docs/ROADMAP.md). Track requested improvements, investigations, and potential additions in the [backlog](docs/BACKLOG.md); entries are planned work, not implemented features or changes to Graph Workbench.
+Next priorities are recorded in [the roadmap](docs/ROADMAP.md). Track non-sensitive requested improvements, investigations, and potential additions in [GitHub Issues](https://github.com/jordan-a-young/little-jay/issues); entries are planned work, not implemented features or changes to Graph Workbench. The [local backlog archive](docs/BACKLOG.md) retains completed evidence, verified migration mappings, and explicitly excluded local entries. Security-sensitive work requires a safe reporting channel, not an ordinary issue.
 
 ## Themes
 

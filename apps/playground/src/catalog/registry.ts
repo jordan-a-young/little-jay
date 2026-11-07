@@ -76,30 +76,46 @@ export const catalogPages: readonly CatalogRegistration[] = [
         : "status loading success error empty feedback",
     component: feedback,
   })),
-  ...["Checkbox", "Field", "Input", "NativeSelect", "Switch", "Textarea"].map((title) => ({
-    id: title.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase(),
-    title,
-    group: "Components / Forms" as const,
-    keywords:
-      title === "Switch"
-        ? "toggle on off boolean native form control"
-        : "label validation native form control",
-    component: forms,
-  })),
-  ...["Card", "DescriptionList", "Dialog", "Disclosure", "IconButton", "Tabs", "TextBlock"].map(
+  ...["Checkbox", "Field", "Input", "NativeSelect", "PasswordField", "Switch", "Textarea"].map(
     (title) => ({
       id: title.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase(),
       title,
-      group: "Components / Inspection" as const,
+      group: "Components / Forms" as const,
       keywords:
-        title === "Card"
-          ? "card surface container header content footer composition"
-          : title === "Tabs"
-            ? "tabs panels keyboard manual activation preserved state"
-            : "metadata inspector native text modal sheet",
-      component: inspection,
+        title === "PasswordField"
+          ? "password reveal show hide current new native form control"
+          : title === "Switch"
+            ? "toggle on off boolean native form control"
+            : "label validation native form control",
+      component: forms,
     }),
   ),
+  ...[
+    "Breadcrumb",
+    "Card",
+    "DescriptionList",
+    "Dialog",
+    "Disclosure",
+    "IconButton",
+    "Table",
+    "Tabs",
+    "TextBlock",
+  ].map((title) => ({
+    id: title.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase(),
+    title,
+    group: "Components / Inspection" as const,
+    keywords:
+      title === "Breadcrumb"
+        ? "breadcrumb navigation hierarchy ancestors current location links"
+        : title === "Card"
+          ? "card surface container header content footer composition"
+          : title === "Table"
+            ? "table rows columns cells caption overflow native data"
+            : title === "Tabs"
+              ? "tabs panels keyboard manual activation preserved state"
+              : "metadata inspector native text modal sheet",
+    component: inspection,
+  })),
   {
     id: "workflow-form",
     title: "Workflow form",

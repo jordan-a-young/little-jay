@@ -27,13 +27,16 @@ describe("catalog registry and links", () => {
       "field",
       "input",
       "native-select",
+      "password-field",
       "switch",
       "textarea",
+      "breadcrumb",
       "card",
       "description-list",
       "dialog",
       "disclosure",
       "icon-button",
+      "table",
       "tabs",
       "text-block",
       "workflow-form",
@@ -52,7 +55,7 @@ describe("catalog registry and links", () => {
     ]);
   });
   it("has stable unique pages for all foundations, components, and patterns", () => {
-    expect(catalogPages).toHaveLength(26);
+    expect(catalogPages).toHaveLength(29);
     expect(new Set(catalogPages.map((page) => page.id)).size).toBe(catalogPages.length);
     expect(catalogPages.some((page) => page.id === "native-select")).toBe(true);
   });
@@ -64,6 +67,9 @@ describe("catalog registry and links", () => {
     expect(filterCatalog("hooks").map((page) => page.id)).toEqual(["hooks"]);
     expect(filterCatalog("panels").map((page) => page.id)).toEqual(["tabs"]);
     expect(filterCatalog("surface").map((page) => page.id)).toEqual(["card"]);
+    expect(filterCatalog("columns").map((page) => page.id)).toEqual(["table"]);
+    expect(filterCatalog("ancestors").map((page) => page.id)).toEqual(["breadcrumb"]);
+    expect(filterCatalog("reveal").map((page) => page.id)).toEqual(["password-field"]);
     expect(filterCatalog("no such component")).toEqual([]);
     expect(filterCatalog("")).toHaveLength(catalogPages.length);
   });
