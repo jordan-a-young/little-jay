@@ -44,7 +44,27 @@ async function cancelBody(
 }
 
 function isJsonContentType(header: string | null) {
-  const [mediaType, ...parameters] = (header ?? "").toLowerCase().split(";");
+  const contentType = (header ?? "").toLowerCase();
+  const sections: string[] = [];
+  let sectionStart = 0;
+  let quoted = false;
+  let escaped = false;
+  for (let index = 0; index < contentType.length; index++) {
+    const character = contentType[index];
+    if (escaped) {
+      escaped = false;
+    } else if (quoted && character === "\\") {
+      escaped = true;
+    } else if (character === '"') {
+      quoted = !quoted;
+    } else if (!quoted && character === ";") {
+      sections.push(contentType.slice(sectionStart, index));
+      sectionStart = index + 1;
+    }
+  }
+  if (quoted) return false;
+  sections.push(contentType.slice(sectionStart));
+  const [mediaType, ...parameters] = sections;
   if (!/^application\/(?:json|[a-z0-9!#$&^_.+-]+\+json)$/.test(mediaType?.trim() ?? ""))
     return false;
   return parameters.every((parameter) => {
