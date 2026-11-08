@@ -16,14 +16,16 @@
     "fmt": "vp fmt",
     "test:packages": "node scripts/test-packages.mjs",
     "changeset": "changeset",
+    "release:validate": "node scripts/release.mjs validate",
     "release:status": "node scripts/release.mjs status",
     "release:version": "node scripts/release.mjs version",
     "release:check": "node scripts/release.mjs check",
     "release:publish": "node scripts/release.mjs publish",
-    "ready": "pnpm check && pnpm build && pnpm typecheck && pnpm test:coverage && pnpm test:packages"
+    "ready": "pnpm release:validate && pnpm check && pnpm build && pnpm typecheck && pnpm test:coverage && pnpm test:packages"
   },
   "devDependencies": {
     "@changesets/cli": "3.0.3",
+    "@changesets/read": "1.0.1",
     "@types/node": "26.6.6",
     "@vitest/coverage-v8": "5.1.0",
     "jsdom": "29.0.1",

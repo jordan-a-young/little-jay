@@ -73,7 +73,11 @@ beforeEach(async () => {
       if (arguments_[0] === "status") return gitState.status;
       if (arguments_[0] === "branch") return gitState.branch;
       if (arguments_[0] === "remote") return gitState.origin;
-      if (arguments_[0] === "ls-remote") return gitState.remote;
+      if (arguments_[0] === "ls-remote") {
+        return gitState.releaseBranch && arguments_[3] === "main"
+          ? `${gitState.releaseBranch}\n${gitState.remote}`
+          : gitState.remote;
+      }
       if (arguments_[1] === "--show-toplevel") return root;
       if (arguments_[1] === "HEAD") return gitState.head;
       throw new Error("Unexpected Git command in release test");
@@ -107,6 +111,79 @@ async function mutateManifest(directory, change) {
 }
 
 describe("release artifacts and versioning", () => {
+  it("validates pending changesets without commands or release-file writes", async () => {
+    const note =
+      '---\n"@littlejay/ui": minor\n"@littlejay/http": patch\n"@littlejay/server": major\n---\n\nImprove consumer behavior.\n';
+    await writeFile(path.join(root, ".changeset/fix.md"), note);
+    const manifest = await readFile(path.join(root, "packages/ui/package.json"), "utf8");
+    await expect(release().validateChangesets()).resolves.toEqual([
+      {
+        id: "fix",
+        summary: "Improve consumer behavior.",
+        releases: [
+          { name: "@littlejay/ui", type: "minor" },
+          { name: "@littlejay/http", type: "patch" },
+          { name: "@littlejay/server", type: "major" },
+        ],
+      },
+    ]);
+    expect(await readFile(path.join(root, ".changeset/fix.md"), "utf8")).toBe(note);
+    expect(await readFile(path.join(root, "packages/ui/package.json"), "utf8")).toBe(manifest);
+    await expect(readFile(path.join(root, ".release/verified.json"))).rejects.toThrow();
+    expect(commands).toEqual([]);
+    expect(lookup).not.toHaveBeenCalled();
+  });
+
+  it("allows no pending notes and explicitly empty changesets", async () => {
+    await expect(release().validateChangesets()).resolves.toEqual([]);
+    await writeFile(
+      path.join(root, ".changeset/empty.md"),
+      "---\n---\n\nMaintainer-only change.\n",
+    );
+    await expect(release().validateChangesets()).resolves.toEqual([
+      { id: "empty", releases: [], summary: "Maintainer-only change." },
+    ]);
+    expect(commands).toEqual([]);
+  });
+
+  it.each(["@littlejay/typo", "little-jay", "@littlejay/playground"])(
+    "rejects a changeset targeting %s",
+    async (name) => {
+      await writeFile(
+        path.join(root, ".changeset/invalid.md"),
+        `---\n"${name}": patch\n---\n\nFix behavior.\n`,
+      );
+      await expect(release().validateChangesets()).rejects.toThrow("Unexpected changeset package");
+      expect(commands).toEqual([]);
+    },
+  );
+
+  it.each(["invalid", "none"])("rejects the changeset bump %s", async (type) => {
+    await writeFile(
+      path.join(root, ".changeset/invalid.md"),
+      `---\n"@littlejay/ui": ${type}\n---\n\nFix behavior.\n`,
+    );
+    await expect(release().validateChangesets()).rejects.toThrow();
+    expect(commands).toEqual([]);
+  });
+
+  it("rejects malformed changeset frontmatter", async () => {
+    await writeFile(
+      path.join(root, ".changeset/invalid.md"),
+      '---\n"@littlejay/ui": [\n---\n\nFix behavior.\n',
+    );
+    await expect(release().validateChangesets()).rejects.toThrow();
+    expect(commands).toEqual([]);
+  });
+
+  it("runs changeset validation before the rest of the readiness gate", async () => {
+    const manifest = JSON.parse(
+      await readFile(new URL("../package.json", import.meta.url), "utf8"),
+    );
+    expect(manifest.scripts.ready.split(" && ")[0]).toBe("pnpm release:validate");
+    expect(manifest.scripts["release:validate"]).toBe("node scripts/release.mjs validate");
+  });
+
   it("derives safe tarball names from independent versions, including prerelease fixtures", () => {
     expect(tarballFilename("@littlejay/ui", "0.2.3")).toBe("littlejay-ui-0.2.3.tgz");
     expect(tarballFilename("@littlejay/tokens", "1.2.0-beta.1")).toBe(
@@ -251,6 +328,19 @@ describe("release artifacts and versioning", () => {
 });
 
 describe("publication boundaries without registry writes", () => {
+  it("reads the exact main ref when a changeset-release/main branch also exists", async () => {
+    gitState.releaseBranch = `${"b".repeat(40)}\trefs/heads/changeset-release/main`;
+    await release().publish({ confirmation: commit });
+    const remoteReads = commands.filter(
+      ([command, argument]) => command === "git" && argument === "ls-remote",
+    );
+    expect(remoteReads.length).toBeGreaterThan(0);
+    for (const command of remoteReads) {
+      expect(command).toEqual(["git", "ls-remote", "--heads", "origin", "refs/heads/main"]);
+    }
+    expect(publishCommands()).toHaveLength(releasePackages.length);
+  });
+
   it.each([repository, repository.slice(0, -4)])(
     "accepts the expected HTTPS origin %s for verified publication",
     async (origin) => {
@@ -306,7 +396,7 @@ describe("publication boundaries without registry writes", () => {
     expect(remoteReads.length).toBeGreaterThan(0);
     const header = `AUTHORIZATION: basic ${Buffer.from(`x-access-token:${env.GITHUB_TOKEN}`).toString("base64")}`;
     for (const [, arguments_, capture, commandEnvironment] of remoteReads) {
-      expect(arguments_).toEqual(["ls-remote", "--heads", "origin", "main"]);
+      expect(arguments_).toEqual(["ls-remote", "--heads", "origin", "refs/heads/main"]);
       expect(capture).toBe(true);
       expect(commandEnvironment).toEqual({
         GIT_CONFIG_COUNT: "1",
@@ -340,6 +430,9 @@ describe("publication boundaries without registry writes", () => {
     ["status", " M package.json", "clean checkout"],
     ["origin", "https://example.test/repo", "Unexpected origin"],
     ["remote", `${"b".repeat(40)}\trefs/heads/main`, "current origin/main"],
+    ["remote", `${commit}\trefs/heads/changeset-release/main`, "current origin/main"],
+    ["remote", "", "current origin/main"],
+    ["remote", `${commit}\trefs/heads/main\n${commit}\trefs/heads/other`, "current origin/main"],
   ])("rejects unexpected Git %s", async (key, value, message) => {
     gitState[key] = value;
     await expect(release().publish({ confirmation: commit })).rejects.toThrow(message);
