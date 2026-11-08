@@ -34,7 +34,7 @@ jobs:
           test "$ENABLED" = true || { echo 'Publication is disabled; complete the release runbook first.'; exit 1; }
           test "$EVENT_REF" = refs/heads/main
           test "$RELEASE_COMMIT" = "$EVENT_COMMIT"
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
         with:
           ref: main
           fetch-depth: 0
@@ -43,10 +43,11 @@ jobs:
         env:
           RELEASE_COMMIT: ${{ inputs.commit }}
         run: test "$(git rev-parse HEAD)" = "$RELEASE_COMMIT"
-      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
         with:
           node-version-file: .node-version
+          package-manager-cache: false
       - run: pnpm install --frozen-lockfile
       - run: pnpm secrets:install
       - run: pnpm release:check
@@ -72,15 +73,18 @@ jobs:
       contents: write
       id-token: write
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
         with:
           ref: main
           fetch-depth: 0
           persist-credentials: false
-      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320
+        with:
+          cache: false
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
         with:
           node-version-file: .node-version
+          package-manager-cache: false
       - run: pnpm install --frozen-lockfile --ignore-scripts
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:

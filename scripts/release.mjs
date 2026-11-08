@@ -177,7 +177,8 @@ export function createRelease({ root = workspace, env = process.env, execute, lo
       confirmation,
       "Release commit does not match confirmation.",
     );
-    assert.equal(git(["remote", "get-url", "origin"]), repository, "Unexpected origin.");
+    const origin = git(["remote", "get-url", "origin"]);
+    assert.ok([repository, repository.slice(0, -4)].includes(origin), "Unexpected origin.");
     let authentication;
     if (env.GITHUB_ACTIONS === "true") {
       assert.ok(env.GITHUB_TOKEN, "The private-origin check requires the workflow GitHub token.");
