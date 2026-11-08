@@ -50,6 +50,37 @@ PebbleState needs application-served assets. Copy the state PNGs from the instal
 
 These components own presentation, not authentication, authorization, workflow transitions, network calls, caches, validation schemas, or routing. Disabled controls and accessibility attributes are not security boundaries. The application owns pending state, retries, draft preservation, reset behavior, and safe error reporting; ErrorBoundary is not a catch-all for asynchronous/event-handler failures.
 
+## Dialog
+
+`Dialog`, `DialogTrigger`, `DialogContent`, `DialogClose` and their Props types are available from the root or `@littlejay/ui/dialog`. Content requires a nonblank visible `title`; an optional `description` explains the task. The built-in Close action remains visible and non-submit by default.
+
+```tsx
+import { Dialog, DialogTrigger, DialogContent } from "@littlejay/ui/dialog";
+
+<Dialog>
+  <DialogTrigger>Review local changes</DialogTrigger>
+  <DialogContent title="Local review" closeDisabled closeLabel="Close local review">
+    This example disables only the built-in Close action.
+  </DialogContent>
+</Dialog>;
+```
+
+`closeDisabled` defaults to `false`. `closeLabel` supplies a nonblank accessible name for the built-in action while its visible text stays “Close”; omit it to retain the existing name. Neither prop replaces or hides the control. Native Escape and outside-dismiss behavior is unchanged by `closeDisabled`: applications that must prevent dismissal while pending should use their existing controlled `open`/`onOpenChange` and dismissal callbacks. The library does not own pending state, request cancellation or approval policy. Keep the trigger mounted for focus restoration; for subtree themes, put `portalContainer` inside the intended scope.
+
+## EmptyState
+
+`EmptyState` and `EmptyStateProps` are available from the root or `@littlejay/ui/empty-state`. The title defaults to the existing `strong` element. Set `titleLevel` to an integer from 1 through 6 to render that native heading directly, without nesting a heading inside `strong`:
+
+```tsx
+import { EmptyState } from "@littlejay/ui/empty-state";
+
+<EmptyState titleLevel={2} title="No checkpoints yet">
+  Start a local task to create its first checkpoint.
+</EmptyState>;
+```
+
+Choose the level for the surrounding document hierarchy; it changes semantics, not presentation size. No arbitrary element/component polymorphism, automatic heading-level selection or announcement role is added. Root native attributes, refs, `className` and `style` still target the wrapper. Title/body/actions remain ordinary React content; application state, data loading and meaningful actions stay consumer-owned.
+
 ## Combobox
 
 `Combobox`, `ComboboxProps` and `ComboboxOption` are available from the root and `@littlejay/ui/combobox`. It is a searchable local single-select backed by React Aria Components. Keep NativeSelect for small lists that do not need search. Load the compiled stylesheet once:

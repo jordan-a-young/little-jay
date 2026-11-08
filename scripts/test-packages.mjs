@@ -286,7 +286,8 @@ import { useFormStatus } from "react-dom";
 import { Button, Checkbox as RootCheckbox, Alert as RootAlert, LoadingIndicator as RootLoadingIndicator, type LoadingIndicatorProps as RootLoadingIndicatorProps, type AlertProps as RootAlertProps, type ButtonVariant as RootButtonVariant } from "@littlejay/ui";
 import { Button as SubpathButton, type ButtonProps, type ButtonVariant } from "@littlejay/ui/button";
 import { Alert, type AlertProps } from "@littlejay/ui/alert";
-import { EmptyState } from "@littlejay/ui/empty-state";
+import { EmptyState, type EmptyStateProps } from "@littlejay/ui/empty-state";
+import { EmptyState as RootEmptyState, type EmptyStateProps as RootEmptyStateProps } from "@littlejay/ui";
 import { PebbleState, type PebbleStateProps } from "@littlejay/ui/pebble-state";
 import { StatusIndicator } from "@littlejay/ui/status-indicator";
 import { LoadingIndicator, type LoadingIndicatorProps } from "@littlejay/ui/loading-indicator";
@@ -307,6 +308,7 @@ import { Disclosure, type DisclosureProps } from "@littlejay/ui/disclosure";
 import { TextBlock, type TextBlockProps } from "@littlejay/ui/text-block";
 import { IconButton, type IconButtonProps } from "@littlejay/ui/icon-button";
 import { Dialog, DialogTrigger, DialogContent, DialogClose, type DialogProps, type DialogTriggerProps, type DialogContentProps, type DialogCloseProps } from "@littlejay/ui/dialog";
+import { Dialog as RootDialog, DialogTrigger as RootDialogTrigger, DialogContent as RootDialogContent, type DialogContentProps as RootDialogContentProps } from "@littlejay/ui";
 import { Tabs, type TabsProps, type TabsItem } from "@littlejay/ui/tabs";
 import { Tabs as RootTabs, type TabsProps as RootTabsProps, type TabsItem as RootTabsItem } from "@littlejay/ui";
 import { Card, CardHeader, CardContent, CardFooter, type CardProps, type CardHeaderProps, type CardContentProps, type CardFooterProps } from "@littlejay/ui/card";
@@ -327,6 +329,13 @@ type ServerResult = ReturnType<typeof createServer>;
 const serverTypecheck: ServerResult | FastifyInstance | undefined = undefined;
 void serverTypecheck;
 type Assert<Condition extends true> = Condition;
+type MatchingEmptyStateProps = Assert<RootEmptyStateProps extends EmptyStateProps ? EmptyStateProps extends RootEmptyStateProps ? true : false : false>;
+type HeadingLevels = Assert<NonNullable<EmptyStateProps["titleLevel"]> extends 1 | 2 | 3 | 4 | 5 | 6 ? 1 | 2 | 3 | 4 | 5 | 6 extends NonNullable<EmptyStateProps["titleLevel"]> ? true : false : false>;
+type InvalidHeadingLevel = Assert<7 extends NonNullable<EmptyStateProps["titleLevel"]> ? false : true>;
+type MatchingDialogContentProps = Assert<RootDialogContentProps extends DialogContentProps ? DialogContentProps extends RootDialogContentProps ? true : false : false>;
+const migrationContracts: [MatchingEmptyStateProps, HeadingLevels, InvalidHeadingLevel, MatchingDialogContentProps] = [true, true, true, true];
+void migrationContracts;
+const headingLevels = [1, 2, 3, 4, 5, 6] as const satisfies readonly NonNullable<EmptyStateProps["titleLevel"]>[];
 type MatchingComboboxProps = Assert<RootComboboxProps extends ComboboxProps ? ComboboxProps extends RootComboboxProps ? true : false : false>;
 type MatchingComboboxOption = Assert<RootComboboxOption extends ComboboxOption ? ComboboxOption extends RootComboboxOption ? true : false : false>;
 type FixedComboboxInput = Assert<Extract<"type" | "role" | "onChange", keyof ComboboxProps> extends never ? true : false>;
@@ -545,6 +554,52 @@ function ExternalControlBaselines() {
     <p role="status" data-consumer-control-counts>Activations: {activations}; submissions: {submits}</p>
   </section>;
 }
+function ExternalPendingDialog({ theme }: { theme: "light" | "dark" }) {
+  const container = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [guardDismissal, setGuardDismissal] = useState(true);
+  const [submits, setSubmits] = useState(0);
+  const Modal = theme === "light" ? Dialog : RootDialog;
+  const Trigger = theme === "light" ? DialogTrigger : RootDialogTrigger;
+  const Content = theme === "light" ? DialogContent : RootDialogContent;
+  return <section data-theme={theme} aria-label={theme + " configured dialog"}>
+    <form onSubmit={event => { event.preventDefault(); setSubmits(count => count + 1); }}>
+      <div ref={container}>
+        <Modal open={open} onOpenChange={nextOpen => { if (nextOpen || !pending || !guardDismissal) setOpen(nextOpen); }}>
+          <Trigger>Open {theme} configured dialog</Trigger>
+          <Content title={theme + " local review"} description="Synthetic pending state only; no request or decision is performed."
+            portalContainer={container.current} closeDisabled={pending} closeLabel={"Close " + theme + " local review"}
+            onEscapeKeyDown={event => { if (pending && guardDismissal) event.preventDefault(); }}
+            onInteractOutside={event => { if (pending && guardDismissal) event.preventDefault(); }}>
+            <Field label={theme + " dialog draft"}><Input defaultValue="Unsaved local draft" /></Field>
+            <Field label={theme + " guard pending dismissal"} orientation="horizontal"><Checkbox checked={guardDismissal} onChange={event => setGuardDismissal(event.currentTarget.checked)} /></Field>
+            <Button onClick={() => setPending(value => !value)}>{pending ? "Finish" : "Simulate"} {theme} pending state</Button>
+            <p role="status">{pending ? "Pending locally" : "Ready to close"}</p>
+          </Content>
+        </Modal>
+      </div>
+    </form>
+    <p data-consumer-dialog-submits={theme}>Submissions: {submits}</p>
+  </section>;
+}
+function ExternalEmptyStateHeadings() {
+  const reference = useRef<HTMLDivElement>(null);
+  const [actions, setActions] = useState(0);
+  return <section aria-label="Native empty-state headings">
+    <div data-theme="light" data-consumer-empty-default>
+      <EmptyState ref={reference} tabIndex={-1} title="Default strong title" style={{ fontSize: "18px" }} action={<Button onClick={() => setActions(count => count + 1)}>Count empty-state action</Button>}>Plain default content.</EmptyState>
+    </div>
+    <div data-theme="dark" data-consumer-empty-heading>
+      <RootEmptyState titleLevel={2} title={"Long native heading with meaningful wrapping ".repeat(8)} style={{ fontSize: "18px" }}>HTML-like text stays inert: {"<em>Not HTML</em>"}</RootEmptyState>
+    </div>
+    <div data-consumer-heading-levels>
+      {headingLevels.map(level => <EmptyState key={level} titleLevel={level} title={"Native heading level " + level} style={{ fontSize: "18px" }}>The heading level does not change title presentation.</EmptyState>)}
+    </div>
+    <Button onClick={() => reference.current?.focus()}>Focus empty-state root ref</Button>
+    <p role="status" data-consumer-empty-actions>Actions: {actions}</p>
+  </section>;
+}
 function App() {
   const ref = useRef<HTMLButtonElement>(null);
   const [clicks, setClicks] = useState(0);
@@ -569,6 +624,9 @@ function App() {
     <div data-theme="dark"><Button>Dark</Button><div data-theme="light"><Button>Nested light</Button></div></div>
     <div className="project"><Button>Override</Button></div>
     <ExternalControlBaselines />
+    <ExternalEmptyStateHeadings />
+    <ExternalPendingDialog theme="light" />
+    <ExternalPendingDialog theme="dark" />
     <section aria-label="External button variants">
       {(["light", "dark"] as const).map(theme => <div key={theme} data-theme={theme}>
         {buttonVariants.map(variant => <div key={variant}>

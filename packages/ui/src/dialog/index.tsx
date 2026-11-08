@@ -13,6 +13,10 @@ export type DialogContentProps = Omit<
   description?: string;
   variant?: "dialog" | "sheet";
   portalContainer?: HTMLElement | null;
+  /** Disables only the built-in Close button; other dismissal paths remain caller-owned. */
+  closeDisabled?: boolean;
+  /** Optional nonblank accessible name for the built-in button; visible text stays Close. */
+  closeLabel?: string;
 };
 
 /** Modal root. Applications own controlled state and any work performed inside it. */
@@ -42,6 +46,8 @@ export function DialogContent({
   description,
   variant = "dialog",
   portalContainer,
+  closeDisabled = false,
+  closeLabel,
   children,
   className = "",
   onEscapeKeyDown,
@@ -49,6 +55,8 @@ export function DialogContent({
 }: DialogContentProps) {
   if (typeof title !== "string" || !title.trim())
     throw new TypeError("DialogContent requires a nonblank title");
+  if (closeLabel !== undefined && (typeof closeLabel !== "string" || !closeLabel.trim()))
+    throw new TypeError("DialogContent requires a nonblank closeLabel when supplied");
   const hasDescription = typeof description === "string" && Boolean(description.trim());
   return (
     <Primitive.Portal container={portalContainer}>
@@ -76,7 +84,9 @@ export function DialogContent({
         )}
         {children}
         <div className="lj-dialog-dismiss">
-          <DialogClose>Close</DialogClose>
+          <DialogClose disabled={closeDisabled} aria-label={closeLabel}>
+            Close
+          </DialogClose>
         </div>
       </Primitive.Content>
     </Primitive.Portal>

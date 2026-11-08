@@ -134,6 +134,12 @@ const documents: Record<string, CatalogDocument> = {
       commonProps,
       { name: "title", type: "ReactNode / required", description: "Visible state label." },
       {
+        name: "titleLevel",
+        type: "1 | 2 | 3 | 4 | 5 | 6 / optional",
+        description:
+          "Renders the title as the corresponding native heading. Omit for the existing strong title. All levels share the same component presentation; unsupported JavaScript values fall back to strong.",
+      },
+      {
         name: "children, action",
         type: "ReactNode",
         description: "Supporting copy and an optional application-owned action.",
@@ -141,6 +147,7 @@ const documents: Record<string, CatalogDocument> = {
     ],
     accessibility: [
       "No implicit announcement role is added.",
+      "Choose titleLevel to fit the surrounding heading hierarchy; it is not inferred. Supply text or inline title content, not a nested heading. Heading semantics do not choose a typography size.",
       "Actions should describe what happens next. This example changes local state only.",
     ],
     examples: [
@@ -149,6 +156,12 @@ const documents: Record<string, CatalogDocument> = {
         title: "Empty / local action",
         component: examples.EmptyExample,
         code: '<EmptyState title={created ? "Example ready" : "No checkpoints yet"} action={<Button onClick={createLocally}>Create local example</Button>}>\n  No real record is created.\n</EmptyState>',
+      },
+      {
+        id: "heading",
+        title: "Native heading / static",
+        component: examples.EmptyHeadingExample,
+        code: '<EmptyState title="No checkpoints yet" titleLevel={2}>\n  Choose a heading level that fits the surrounding page hierarchy.\n</EmptyState>',
       },
     ],
   },
