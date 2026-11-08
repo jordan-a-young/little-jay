@@ -4,6 +4,7 @@ import { createHash } from "node:crypto";
 import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { readChangesets } from "@changesets/read";
 import { tarballFilename } from "./package-artifacts.mjs";
 
 export const releasePackages = ["brand", "tokens", "http", "server", "ui"];
@@ -90,6 +91,25 @@ export function createRelease({ root = workspace, env = process.env, execute, lo
     return (await readdir(path.join(root, ".changeset"))).filter(
       (filename) => filename.endsWith(".md") && !["README.md", "AGENTS.md"].includes(filename),
     );
+  }
+
+  async function validateChangesets() {
+    const changesets = await readChangesets(root);
+    const allowedPackages = new Set(releasePackages.map((name) => `@littlejay/${name}`));
+    const allowedTypes = new Set(["patch", "minor", "major"]);
+    for (const changeset of changesets) {
+      for (const release of changeset.releases) {
+        assert.ok(
+          allowedPackages.has(release.name),
+          `Unexpected changeset package in ${changeset.id}: ${release.name}`,
+        );
+        assert.ok(
+          allowedTypes.has(release.type),
+          `Unexpected changeset bump in ${changeset.id}: ${release.type}`,
+        );
+      }
+    }
+    return changesets;
   }
 
   async function version() {
@@ -189,10 +209,10 @@ export function createRelease({ root = workspace, env = process.env, execute, lo
         GIT_TERMINAL_PROMPT: "0",
       };
     }
-    const remote = git(["ls-remote", "--heads", "origin", "main"], authentication);
+    const remote = git(["ls-remote", "--heads", "origin", "refs/heads/main"], authentication);
     assert.equal(
-      remote.split(/\s+/)[0],
-      confirmation,
+      remote,
+      `${confirmation}\trefs/heads/main`,
       "Release commit must be current origin/main.",
     );
     assert.equal((await pending()).length, 0, "Version pending changesets before publishing.");
@@ -306,14 +326,17 @@ export function createRelease({ root = workspace, env = process.env, execute, lo
     return summary;
   }
 
-  return { check, status, version, publish, manifests };
+  return { check, status, version, publish, manifests, validateChangesets };
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
     const [command, ...arguments_] = process.argv.slice(2);
     const release = createRelease();
-    if (command === "status") await release.status();
+    if (command === "validate") {
+      const changesets = await release.validateChangesets();
+      console.log(`Validated ${changesets.length} pending changesets. No release files changed.`);
+    } else if (command === "status") await release.status();
     else if (command === "check") await release.check();
     else if (command === "version") await release.version();
     else if (command === "publish") {
@@ -332,7 +355,10 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
         confirmation: arguments_[confirmationIndex + 1],
         verifiedArtifacts: arguments_.includes("--verified-artifacts"),
       });
-    } else throw new Error("Use release:version, release:check or release:publish through pnpm.");
+    } else
+      throw new Error(
+        "Use release:validate, release:status, release:version, release:check or release:publish through pnpm.",
+      );
   } catch (error) {
     console.error(error instanceof Error ? error.message : "Release command failed.");
     process.exitCode = 1;

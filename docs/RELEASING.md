@@ -18,6 +18,8 @@ Run `pnpm changeset` from the root for a consumer-visible library change. Select
 - Root and runnable apps are never published or versioned by Changesets.
 - This release path supports stable versions and npm's `latest` tag only. Prerelease/`next` support requires a separately reviewed extension, not a flag added ad hoc.
 
+Run `pnpm release:validate` to parse all pending notes with the Changesets parser and check that every target is one of the five libraries and every bump is patch, minor or major. The readiness/CI gate runs it before the other checks. No notes and explicitly empty notes are valid, so documentation/tooling-only changes do not need an artificial release. Validation requires no Git history or registry access and does not modify notes, versions, changelogs or the lockfile.
+
 Use `pnpm release:status` to inspect the proposed release. For local preparation, run `pnpm release:version`: it consumes notes, generates per-package changelogs/versions, regenerates `pnpm-lock.yaml` using pnpm, and formats release files. Review the diff. It does not commit, tag, push or publish; avoid invoking it with unrelated uncommitted work. Generated notes include commit references that may require access to this private source repository.
 
 ## Release PR automation
@@ -57,7 +59,7 @@ The publish job must use the GitHub **`npm-publish`** environment. Its live prot
 
 - The read-only verify job uses frozen installation, the full gate and a history secret scan, then uploads verified tarballs and their commit/hash record.
 - The publish job alone has `id-token: write`; it downloads that same run's exact artifact ID, installs tooling with lifecycle scripts disabled and no restored cache, and checks the complete artifact set before the first upload. It does not rebuild or rerun application/test code with OIDC permissions.
-- The script checks a clean, synchronized main, expected origin, confirmation SHA, allowlist and every tarball hash. The origin must be exactly `https://github.com/jordan-a-young/little-jay.git` or the equivalent HTTPS URL without `.git` used by GitHub checkout; other repositories, protocols and URL variants are rejected. Publication order is brand/tokens, independent HTTP/server, then UI. Existing versions are skipped only if registry artifact integrity matches; authentication/network errors are not treated as “unpublished.”
+- The script checks a clean, synchronized main, expected origin, confirmation SHA, allowlist and every tarball hash. The origin must be exactly `https://github.com/jordan-a-young/little-jay.git` or the equivalent HTTPS URL without `.git` used by GitHub checkout; other repositories, protocols and URL variants are rejected. Synchronization queries the exact `refs/heads/main` ref, not the similarly named `changeset-release/main` branch. Publication order is brand/tokens, independent HTTP/server, then UI. Existing versions are skipped only if registry artifact integrity matches; authentication/network errors are not treated as “unpublished.”
 - pnpm waits for each new version to become installable before proceeding to its dependent. Publication is serialized and not canceled by a newer run. npm releases are **not atomic across packages**.
 - Only after every planned package is confirmed does Changesets create local package tags (`@littlejay/name@version`). The GitHub action pushes them and creates corresponding GitHub releases from package changelogs. No all-package `v0.1.0` tag is used.
 

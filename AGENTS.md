@@ -46,7 +46,7 @@ Select browser checks using the matrix's risk policy: changed rendering/styles, 
 | `pnpm test:coverage`                      | Full suite with V8 coverage and source-inventory validation; build first                                                       |
 | `pnpm test <file-or-path>`                | Focused tests through the root configuration; packages do not have test scripts                                                |
 | `TMPDIR=/tmp/opencode pnpm test:packages` | Packs five libraries and tests an isolated consumer; retains temporary artifacts and may need registry access; never publishes |
-| `pnpm ready`                              | Full CI gate: check, build, typecheck, coverage tests, and package-consumer checks                                             |
+| `pnpm ready`                              | Full CI gate: changeset validation, check, build, typecheck, coverage tests, and package-consumer checks                       |
 | `pnpm fmt`                                | Formats in place; prefer `pnpm exec vp fmt <changed-paths>` to avoid unrelated edits                                           |
 
 - Add regression coverage for observable behavior using existing colocated tests. `vite.config.ts` defines Node and jsdom component projects; do not add another test runner.
