@@ -251,6 +251,40 @@ describe("release artifacts and versioning", () => {
 });
 
 describe("publication boundaries without registry writes", () => {
+  it.each([repository, repository.slice(0, -4)])(
+    "accepts the expected HTTPS origin %s for verified publication",
+    async (origin) => {
+      await release().check();
+      gitState.origin = origin;
+      await release().publish({ confirmation: commit, verifiedArtifacts: true });
+      expect(publishCommands()).toHaveLength(releasePackages.length);
+    },
+  );
+
+  it.each([
+    "https://example.test/repo",
+    "https://github.com/another-owner/little-jay.git",
+    "https://github.com/jordan-a-young/another-repository.git",
+    "http://github.com/jordan-a-young/little-jay.git",
+    "git@github.com:jordan-a-young/little-jay.git",
+    "https://github.com.example.test/jordan-a-young/little-jay.git",
+    "https://github.com@untrusted.test/jordan-a-young/little-jay.git",
+    `${repository}.git`,
+    `${repository}/`,
+    `${repository}?redirect=other`,
+    `${repository}#other`,
+  ])("rejects unexpected origin %s before remote or registry access", async (origin) => {
+    gitState.origin = origin;
+    await expect(
+      release().publish({ confirmation: commit, verifiedArtifacts: true }),
+    ).rejects.toThrow("Unexpected origin");
+    expect(publishCommands()).toEqual([]);
+    expect(lookup).not.toHaveBeenCalled();
+    expect(
+      commands.some(([command, argument]) => command === "git" && argument === "ls-remote"),
+    ).toBe(false);
+  });
+
   it("requires explicit activation and exact SHA confirmation", async () => {
     env.LITTLEJAY_PUBLISH_ENABLED = "false";
     await expect(release().publish({ confirmation: commit })).rejects.toThrow(
@@ -437,7 +471,8 @@ it("keeps workflows manual-only for publication and isolates OIDC from verificat
   expect(publish).toContain("artifact-ids: ${{ needs.verify.outputs.artifact-id }}");
   expect(publish).toContain("--frozen-lockfile --ignore-scripts");
   expect(publish).not.toContain("pnpm ready");
-  expect(publish).not.toContain("cache:");
+  expect(publish).not.toMatch(/^\s+cache:\s*(?!false\b)\S+/m);
+  expect(publish).toContain("package-manager-cache: false");
   expect(workflow).not.toContain("NPM_TOKEN");
   const versionWorkflow = await readFile(
     new URL("../.github/workflows/release-pr.yml", import.meta.url),
@@ -447,3 +482,40 @@ it("keeps workflows manual-only for publication and isolates OIDC from verificat
   expect(versionWorkflow).not.toContain("id-token: write");
   expect(versionWorkflow).not.toContain("release:publish");
 });
+
+it.each(["ci.yml", "secrets.yml", "release-pr.yml", "publish.yml"])(
+  "%s pins Node 24 actions while preserving explicit project Node and cache settings",
+  async (filename) => {
+    const workflow = await readFile(
+      new URL(`../.github/workflows/${filename}`, import.meta.url),
+      "utf8",
+    );
+    const actionReferences = [
+      ...workflow.matchAll(
+        /uses: (actions\/checkout|actions\/setup-node|pnpm\/action-setup)@(\S+)/g,
+      ),
+    ];
+    const expectedRevisions = {
+      "actions/checkout": "fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09",
+      "actions/setup-node": "a0853c24544627f65ddf259abe73b1d18a591444",
+      "pnpm/action-setup": "fc06bc1257f339d1d5d8b3a19a8cae5388b55320",
+    };
+    expect(actionReferences.length).toBeGreaterThanOrEqual(2);
+    for (const [, action, revision] of actionReferences) {
+      expect(revision).toBe(expectedRevisions[action]);
+    }
+    const nodeSetupSteps = workflow
+      .split(/\n      - /)
+      .filter((step) => step.startsWith("uses: actions/setup-node@"));
+    expect(nodeSetupSteps.length).toBeGreaterThan(0);
+    for (const step of nodeSetupSteps) {
+      expect(step).toContain("node-version-file: .node-version");
+      expect(step).toContain("package-manager-cache: false");
+    }
+    if (filename === "ci.yml") {
+      expect(workflow).toContain("cache: pnpm");
+    } else {
+      expect(workflow).not.toMatch(/^\s+cache:\s*(?!false\b)\S+/m);
+    }
+  },
+);
