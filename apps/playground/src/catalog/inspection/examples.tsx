@@ -283,6 +283,47 @@ export function DialogExample() {
   );
 }
 
+export function PendingDialogExample() {
+  const [open, setOpen] = useState(false);
+  const [pending, setPending] = useState(false);
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (!pending) setOpen(nextOpen);
+      }}
+    >
+      <DialogTrigger>Open pending dialog demo</DialogTrigger>
+      <DialogContent
+        title="Local pending simulation"
+        description="Toggle synthetic pending state. Nothing is saved or sent."
+        closeDisabled={pending}
+        closeLabel="Close pending dialog demo"
+        onEscapeKeyDown={(event) => {
+          if (pending) event.preventDefault();
+        }}
+        onInteractOutside={(event) => {
+          if (pending) event.preventDefault();
+        }}
+      >
+        <Button aria-pressed={pending} onClick={() => setPending((current) => !current)}>
+          Simulate pending
+        </Button>
+        <p role="status">
+          {pending
+            ? "Pending simulation: finish by toggling Simulate pending off to enable dismissal."
+            : "Ready: Close, Escape and outside click can dismiss the dialog."}
+        </p>
+        <p>
+          closeDisabled affects only the built-in Close button. This example separately prevents
+          Escape and outside dismissal in its callbacks and guards controlled open state. All
+          dismissal decisions remain application-owned.
+        </p>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function SheetExample() {
   const [open, setOpen] = useState(false);
   return (

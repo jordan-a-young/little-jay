@@ -168,6 +168,65 @@ describe("component catalog", () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 
+  it("deep-links to a native empty-state heading without changing the default example", async () => {
+    await renderApp("#/empty-state/heading");
+    await vi.waitFor(() =>
+      expect(container.querySelector(".catalog-preview h2")?.textContent).toBe(
+        "No checkpoints yet",
+      ),
+    );
+    const preview = container.querySelector(".catalog-preview")!;
+    expect(preview.querySelector("strong, [role='status'], [aria-live]")).toBeNull();
+    expect(container.textContent).toContain("titleLevel");
+    await act(() =>
+      router.navigate({
+        to: "/$pageId/{-$exampleId}",
+        params: { pageId: "empty-state", exampleId: undefined },
+      }),
+    );
+    await vi.waitFor(() =>
+      expect(container.querySelector(".catalog-preview strong")?.textContent).toBe(
+        "No checkpoints yet",
+      ),
+    );
+    expect(container.querySelector(".catalog-preview h2")).toBeNull();
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("demonstrates caller-owned pending dismissal and recovers the configured Close action", async () => {
+    await renderApp("#/dialog/pending");
+    await vi.waitFor(() =>
+      expect(container.querySelector(".catalog-preview button")).not.toBeNull(),
+    );
+    const trigger = container.querySelector<HTMLButtonElement>(".catalog-preview button")!;
+    trigger.focus();
+    await act(() => trigger.click());
+    const modal = document.querySelector<HTMLElement>('.lj-dialog-content[role="dialog"]')!;
+    expect(modal).not.toBeNull();
+    const toggle = modal.querySelector<HTMLButtonElement>("[aria-pressed]")!;
+    const close = modal.querySelector<HTMLButtonElement>(
+      '[aria-label="Close pending dialog demo"]',
+    )!;
+    expect(close.textContent).toBe("Close");
+    expect(close.disabled).toBe(false);
+    await act(() => toggle.click());
+    expect(close.disabled).toBe(true);
+    expect(modal.querySelector('[role="status"]')?.textContent).toContain("Pending simulation");
+    await act(() => {
+      close.click();
+      document.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }),
+      );
+    });
+    expect(document.body.contains(modal)).toBe(true);
+    await act(() => toggle.click());
+    expect(close.disabled).toBe(false);
+    await act(() => close.click());
+    expect(document.body.contains(modal)).toBe(false);
+    await vi.waitFor(() => expect(document.activeElement).toBe(trigger));
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
   it("uses identical explicit SVG geometry for enabled and disabled refresh examples", async () => {
     await renderApp("#/icon-button");
     await vi.waitFor(() => expect(container.querySelectorAll(".lj-icon-button")).toHaveLength(2));

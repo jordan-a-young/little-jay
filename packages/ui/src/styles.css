@@ -19,6 +19,12 @@
 @source "./combobox";
 
 @layer components {
+  .lj-empty-state-title {
+    margin: 0;
+    font-size: inherit;
+    line-height: inherit;
+    overflow-wrap: anywhere;
+  }
   .lj-combobox {
     min-width: 0;
     position: relative;

@@ -114,6 +114,14 @@ export function EmptyExample() {
     </>
   );
 }
+export function EmptyHeadingExample() {
+  return (
+    <EmptyState title="No checkpoints yet" titleLevel={2}>
+      This static panel uses a native h2. Choose a level that fits the surrounding page hierarchy;
+      heading semantics do not change the title's visual size.
+    </EmptyState>
+  );
+}
 export function StatusExamples() {
   return (
     <div className="flex flex-wrap gap-3" role="group" aria-label="Example workflow states">

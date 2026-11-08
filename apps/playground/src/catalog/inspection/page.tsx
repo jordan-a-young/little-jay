@@ -342,6 +342,18 @@ const documents: Record<string, CatalogDocument> = {
           "Required nonblank visible title; optional linked description; a Close button is always included.",
       },
       {
+        name: "closeDisabled",
+        type: "boolean / default false",
+        description:
+          "DialogContent: disables only its built-in non-submit Close button. Does not prevent Escape or outside dismissal; applications own pending state and dismissal decisions.",
+      },
+      {
+        name: "closeLabel",
+        type: "string / optional",
+        description:
+          "DialogContent: nonblank accessible name for the built-in button. Blank labels throw. Visible text stays Close; omission preserves its native Close name. Include Close in custom names to match the visible label.",
+      },
+      {
         name: "portalContainer / content props",
         type: "HTMLElement; Radix content props",
         description:
@@ -350,6 +362,7 @@ const documents: Record<string, CatalogDocument> = {
     ],
     accessibility: [
       "Keep a DialogTrigger mounted for focus restoration. Escape, outside interaction, and Close request dismissal.",
+      "closeDisabled does not implement a pending policy. To prevent dismissal, use controlled open/onOpenChange and deliberately preventDefault in onEscapeKeyDown/onInteractOutside. Keep a reachable control to end a local pending simulation.",
       "Tab/Shift+Tab stay inside the modal. Do not remove visible titles or focus indicators.",
       "Portals inherit tokens from their destination. Document-level light/dark themes work by default; scoped themes need portalContainer in that scope.",
       "No animation is added, including under reduced-motion preferences. Sheet is the same modal behavior with a side layout.",
@@ -366,6 +379,12 @@ const documents: Record<string, CatalogDocument> = {
         title: "Controlled metadata sheet",
         component: examples.SheetExample,
         code: '<Dialog open={open} onOpenChange={setOpen}><DialogTrigger>Metadata</DialogTrigger><DialogContent variant="sheet" title="Checkpoint metadata"><Metadata /></DialogContent></Dialog>',
+      },
+      {
+        id: "pending",
+        title: "Caller-owned pending simulation",
+        component: examples.PendingDialogExample,
+        code: 'const [open, setOpen] = useState(false);\nconst [pending, setPending] = useState(false);\n\n<Dialog open={open} onOpenChange={(nextOpen) => { if (!pending) setOpen(nextOpen); }}>\n  <DialogTrigger>Open pending dialog demo</DialogTrigger>\n  <DialogContent\n    title="Local pending simulation"\n    description="Synthetic state only. Nothing is saved or sent."\n    closeDisabled={pending}\n    closeLabel="Close pending dialog demo"\n    onEscapeKeyDown={(event) => { if (pending) event.preventDefault(); }}\n    onInteractOutside={(event) => { if (pending) event.preventDefault(); }}\n  >\n    <Button aria-pressed={pending} onClick={() => setPending((current) => !current)}>Simulate pending</Button>\n    <p role="status">{pending ? "Pending simulation: toggle off to enable dismissal." : "Ready to dismiss."}</p>\n  </DialogContent>\n</Dialog>',
       },
     ],
   },
