@@ -1,0 +1,142 @@
+name: Finalize approved npm release
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: Exact reviewed main SHA used by the staging run
+        required: true
+        type: string
+      source_run:
+        description: Staging workflow run ID containing the original verified artifacts
+        required: true
+        type: string
+      source_attempt:
+        description: Exact source attempt (normally 1, even if someone later reran it)
+        required: true
+        default: "1"
+        type: string
+      reconcile_failed:
+        description: Explicit no-upload reconciliation of a failed staging attempt after npm review
+        default: false
+        type: boolean
+permissions: {}
+concurrency:
+  group: littlejay-npm-publication
+  cancel-in-progress: false
+env:
+  RELEASE_COMMIT: ${{ inputs.commit }}
+  SOURCE_RUN: ${{ inputs.source_run }}
+  SOURCE_ATTEMPT: ${{ inputs.source_attempt }}
+  RECONCILE_FAILED: ${{ inputs.reconcile_failed }}
+  LITTLEJAY_PUBLISH_ENABLED: ${{ vars.NPM_PUBLISH_ENABLED }}
+jobs:
+  verify:
+    if: >-
+      github.repository == 'jordan-a-young/little-jay' &&
+      github.ref == 'refs/heads/main' &&
+      github.actor == 'jordan-a-young' &&
+      github.triggering_actor == 'jordan-a-young'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      artifact-id: ${{ steps.source.outputs.artifact-id }}
+    steps:
+      - name: Require activation and exact dispatch commit
+        env:
+          EVENT_COMMIT: ${{ github.sha }}
+        run: |
+          test "$LITTLEJAY_PUBLISH_ENABLED" = true
+          test "$RELEASE_COMMIT" = "$EVENT_COMMIT"
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Reject main moving before source verification
+        run: test "$(git rev-parse HEAD)" = "$RELEASE_COMMIT"
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320
+        with:
+          cache: false
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Authenticate the exact source attempt and artifact
+        id: source
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          args=(--confirm "$RELEASE_COMMIT" --source-run "$SOURCE_RUN" --source-attempt "$SOURCE_ATTEMPT")
+          if [ "$RECONCILE_FAILED" = true ]; then args+=(--reconcile-failed); fi
+          pnpm release:source "${args[@]}"
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          artifact-ids: ${{ steps.source.outputs.artifact-id }}
+          run-id: ${{ inputs.source_run }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          merge-multiple: true
+          path: .release/
+      - name: Verify all npm approvals and artifact integrities without writes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_ARTIFACT_ID: ${{ steps.source.outputs.artifact-id }}
+        run: |
+          args=(--confirm "$RELEASE_COMMIT" --source-run "$SOURCE_RUN" --source-attempt "$SOURCE_ATTEMPT")
+          if [ "$RECONCILE_FAILED" = true ]; then args+=(--reconcile-failed); fi
+          pnpm release:verify-finalization "${args[@]}"
+  finalize:
+    needs: verify
+    if: >-
+      github.repository == 'jordan-a-young/little-jay' &&
+      github.ref == 'refs/heads/main' &&
+      github.actor == 'jordan-a-young' &&
+      github.triggering_actor == 'jordan-a-young'
+    environment: npm-publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Reject main moving during protected-environment approval
+        run: test "$(git rev-parse HEAD)" = "$RELEASE_COMMIT"
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320
+        with:
+          cache: false
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          artifact-ids: ${{ needs.verify.outputs.artifact-id }}
+          run-id: ${{ inputs.source_run }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          merge-multiple: true
+          path: .release/
+      - name: Reverify and finalize approved release metadata without npm credentials
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_ARTIFACT_ID: ${{ needs.verify.outputs.artifact-id }}
+        run: |
+          args=(--confirm "$RELEASE_COMMIT" --source-run "$SOURCE_RUN" --source-attempt "$SOURCE_ATTEMPT")
+          if [ "$RECONCILE_FAILED" = true ]; then args+=(--reconcile-failed); fi
+          pnpm release:finalize "${args[@]}"
+      - name: Retain metadata finalization progress
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: npm-finalization-report-${{ github.run_attempt }}
+          path: .release/finalization.json
+          if-no-files-found: ignore
+          retention-days: 30

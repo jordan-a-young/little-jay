@@ -24,6 +24,13 @@ Use a bundler that resolves package CSS imports, or copy the exported stylesheet
 
 `tailwind.css` is an optional Tailwind 4 `@theme inline` utility mapping, used alongside the theme in a Tailwind compilation; it is not standalone component CSS. Applications using `@littlejay/ui/styles.css` already get the theme and compiled components without installing Tailwind; do not add a second theme import merely to use UI components.
 
+## Visual design principles
+
+- Use semantic roles for hierarchy: background and surface group content; content and muted distinguish text emphasis; primary identifies deliberate action emphasis. Do not use a brand swatch as a substitute for an action or feedback role.
+- Reuse established typography, spacing, alignment, and radius patterns in the consuming application. This package does not provide a complete typography/spacing scale or responsive layout system; do not invent token imports that are not in the installed CSS/exports.
+- Preserve readable hierarchy, foreground/background contrast, and distinguishable control/state cues in light, dark, and nested themes. Pair color with text or another non-color cue, and check actual combinations after overrides.
+- Let content and controls adapt to narrow space, long text, zoom, and text resizing; colors and tokens cannot solve layout or interaction accessibility on their own. Theme changes should not reset application drafts or focus. Design toward applicable WCAG 2.2 AA requirements without treating a palette as conformance evidence.
+
 ## Accessibility
 
 Preserve foreground/background pairs and verify contrast in both themes after overrides. Tokens alone do not guarantee accessible names, focus behavior, semantics, reduced motion, or contrast for arbitrary combinations. Do not communicate status only by color.
