@@ -34,6 +34,8 @@ The default whole-operation timeout is 10,000 ms; `timeoutMs` must be an integer
 
 Success requires UTF-8 JSON (`application/json` or `application/*+json`). Empty/204 bodies, invalid UTF-8/JSON, and decoder failures are errors. Cancellation/deadlines cover fetching, reading, and awaiting an async decoder, but cannot interrupt synchronous JS or stop an already-running decoder. Keep decoders bounded, side-effect-free, and responsible for their own resources.
 
+The charset may be absent or quoted/unquoted `UTF-8`. Quoted extension parameters respect backslash escapes and may contain semicolons or charset-like text: `application/json; profile="https://example.test/schema;charset=utf-16"` is accepted. An actual unsupported charset parameter, including one after a quoted extension, or an unterminated quoted value produces `content_type`.
+
 `HttpError.code` is `aborted`, `timeout`, `network`, `status`, `size`, `content_type`, `json`, or `decode`; `status` is available for response-related failures. Messages are fixed and omit URL, headers, bodies, abort reasons, and decoder diagnostics. A size failure takes precedence over an unsuccessful HTTP status when its body exceeds the limit. Do not expect an original cause or raw server message.
 
 ## Application policy

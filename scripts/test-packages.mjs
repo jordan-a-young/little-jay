@@ -251,6 +251,21 @@ try {
   assert.equal((await server.inject("/probes/ready")).statusCode, 503);
   assert.deepEqual((await server.inject("/failure")).json(), { statusCode: 500, error: { code: "INTERNAL_ERROR", message: "Internal server error" } });
   assert.equal(await fetchJson("https://example.test", { fetch: async () => Response.json({ ok: true }), decode: (value) => value.ok }), true);
+  for (const contentType of [
+    'application/json; profile="https://example.test/schema;charset=utf-16"',
+    'application/problem+json; profile="example; charset=iso-8859-1"; charset="UTF-8"',
+  ]) {
+    assert.equal(await fetchJson("https://example.test/quoted-parameters", {
+      fetch: async () => new Response('{"ok":true}', { headers: { "Content-Type": contentType } }),
+      decode: (value) => value.ok,
+    }), true);
+  }
+  await assert.rejects(fetchJson("https://example.test/unsupported-charset", {
+    fetch: async () => new Response('{"ok":true}', { headers: {
+      "Content-Type": 'application/json; profile="example; charset=utf-8"; charset=utf-16',
+    } }),
+    decode: (value) => value,
+  }), (error) => error instanceof HttpError && error.code === "content_type" && error.message === "Expected a UTF-8 JSON response");
   await assert.rejects(fetchJson("https://example.test/private", { fetch: async () => new Response("secret", { status: 500 }), decode: (value) => value }), (error) => error instanceof HttpError && error.code === "status" && !String(error).includes("secret"));
 } finally {
   await server.close();
@@ -268,7 +283,7 @@ await writeFile(
   `import { useActionState, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { useFormStatus } from "react-dom";
-import { Button, Alert as RootAlert, LoadingIndicator as RootLoadingIndicator, type LoadingIndicatorProps as RootLoadingIndicatorProps, type AlertProps as RootAlertProps, type ButtonVariant as RootButtonVariant } from "@littlejay/ui";
+import { Button, Checkbox as RootCheckbox, Alert as RootAlert, LoadingIndicator as RootLoadingIndicator, type LoadingIndicatorProps as RootLoadingIndicatorProps, type AlertProps as RootAlertProps, type ButtonVariant as RootButtonVariant } from "@littlejay/ui";
 import { Button as SubpathButton, type ButtonProps, type ButtonVariant } from "@littlejay/ui/button";
 import { Alert, type AlertProps } from "@littlejay/ui/alert";
 import { EmptyState } from "@littlejay/ui/empty-state";
@@ -505,6 +520,31 @@ function ExternalDismissibleAlert({ theme }: { theme: "light" | "dark" }) {
     <p role="status">Submits: {submits}; visible: {String(visible)}</p>
   </section>;
 }
+function ExternalControlBaselines() {
+  const [activations, setActivations] = useState(0);
+  const [submits, setSubmits] = useState(0);
+  return <section aria-label="Reset-free control baselines" className="consumer-font-override">
+    <h2>Reset-free control baselines</h2>
+    {(["light", "dark"] as const).map(theme => {
+      const surroundingTheme = theme === "light" ? "dark" : "light";
+      const ThemedCheckbox = theme === "light" ? Checkbox : RootCheckbox;
+      return <div key={theme} data-theme={surroundingTheme} style={{ colorScheme: surroundingTheme }}>
+        <form data-theme={theme} data-consumer-control-scope={theme} onSubmit={event => { event.preventDefault(); setSubmits(count => count + 1); }}>
+          <h3>{theme} controls inside {surroundingTheme}</h3>
+          <Button data-consumer-primary onClick={() => setActivations(count => count + 1)}>Activate {theme} primary</Button>
+          <SubpathButton data-consumer-secondary variant="secondary" onClick={() => setActivations(count => count + 1)}>Activate {theme} secondary</SubpathButton>
+          <Button disabled>Unavailable {theme} action</Button>
+          <Field label={theme + " unchecked preference"} orientation="horizontal"><ThemedCheckbox name={theme + "-unchecked"} value="yes" /></Field>
+          <Field label={theme + " checked preference"} orientation="horizontal"><ThemedCheckbox name={theme + "-checked"} value="yes" defaultChecked /></Field>
+          <Field label={theme + " disabled preference"} orientation="horizontal" disabled><ThemedCheckbox name={theme + "-disabled"} defaultChecked /></Field>
+          <Button type="submit">Inspect {theme} form</Button>
+          <Button type="reset">Reset {theme} controls</Button>
+        </form>
+      </div>;
+    })}
+    <p role="status" data-consumer-control-counts>Activations: {activations}; submissions: {submits}</p>
+  </section>;
+}
 function App() {
   const ref = useRef<HTMLButtonElement>(null);
   const [clicks, setClicks] = useState(0);
@@ -528,6 +568,7 @@ function App() {
     <p role="status">Clicks: {clicks}; submits: {submits}; ref: {String(focused)}</p>
     <div data-theme="dark"><Button>Dark</Button><div data-theme="light"><Button>Nested light</Button></div></div>
     <div className="project"><Button>Override</Button></div>
+    <ExternalControlBaselines />
     <section aria-label="External button variants">
       {(["light", "dark"] as const).map(theme => <div key={theme} data-theme={theme}>
         {buttonVariants.map(variant => <div key={variant}>
@@ -636,7 +677,7 @@ createRoot(document.getElementById("root")!).render(<App />);
 );
 await writeFile(
   path.join(consumer, "overrides.css"),
-  ".project { --lj-primary: #7c3aed; --lj-danger: #7c3aed; --lj-border: #7c3aed; --lj-radius-control: 0.25rem; }",
+  ".project { --lj-primary: #7c3aed; --lj-danger: #7c3aed; --lj-border: #7c3aed; --lj-radius-control: 0.25rem; }\n.consumer-font-override { --lj-font-sans: Georgia, serif; }",
 );
 await writeFile(
   path.join(consumer, "styles.d.ts"),

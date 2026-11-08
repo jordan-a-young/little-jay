@@ -34,6 +34,8 @@ Load `@littlejay/ui/styles.css` once at the application entry. It contains compi
 
 Use `data-theme="light"` or `data-theme="dark"` on the document root or a subtree. The application owns preference persistence and system-theme selection. Override semantic `--lj-*` properties after the library stylesheet, scoped to the relevant theme/container; review foreground/background contrast together. Brand blue is not the primary action color. For locally themed dialogs, place the portal in the themed subtree using `portalContainer`; document-root themes inherit normally.
 
+Button supplies its own border reset and typography baseline (1rem text, 1.5 line height, medium weight) in every variant. Its font family follows `--lj-font-sans`, including scoped overrides. Checkbox keeps native rendering and follows `--lj-color-scheme` in the nearest light/dark theme scope, including nested opposite-theme sections. Neither control sets the application's native theme preference policy.
+
 PebbleState needs application-served assets. Copy the state PNGs from the installed `@littlejay/brand/states/manifest.json` into your own public asset pipeline, preserving names and proportions. Pass a deployment-aware `assetBaseUrl` ending in `/` (for example `/my-app/branding/`, with images under `states/`). The library does not copy assets or infer the app base URL. Artwork has separate reserved rights; read the installed brand README before reuse.
 
 ## Accessibility

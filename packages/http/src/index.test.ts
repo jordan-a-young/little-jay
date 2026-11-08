@@ -160,6 +160,86 @@ describe("bounded JSON transport", () => {
   });
 
   it.each([
+    "application/json",
+    "application/json; charset=utf-8",
+    'application/json; charset="UTF-8"',
+    'application/json; profile="https://example.test/schema;charset=utf-16"',
+    'application/problem+json; profile="https://example.test/schema;charset=utf-16"',
+    'Application/Problem+JSON; profile="schema;CHARSET=UTF-16"; CHARSET="UTF-8"',
+    'application/json; charset=utf-8; profile="schema;charset=utf-16"',
+    'application/json; profile="schema;charset=utf-16"; charset=utf-8; version="1;2"',
+    String.raw`application/json; profile="escaped\";charset=utf-16"; charset=utf-8`,
+    String.raw`application/json; profile="escaped\\"; charset="UTF-8"`,
+    String.raw`application/json; profile="escaped\;charset=utf-16"`,
+  ])("accepts supported JSON parameter boundaries: %s", async (contentType) => {
+    const response = new Response('{"ok":true}', { headers: { "content-type": contentType } });
+    await expect(fetchJson("/health", { decode, fetch: injected(response) })).resolves.toBe(true);
+    expect(response.body?.locked).toBe(false);
+  });
+
+  it.each([
+    "application/json; charset=utf-16",
+    'application/problem+json; charset="UTF-16"',
+    'application/json; profile="schema;charset=utf-8"; charset=utf-16',
+    'application/problem+json; profile="schema;charset=utf-8"; charset="UTF-16"',
+    String.raw`application/json; profile="escaped\";charset=utf-8"; charset=utf-16`,
+    String.raw`application/json; profile="escaped\\"; charset=utf-16`,
+    'application/json; charset=utf-16; profile="schema;charset=utf-8"',
+    'text/plain; profile="schema;charset=utf-8"',
+    'application/json; profile="unterminated',
+    'application/json; profile="unterminated\\',
+    String.raw`application/json; profile="unterminated\"`,
+    'application/json; charset="utf-8',
+  ])("rejects unsupported or unterminated JSON parameters safely: %s", async (contentType) => {
+    vi.useFakeTimers();
+    const controller = new AbortController();
+    const remove = vi.spyOn(controller.signal, "removeEventListener");
+    const response = new Response('{"ok":true}', { headers: { "content-type": contentType } });
+    const decoder = vi.fn(decode);
+    try {
+      await fetchJson("/health", {
+        decode: decoder,
+        fetch: injected(response),
+        signal: controller.signal,
+      });
+      expect.unreachable();
+    } catch (error) {
+      expect(error).toBeInstanceOf(HttpError);
+      expect(error).toMatchObject({
+        code: "content_type",
+        message: "Expected a UTF-8 JSON response",
+        status: 200,
+      });
+      expect((error as Error).cause).toBeUndefined();
+      expect(String(error) + JSON.stringify(error)).not.toContain(contentType);
+    }
+    expect(decoder).not.toHaveBeenCalled();
+    expect(response.body?.locked).toBe(false);
+    expect(remove).toHaveBeenCalledWith("abort", expect.any(Function));
+    expect(vi.getTimerCount()).toBe(0);
+    remove.mockRestore();
+  });
+
+  it.each([
+    [200, 1, "size"],
+    [500, 1, "size"],
+    [500, 100, "status"],
+    [200, 100, "content_type"],
+  ] as const)(
+    "preserves error precedence for quoted parameters with status %s and byte limit %s",
+    async (status, maxResponseBytes, code) => {
+      const response = new Response("invalid JSON", {
+        status,
+        headers: { "content-type": 'application/json; profile="schema;v=1"; charset=utf-16' },
+      });
+      await expect(
+        fetchJson("/health", { decode, fetch: injected(response), maxResponseBytes }),
+      ).rejects.toMatchObject({ code, status });
+      expect(response.body?.locked).toBe(false);
+    },
+  );
+
+  it.each([
     ["json", () => new Response("<secret>", { headers: { "content-type": "application/json" } })],
     [
       "json",

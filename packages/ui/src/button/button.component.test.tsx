@@ -18,6 +18,31 @@ describe("button variant interactions", () => {
     vi.unstubAllGlobals();
   });
 
+  it("preserves native hidden behavior and consumer style composition", async () => {
+    await act(() =>
+      root.render(
+        <Button hidden className="project-button" style={{ margin: "3px" }}>
+          Optional action
+        </Button>,
+      ),
+    );
+    const button = container.querySelector("button")!;
+    expect(button.hidden).toBe(true);
+    expect(getComputedStyle(button).display).toBe("none");
+    expect(button.classList.contains("project-button")).toBe(true);
+    expect(button.style.margin).toBe("3px");
+    await act(() =>
+      root.render(
+        <Button className="project-button" style={{ margin: "3px" }}>
+          Optional action
+        </Button>,
+      ),
+    );
+    expect(container.querySelector("button")).toBe(button);
+    expect(button.hidden).toBe(false);
+    expect(getComputedStyle(button).display).not.toBe("none");
+  });
+
   it.each(["primary", "secondary", "outline", "ghost", "danger"] as const)(
     "%s preserves refs, disabled behavior, and explicit form submission",
     async (variant) => {
