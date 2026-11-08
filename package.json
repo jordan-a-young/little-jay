@@ -20,7 +20,11 @@
     "release:status": "node scripts/release.mjs status",
     "release:version": "node scripts/release.mjs version",
     "release:check": "node scripts/release.mjs check",
-    "release:publish": "node scripts/release.mjs publish",
+    "release:stage": "node scripts/release.mjs stage",
+    "release:inspect": "node scripts/release.mjs inspect",
+    "release:source": "node scripts/release.mjs source",
+    "release:verify-finalization": "node scripts/release.mjs verify-finalization",
+    "release:finalize": "node scripts/release.mjs finalize",
     "ready": "pnpm release:validate && pnpm check && pnpm build && pnpm typecheck && pnpm test:coverage && pnpm test:packages"
   },
   "devDependencies": {

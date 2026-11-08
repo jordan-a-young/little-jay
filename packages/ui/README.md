@@ -38,6 +38,17 @@ Button supplies its own border reset and typography baseline (1rem text, 1.5 lin
 
 PebbleState needs application-served assets. Copy the state PNGs from the installed `@littlejay/brand/states/manifest.json` into your own public asset pipeline, preserving names and proportions. Pass a deployment-aware `assetBaseUrl` ending in `/` (for example `/my-app/branding/`, with images under `states/`). The library does not copy assets or infer the app base URL. Artwork has separate reserved rights; read the installed brand README before reuse.
 
+## UI and UX design principles
+
+- Start with the person's task and reuse existing controls before adding a new interaction. Keep primary emphasis selective, group related content with consistent spacing/alignment, and use meaningful headings and readable typography. Containers do not choose your page's heading levels or landmarks.
+- Style through semantic tokens and established application patterns; do not introduce one-off colors, a second theme, or decorative containers for every section. Preserve hierarchy, contrast, and state cues in both themes. Brand color is not automatically an action color.
+- Prefer native semantics and predictable interaction. Provide visible labels, usable separated targets, keyboard access, visible focus, and appropriate restoration. Design toward applicable WCAG 2.2 AA requirements; components and tokens alone do not establish application conformance.
+- Design the relevant pending, empty, success, error, selected, disabled, and read-only experiences, not only the default screenshot. Use text rather than color alone, distinguish background refresh/cached data from initial loading, preserve drafts, and provide clear recovery without exposing diagnostics. Choose announcements deliberately to avoid duplicate or unnecessary alerts.
+- Use concise, specific action labels and consistent terminology. Explain constraints and destructive consequences; confirmation/undo remains application-owned and is never authorization. Disclose secondary detail progressively without hiding essential information or actions.
+- Adapt to narrow space, long content, zoom/text resizing, and reduced motion without losing information or essential controls. Use deliberate accessible overflow where needed. Theme/layout changes should not unexpectedly reset drafts, selection, or focus; hidden content may still have running effects.
+
+These are usage principles, not additional automatic behavior or new component props. The application owns composition, content, state transitions, recovery, and verification; preserve the documented contract of each component.
+
 ## Accessibility
 
 - Give controls visible labels. Field associates exactly one supported labelable control with its label, description, and error; put its ID on Field, not the child. Native form semantics/ref props remain available. Button defaults to `type="button"`; opt into submission explicitly.

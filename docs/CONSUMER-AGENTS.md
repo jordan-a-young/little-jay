@@ -9,7 +9,7 @@ Use one consumer-owned `AGENTS.md` for both tools; no Little Jay plugin, MCP ser
 1. Install only the packages the application needs, using its existing package manager and compatible runtime/peers. Do not copy this monorepo's toolchain or release commands into a consumer.
 2. Merge the section below into the consuming repository's root `AGENTS.md`; preserve its existing rules. In a monorepo, adjust README paths to the workspace where each dependency is installed. Missing optional packages do not need to be installed just for documentation.
 3. Start a new OpenCode or Codex session in that repository. Ask it to read the relevant installed README before planning a change; a Markdown link alone is not automatic loading.
-4. Confirm discovery with: “Without editing or making network requests, list the Little Jay package versions and documentation paths you read, identify the public imports and optimization constraints relevant to this task, and name this application's verification commands.” It should cite installed files, not guess from the latest online documentation.
+4. Confirm discovery with: “Without editing or making network requests, list the Little Jay package versions and documentation paths you read, identify the public imports, applicable UI/UX design principles and optimization constraints relevant to this task, and name this application's verification commands.” It should cite installed files, not guess from the latest online documentation. If an older installed guide lacks design principles, report that gap rather than assuming a newer guide's APIs or upgrading the package without approval.
 
 [OpenCode V2 instructions](https://opencode.ai/v2/docs/instructions) and [Codex project instructions](https://developers.openai.com/codex/agent-configuration/agents-md) both support project `AGENTS.md`. Their nested discovery and update behavior differ; keep the shared entry point at the consumer root and explicitly request task-relevant reads. Check local overrides or disabled project discovery if the entry point is missing. No claim is made that installing a dependency activates its instructions. These docs do not change either tool's permissions or global configuration.
 
@@ -20,7 +20,7 @@ Copy/adapt the following into the **consuming repository's own** `AGENTS.md`. Pa
 ```markdown
 ## Little Jay dependencies
 
-Before changing code that consumes an installed Little Jay package, read its usage guide, including Optimization guidance:
+Before planning or changing code that consumes an installed Little Jay package, read its usage guide, including applicable design principles and Optimization guidance:
 
 - UI imports, CSS/theme setup, accessible controls, and app-owned state: [@littlejay/ui](node_modules/@littlejay/ui/README.md).
 - Framework-independent theme tokens and contrast obligations: [@littlejay/tokens](node_modules/@littlejay/tokens/README.md).
@@ -33,6 +33,7 @@ Read only guides relevant to the task and check the installed versions, public p
 Optimize for the requested outcome, not speculative complexity:
 
 - Reuse existing components and semantic tokens. Load compiled UI CSS once; do not add Tailwind, a second theme, or a replacement component library merely to use Little Jay.
+- For UI/UX work, state the person's task and design the hierarchy, concise labels, consistent spacing/type, relevant pending/empty/error/success states, and recovery. Preserve native semantics, visible labels, keyboard/focus, non-color state cues, contrast in both themes, usable targets, narrow-layout/zoom reflow, and reduced motion. Use progressive disclosure without hiding essential actions or consequences; preserve drafts and user control. Read the installed UI/token guides for details and record acceptance criteria using this application's checks; do not assume tokens alone establish accessibility conformance.
 - Keep React state local, avoid redundant effects and duplicate query caches, and remember that inactive visited Tabs panels remain mounted with effects running. Preserve keyboard/focus, draft and theme behavior.
 - Bound JSON requests and decoding, forward cancellation, and keep cache/retry policy in the application. Never add automatic mutation retries as a performance shortcut.
 - Keep server connections and shutdown app-owned, readiness checks bounded, and logs safe. Copy only needed, permitted brand assets with deployment-aware URLs.

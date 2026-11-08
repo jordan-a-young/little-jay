@@ -24,6 +24,18 @@ personal data, or security-sensitive details.]
 - Relevant paths/components: [verified starting points]
 - Consumer/use case and reuse: [owning screen/source and existing alternatives]
 
+## Design check
+
+[Use docs/DESIGN-PRINCIPLES.md before marking ready. Keep this proportionate;
+for non-UI work, explain which UI/UX considerations do not apply.]
+
+- Experience: [task flow, visual/content hierarchy, consistent components,
+  relevant interaction/states, error prevention and recovery]
+- Accessibility and adaptation: [labels, keyboard/focus, contrast, themes,
+  narrow layouts, zoom/reflow and reduced motion where affected]
+- Ownership and tradeoffs: [app/library boundary, public compatibility,
+  dependency justification and any proposed principle deviation]
+
 ## Acceptance criteria
 
 - [ ] AC1: [observable behavior, including relevant edge/error cases]
