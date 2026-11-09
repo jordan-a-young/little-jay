@@ -1,6 +1,5 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { QueryClient } from "@tanstack/react-query";
 import { createMemoryHistory, RouterContextProvider } from "@tanstack/react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
 import { createCatalogRouter } from "../../router.js";
@@ -13,7 +12,6 @@ vi.mock("../../use-theme.js", () => ({
 describe("Switch catalog", () => {
   let container: HTMLDivElement;
   let root: Root;
-  let client: QueryClient;
   let router: ReturnType<typeof createCatalogRouter>;
 
   beforeEach(() => {
@@ -21,14 +19,12 @@ describe("Switch catalog", () => {
     container = document.createElement("div");
     document.body.append(container);
     root = createRoot(container);
-    client = new QueryClient();
-    router = createCatalogRouter(client, createMemoryHistory({ initialEntries: ["/switch"] }));
+    router = createCatalogRouter(createMemoryHistory({ initialEntries: ["/switch"] }));
   });
 
   afterEach(async () => {
     await act(() => root.unmount());
     container.remove();
-    client.clear();
     router.history.destroy();
     vi.unstubAllGlobals();
   });

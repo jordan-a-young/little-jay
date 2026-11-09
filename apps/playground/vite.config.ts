@@ -20,6 +20,5 @@ export default defineConfig(({ command }) => ({
   },
   server: {
     port: Number(process.env.WEB_PORT ?? 5173),
-    proxy: { "/api": process.env.API_PROXY_TARGET ?? "http://127.0.0.1:5050" },
   },
 }));

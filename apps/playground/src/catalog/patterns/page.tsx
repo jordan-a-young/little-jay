@@ -1,6 +1,6 @@
 import { DocumentationPage } from "../DocumentationPage.js";
 import type { CatalogDocument, CatalogPageProps } from "../types.js";
-import { ApiConnectionExample, WorkflowForm } from "./examples.js";
+import { LocalServerGuide, WorkflowForm } from "./examples.js";
 
 const documents: Record<string, CatalogDocument> = {
   "workflow-form": {
@@ -30,22 +30,22 @@ const documents: Record<string, CatalogDocument> = {
   },
   "api-connection": {
     overview:
-      "The existing Fastify health-check demo. Only opening this pattern mounts the health query; component and foundation pages do not require the API. TanStack Query owns caching and cancellation policy.",
+      "A static guide to the optional local server demo. The catalog is frontend-only: opening this page makes no API requests, starts no server and reports no connection state. The existing deep link is retained.",
     usage:
-      "const health = useQuery(healthQueryOptions);\n\n<Button disabled={health.isFetching || health.isPaused}\n  onClick={() => void health.refetch()}>Refresh API</Button>",
+      "pnpm install --frozen-lockfile\npnpm dev\n\npnpm dev:server\ncurl http://127.0.0.1:5050/api/health\ncurl http://127.0.0.1:5050/api/example",
     props: [],
     accessibility: [
-      "Real connection state is communicated in text. Offline cached data is not presented as a fresh health check.",
-      "The query uses @littlejay/http with native fetch, its abort signal, a 4 KiB response limit, a 10-second timeout, a runtime decoder, a 30-second stale window, and no automatic retries.",
-      "This demo reads /api/health. The API keeps its default port 5050; development and production require a matching proxy.",
-      "Reset preview resets local component state but does not erase the shared query cache. Refresh API explicitly requests fresh data.",
+      "Commands are instructions for a local clone, not browser-executed requests or live status indicators.",
+      "The catalog has no API proxy, QueryClient or backend requirement. Its local forms and preview reset remain app-owned.",
+      "The optional server binds to loopback on port 5050 by default. Run its command separately; HOST and PORT configuration belong to that process.",
+      "Synthetic server data does not establish external-service health. Do not place private configuration or dependency contents in responses or logs.",
     ],
     examples: [
       {
         id: "default",
-        title: "Live health check",
-        component: ApiConnectionExample,
-        code: 'const health = useQuery(healthQueryOptions);\n\n<Alert title="API connection" tone={health.isError ? "danger" : "info"}>\n  {health.isPending ? "Checking API…" : health.isError ? "Unable to reach the API" : "API is healthy"}\n</Alert>',
+        title: "Run the local server separately",
+        component: LocalServerGuide,
+        code: "<p>Start the catalog with <code>pnpm dev</code>.</p>\n<p>In another terminal, run <code>pnpm dev:server</code>.</p>",
       },
     ],
   },

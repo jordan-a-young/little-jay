@@ -1,6 +1,6 @@
 # JSON transport
 
-`@littlejay/http` is an ESM browser/Node package prepared for public npm distribution, with one operation, `fetchJson`, and a structured `HttpError`. The playground's health query is its first consumer.
+`@littlejay/http` is an ESM browser/Node package prepared for public npm distribution, with one operation, `fetchJson`, and a structured `HttpError`. The frontend-only playground includes illustrative transport guidance but does not install or execute this package. Library regressions and the packed consumer exercise the actual transport contract.
 
 ```ts
 import { fetchJson, HttpError } from "@littlejay/http";
@@ -35,4 +35,4 @@ const status = await fetchJson("/api/health", {
 
 `HttpError.code` is one of `aborted`, `timeout`, `network`, `status`, `size`, `content_type`, `json`, or `decode`. `message` is fixed by that code; `status` is available for response-related failures. There is no original cause, URL, response body, response headers, or raw decoder message. The ordinary Error stack describes the local call path, not a server-provided stack. Invalid local limits throw TypeError before I/O. A size error takes precedence over an unsuccessful status when the body exceeds its bound.
 
-TanStack Query continues to own the playground's query key, 30-second stale window, cancellation, offline pause/resume, cache, and explicit refresh. Its health query sets `retry: false`; the transport never retries writes. Applications may map safe error codes to user-facing copy without showing raw diagnostics.
+In applications that use TanStack Query, the application owns query keys, freshness, cancellation, offline pause/resume, caching and explicit refresh. The playground's non-executing guide illustrates a 30-second stale window and `retry: false`; it is not a live health check. The transport never retries writes. Applications may map safe error codes to user-facing copy without showing raw diagnostics.

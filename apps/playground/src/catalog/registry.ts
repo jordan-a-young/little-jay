@@ -152,9 +152,9 @@ export const catalogPages: readonly CatalogRegistration[] = [
   },
   {
     id: "api-connection",
-    title: "API connection",
+    title: "Local server demo",
     group: "Patterns",
-    keywords: "fetch fastify health query offline",
+    keywords: "api fastify server local clone optional frontend independent",
     component: patterns,
   },
 ];

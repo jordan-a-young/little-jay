@@ -1,6 +1,5 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createMemoryHistory, RouterProvider } from "@tanstack/react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
 import { createCatalogRouter } from "./router.js";
@@ -13,7 +12,6 @@ vi.mock("./use-theme.js", () => ({
 describe("catalog routing compatibility", () => {
   let container: HTMLDivElement;
   let root: Root;
-  let client: QueryClient;
   let router: ReturnType<typeof createCatalogRouter>;
 
   beforeEach(() => {
@@ -23,12 +21,10 @@ describe("catalog routing compatibility", () => {
     container = document.createElement("div");
     document.body.append(container);
     root = createRoot(container);
-    client = new QueryClient();
   });
   afterEach(async () => {
     await act(() => root.unmount());
     router?.history.destroy();
-    client.clear();
     container.remove();
     window.history.replaceState(null, "", "/");
     vi.unstubAllGlobals();
@@ -36,13 +32,7 @@ describe("catalog routing compatibility", () => {
 
   async function renderRouter() {
     await router.load();
-    await act(async () =>
-      root.render(
-        <QueryClientProvider client={client}>
-          <RouterProvider router={router} />
-        </QueryClientProvider>,
-      ),
-    );
+    await act(async () => root.render(<RouterProvider router={router} />));
   }
 
   it.each([
@@ -63,7 +53,7 @@ describe("catalog routing compatibility", () => {
     ["/button/%2F", "Button", "Example not found"],
     ["/missing", "Page not found", undefined],
   ])("handles entry %s without starting requests", async (path, title, example) => {
-    router = createCatalogRouter(client, createMemoryHistory({ initialEntries: [path] }));
+    router = createCatalogRouter(createMemoryHistory({ initialEntries: [path] }));
     await renderRouter();
     await vi.waitFor(() => expect(container.querySelector("h1")?.textContent).toBe(title));
     if (example) {
@@ -88,7 +78,7 @@ describe("catalog routing compatibility", () => {
       "",
       "/little-jay/?preview=1#pebble-states",
     );
-    router = createCatalogRouter(client);
+    router = createCatalogRouter();
     await renderRouter();
     await vi.waitFor(() => expect(container.querySelector("h1")?.textContent).toBe("PebbleState"));
     expect(window.history.state.marker).toBe("preserved");
