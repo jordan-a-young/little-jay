@@ -191,6 +191,7 @@ for (const name of ["brand", "tokens", "ui", "server", "http"]) {
     assert.equal(manifest.peerDependencies.react, "^19.0.0");
     assert.equal(manifest.peerDependencies["react-dom"], "^19.0.0");
     assert.equal(manifest.dependencies.react, undefined);
+    assert.equal(manifest.dependencies["@radix-ui/react-dialog"], undefined);
     const outputFiles = await readdir(path.join(directory, "dist"));
     const modules = await Promise.all(
       outputFiles
@@ -198,6 +199,7 @@ for (const name of ["brand", "tokens", "ui", "server", "http"]) {
         .map((file) => readFile(path.join(directory, "dist", file), "utf8")),
     );
     assert.match(modules.join("\n"), /from ["']react\/jsx-runtime["']/);
+    assert.doesNotMatch(modules.join("\n"), /@radix-ui\/react-dialog|react-remove-scroll/);
     const stylesheet = await readFile(path.join(directory, "dist/styles.css"), "utf8");
     const stylesheetRules = [...stylesheet.matchAll(/([^{}]+)\{([^{}]+)\}/g)];
     for (const [className, display] of [
@@ -206,6 +208,7 @@ for (const name of ["brand", "tokens", "ui", "server", "http"]) {
       ["lj-loading-indicator", "inline-flex"],
       ["lj-icon-button", "inline-flex"],
       ["lj-status-indicator", "inline-flex"],
+      ["lj-button-link", "inline-flex"],
     ]) {
       assert.ok(
         stylesheetRules.some(
@@ -285,6 +288,9 @@ import { createRoot } from "react-dom/client";
 import { useFormStatus } from "react-dom";
 import { Button, Checkbox as RootCheckbox, Alert as RootAlert, LoadingIndicator as RootLoadingIndicator, type LoadingIndicatorProps as RootLoadingIndicatorProps, type AlertProps as RootAlertProps, type ButtonVariant as RootButtonVariant } from "@littlejay/ui";
 import { Button as SubpathButton, type ButtonProps, type ButtonVariant } from "@littlejay/ui/button";
+import { Link, type LinkProps } from "@littlejay/ui/link";
+import { ButtonLink, type ButtonLinkProps } from "@littlejay/ui/button-link";
+import { Link as RootLink, ButtonLink as RootButtonLink, type LinkProps as RootLinkProps, type ButtonLinkProps as RootButtonLinkProps } from "@littlejay/ui";
 import { Alert, type AlertProps } from "@littlejay/ui/alert";
 import { EmptyState, type EmptyStateProps } from "@littlejay/ui/empty-state";
 import { EmptyState as RootEmptyState, type EmptyStateProps as RootEmptyStateProps } from "@littlejay/ui";
@@ -329,10 +335,22 @@ type ServerResult = ReturnType<typeof createServer>;
 const serverTypecheck: ServerResult | FastifyInstance | undefined = undefined;
 void serverTypecheck;
 type Assert<Condition extends true> = Condition;
+type MatchingLinkProps = Assert<RootLinkProps extends LinkProps ? LinkProps extends RootLinkProps ? true : false : false>;
+type MatchingButtonLinkProps = Assert<RootButtonLinkProps extends ButtonLinkProps ? ButtonLinkProps extends RootButtonLinkProps ? true : false : false>;
+type RequiredLinkHref = Assert<{} extends Pick<LinkProps, "href"> ? false : true>;
+type RequiredButtonLinkHref = Assert<{} extends Pick<ButtonLinkProps, "href"> ? false : true>;
+type NoDisabledLinkContract = Assert<"disabled" extends keyof LinkProps | keyof ButtonLinkProps ? false : true>;
+type ButtonLinkVariants = Assert<NonNullable<ButtonLinkProps["variant"]> extends ButtonVariant ? ButtonVariant extends NonNullable<ButtonLinkProps["variant"]> ? true : false : false>;
+const linkContracts: [MatchingLinkProps, MatchingButtonLinkProps, RequiredLinkHref, RequiredButtonLinkHref, NoDisabledLinkContract, ButtonLinkVariants] = [true, true, true, true, true, true];
+void linkContracts;
 type MatchingEmptyStateProps = Assert<RootEmptyStateProps extends EmptyStateProps ? EmptyStateProps extends RootEmptyStateProps ? true : false : false>;
 type HeadingLevels = Assert<NonNullable<EmptyStateProps["titleLevel"]> extends 1 | 2 | 3 | 4 | 5 | 6 ? 1 | 2 | 3 | 4 | 5 | 6 extends NonNullable<EmptyStateProps["titleLevel"]> ? true : false : false>;
 type InvalidHeadingLevel = Assert<7 extends NonNullable<EmptyStateProps["titleLevel"]> ? false : true>;
 type MatchingDialogContentProps = Assert<RootDialogContentProps extends DialogContentProps ? DialogContentProps extends RootDialogContentProps ? true : false : false>;
+type IndependentDialogContract = Assert<Extract<"onEscapeKeyDown" | "onInteractOutside" | "onOpenAutoFocus" | "onCloseAutoFocus" | "onPointerDownOutside" | "onFocusOutside" | "asChild" | "forceMount" | "modal", keyof DialogContentProps | keyof DialogProps> extends never ? true : false>;
+type DialogDismissalContract = Assert<DialogContentProps["dismissOnEscape"] extends boolean | undefined ? DialogContentProps["dismissOnOutsidePress"] extends boolean | undefined ? true : false : false>;
+const dialogContracts: [IndependentDialogContract, DialogDismissalContract] = [true, true];
+void dialogContracts;
 const migrationContracts: [MatchingEmptyStateProps, HeadingLevels, InvalidHeadingLevel, MatchingDialogContentProps] = [true, true, true, true];
 void migrationContracts;
 const headingLevels = [1, 2, 3, 4, 5, 6] as const satisfies readonly NonNullable<EmptyStateProps["titleLevel"]>[];
@@ -570,8 +588,8 @@ function ExternalPendingDialog({ theme }: { theme: "light" | "dark" }) {
           <Trigger>Open {theme} configured dialog</Trigger>
           <Content title={theme + " local review"} description="Synthetic pending state only; no request or decision is performed."
             portalContainer={container.current} closeDisabled={pending} closeLabel={"Close " + theme + " local review"}
-            onEscapeKeyDown={event => { if (pending && guardDismissal) event.preventDefault(); }}
-            onInteractOutside={event => { if (pending && guardDismissal) event.preventDefault(); }}>
+            dismissOnEscape={!pending || !guardDismissal}
+            dismissOnOutsidePress={!pending || !guardDismissal}>
             <Field label={theme + " dialog draft"}><Input defaultValue="Unsaved local draft" /></Field>
             <Field label={theme + " guard pending dismissal"} orientation="horizontal"><Checkbox checked={guardDismissal} onChange={event => setGuardDismissal(event.currentTarget.checked)} /></Field>
             <Button onClick={() => setPending(value => !value)}>{pending ? "Finish" : "Simulate"} {theme} pending state</Button>
@@ -600,6 +618,27 @@ function ExternalEmptyStateHeadings() {
     <p role="status" data-consumer-empty-actions>Actions: {actions}</p>
   </section>;
 }
+function ExternalNavigation({ theme }: { theme: "light" | "dark" }) {
+  const ref = useRef<HTMLAnchorElement>(null);
+  const [activations, setActivations] = useState(0);
+  const Anchor = theme === "light" ? Link : RootLink;
+  const Navigation = theme === "light" ? ButtonLink : RootButtonLink;
+  return <section className="consumer-navigation" data-theme={theme} data-consumer-navigation={theme} aria-label={theme + " native navigation"}>
+    <h2>{theme} native navigation</h2>
+    <p><Anchor ref={ref} data-consumer-inline href="#consumer-navigation-target" aria-current="page" onClick={() => setActivations(count => count + 1)}>Consumer destination</Anchor></p>
+    <button type="button" data-consumer-focus-link onClick={() => ref.current?.focus()}>Focus {theme} anchor</button>
+    <p><Anchor href="#consumer-navigation-target">{"long-inline-navigation-label-".repeat(12)}</Anchor></p>
+    <div className="consumer-navigation-variants">{buttonVariants.map(variant => <Navigation key={variant} data-consumer-link-variant={variant} variant={variant} href="#consumer-navigation-target" onClick={() => setActivations(count => count + 1)}>{variant} destination</Navigation>)}</div>
+    <p><Navigation variant="outline" href="#consumer-navigation-target">{"long-button-navigation-label-".repeat(12)}</Navigation></p>
+    <p><Anchor href="#consumer-navigation-target" target="_blank" rel="noopener noreferrer" data-consumer-new-tab>Open local destination in a new tab</Anchor></p>
+    <p><Anchor href="data:text/plain,synthetic%20local%20notes" download="local-notes.txt">Download synthetic local notes</Anchor></p>
+    <button type="button" data-consumer-before-hidden>Before hidden anchor</button>
+    <Anchor hidden href="#consumer-navigation-target">Hidden inline anchor</Anchor>
+    <Navigation hidden href="#consumer-navigation-target">Hidden button anchor</Navigation>
+    <button type="button" data-consumer-after-hidden>After hidden anchors</button>
+    <p role="status" data-consumer-navigation-count>Native activations: {activations}</p>
+  </section>;
+}
 function App() {
   const ref = useRef<HTMLButtonElement>(null);
   const [clicks, setClicks] = useState(0);
@@ -624,6 +663,9 @@ function App() {
     <div data-theme="dark"><Button>Dark</Button><div data-theme="light"><Button>Nested light</Button></div></div>
     <div className="project"><Button>Override</Button></div>
     <ExternalControlBaselines />
+    <ExternalNavigation theme="light" />
+    <ExternalNavigation theme="dark" />
+    <h2 id="consumer-navigation-target" tabIndex={-1}>Native navigation destination</h2>
     <ExternalEmptyStateHeadings />
     <ExternalPendingDialog theme="light" />
     <ExternalPendingDialog theme="dark" />
@@ -735,11 +777,102 @@ createRoot(document.getElementById("root")!).render(<App />);
 );
 await writeFile(
   path.join(consumer, "overrides.css"),
-  ".project { --lj-primary: #7c3aed; --lj-danger: #7c3aed; --lj-border: #7c3aed; --lj-radius-control: 0.25rem; }\n.consumer-font-override { --lj-font-sans: Georgia, serif; }",
+  ".project { --lj-primary: #7c3aed; --lj-danger: #7c3aed; --lj-border: #7c3aed; --lj-radius-control: 0.25rem; }\n.consumer-font-override { --lj-font-sans: Georgia, serif; }\n.consumer-navigation { min-width: 0; padding: 1rem; background: var(--lj-background); color: var(--lj-content); }\n.consumer-navigation-variants { display: flex; flex-wrap: wrap; gap: 0.75rem; }",
 );
 await writeFile(
   path.join(consumer, "styles.d.ts"),
   'declare module "*.css" {}\ndeclare module "*.svg" { const source: string; export default source; }\ndeclare module "*.png" { const source: string; export default source; }\n',
+);
+const dialogFixture = path.join(consumer, "dialog-fixture");
+await mkdir(dialogFixture);
+await writeFile(
+  path.join(dialogFixture, "index.html"),
+  '<!doctype html><html lang="en"><head><!-- fixture-csp-meta --><meta name="viewport" content="width=device-width, initial-scale=1"><title>Packaged Dialog nonce integration</title><link rel="icon" href="data:,"></head><body><div id="root"></div><script type="module" src="/main.tsx"></script></body></html>',
+);
+await writeFile(
+  path.join(dialogFixture, "main.tsx"),
+  `import { StrictMode, useEffect, useRef, useState } from "react";
+import { createRoot } from "react-dom/client";
+import { Button, Combobox, Dialog, DialogTrigger, DialogContent, DialogClose } from "@littlejay/ui";
+import { Dialog as SubpathDialog, DialogContent as SubpathContent } from "@littlejay/ui/dialog";
+import "@littlejay/ui/styles.css";
+import "./styles.css";
+document.documentElement.dataset.cspViolations = "0";
+document.addEventListener("securitypolicyviolation", () => {
+  document.documentElement.dataset.cspViolations = String(Number(document.documentElement.dataset.cspViolations) + 1);
+});
+function App() {
+  const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(true);
+  const [pending, setPending] = useState(false);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [variant, setVariant] = useState<"dialog" | "sheet">("dialog");
+  const [draft, setDraft] = useState("Unsaved local draft");
+  const [selected, setSelected] = useState<string | null>("north");
+  const [portal, setPortal] = useState<HTMLElement | null>(null);
+  const [popupPortal, setPopupPortal] = useState<HTMLElement | null>(null);
+  const [customOpen, setCustomOpen] = useState(false);
+  const [nativeKeys, setNativeKeys] = useState(0);
+  const [hasCustomOrigin, setHasCustomOrigin] = useState(true);
+  const fallback = useRef<HTMLButtonElement>(null);
+  const customOrigin = useRef<HTMLButtonElement>(null);
+  const customWasOpen = useRef(false);
+  const content = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (customWasOpen.current && !customOpen && document.activeElement === document.body) {
+      (customOrigin.current ?? fallback.current)?.focus();
+    }
+    customWasOpen.current = customOpen;
+  }, [customOpen]);
+  return <main>
+    <h1>Packaged Dialog nonce integration</h1>
+    <p>Local synthetic state only. No requests, acceptance decisions or persistence.</p>
+    <Button onClick={() => setTheme(value => value === "light" ? "dark" : "light")}>Toggle theme</Button>
+    <Button onClick={() => setVariant(value => value === "dialog" ? "sheet" : "dialog")}>Toggle dialog layout</Button>
+    <Button ref={fallback}>Refresh fallback</Button>
+    {hasCustomOrigin && <Button ref={customOrigin} onClick={event => { event.currentTarget.focus(); setCustomOpen(true); }}>Open without DialogTrigger</Button>}
+    {customOpen && <SubpathDialog open onOpenChange={next => { if (!next) setCustomOpen(false); }}>
+      <SubpathContent title="Application focus recovery">
+        <p>Closing unmounts the entire controlled Dialog root.</p>
+        <Button onClick={() => { setHasCustomOrigin(false); setCustomOpen(false); }}>Remove opener and close</Button>
+      </SubpathContent>
+    </SubpathDialog>}
+    <div className="fixture-spacer" aria-hidden="true" />
+    <section ref={setPortal} data-theme={theme} aria-label="Scoped modal fixture">
+      <div className="fixture-background-scroll" tabIndex={0} aria-label="Background scroller"><p>Background start</p><div className="fixture-spacer" /><p>Background end</p></div>
+      <Button onClick={() => setMounted(value => !value)}>Toggle modal owner</Button>
+      {mounted && <Dialog open={open} onOpenChange={next => { if (!pending) setOpen(next); }}>
+        <DialogTrigger>Open packaged modal</DialogTrigger>
+        <DialogContent ref={content} title="Review local draft" description="Synthetic state is kept by the application."
+          portalContainer={portal} variant={variant} closeDisabled={pending}
+          aria-busy={pending} data-native-key-count={nativeKeys}
+          onKeyDown={event => { if (event.key === "F2") setNativeKeys(count => count + 1); }}
+          dismissOnEscape={!pending} dismissOnOutsidePress={!pending}>
+          <div ref={setPopupPortal}>
+            <label>Draft <input autoFocus value={draft} onChange={event => setDraft(event.currentTarget.value)} /></label>
+            <Combobox aria-label="Local project" value={selected} onValueChange={setSelected} portalContainer={popupPortal}
+              options={[{value:"north",label:"North"},{value:"south",label:"South"}]} />
+            <Button onClick={() => setPending(value => !value)}>{pending ? "Finish pending" : "Simulate pending"}</Button>
+            <Button onClick={() => setTheme(value => value === "light" ? "dark" : "light")}>Change modal theme</Button>
+            <Button onClick={() => { setPending(false); setOpen(false); setMounted(false); }}>Unmount modal owner</Button>
+            {Array.from({length:24}, (_, index) => <p key={index}>Local detail {index + 1}: readable long content with wrapping and keyboard scrolling, without clipping essential actions.</p>)}
+            <input aria-label="Last modal field" />
+            <DialogClose disabled={pending}>Done reviewing</DialogClose>
+          </div>
+        </DialogContent>
+      </Dialog>}
+      <p id="fixture-state">{open ? "Modal requested open" : "Modal closed"}; {pending ? "pending" : "ready"}; {theme}; {variant}; {draft}; {selected}</p>
+    </section>
+    <div className="fixture-spacer" aria-hidden="true" />
+    <div id="fixed-marker" aria-hidden="true">Fixed marker</div>
+  </main>;
+}
+createRoot(document.getElementById("root")!).render(<StrictMode><App /></StrictMode>);
+`,
+);
+await writeFile(
+  path.join(dialogFixture, "styles.css"),
+  "body { font-family: system-ui, sans-serif; } main { overflow-wrap: anywhere; } button { margin: 0.25rem; } .fixture-spacer { height: 160vh; } .fixture-background-scroll { height: 8rem; overflow: auto; border: 1px solid; } #fixture-state { min-block-size: 8rem; } #fixed-marker { position: fixed; inset-block-start: 0; inset-inline-end: 0; background: white; color: black; pointer-events: none; }",
 );
 await writeFile(
   path.join(consumer, "tsconfig.json"),
@@ -754,12 +887,23 @@ await writeFile(
       skipLibCheck: false,
       types: ["node", "react", "react-dom"],
     },
-    include: ["main.tsx", "styles.d.ts", "documented-*.tsx", "documented-*.ts"],
+    include: [
+      "main.tsx",
+      "dialog-fixture/main.tsx",
+      "styles.d.ts",
+      "documented-*.tsx",
+      "documented-*.ts",
+    ],
   }),
 );
 run(["exec", "tsc", "-p", path.join(consumer, "tsconfig.json")], workspace);
 await build({
   root: consumer,
+  configFile: false,
+  build: { outDir: "dist" },
+});
+await build({
+  root: dialogFixture,
   configFile: false,
   build: { outDir: "dist" },
 });

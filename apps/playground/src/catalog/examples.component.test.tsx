@@ -26,6 +26,14 @@ describe("catalog example behavior", () => {
 
   beforeEach(() => {
     vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+    vi.stubGlobal("CSS", {
+      ...globalThis.CSS,
+      escape: (value: string) =>
+        Array.from(
+          String(value),
+          (character) => `\\${(character.codePointAt(0) || 0xfffd).toString(16)} `,
+        ).join(""),
+    });
     vi.stubGlobal("fetch", vi.fn());
     container = document.createElement("div");
     document.body.append(container);
@@ -194,8 +202,9 @@ describe("catalog example behavior", () => {
       "Read-only local example.",
     );
     expect(dialog.querySelector("dl")?.textContent).toContain("Saved draft");
+    await vi.waitFor(() => expect(document.activeElement).toBe(dialog));
     await act(() =>
-      document.dispatchEvent(
+      dialog.dispatchEvent(
         new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }),
       ),
     );

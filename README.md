@@ -87,7 +87,7 @@ packages/
   server/        @littlejay/server: factory and opt-in error/health/readiness plugins
 ```
 
-Layers are introduced only when they contain useful code. Radix Dialog supports the modal slice; TypeBox validates one local API endpoint. Each real project owns its application-specific schemas.
+Layers are introduced only when they contain useful code. React Aria supports complex modal and Combobox interactions; TypeBox validates one local API endpoint. Each real project owns its application-specific schemas. See the [UI guide](packages/ui/README.md#dialog) for Dialog's application-owned CSP nonce setup and Chromium support scope.
 
 ## Button
 
@@ -148,9 +148,9 @@ The playground demonstrates a render failure without taking down sibling control
 
 `DescriptionList`, `Disclosure`, `TextBlock`, and `IconButton` are exported at the root and their kebab-case subpaths. DescriptionList uses native `dl` with caller-supplied `dt`/`dd` pairs; Disclosure uses native `details`/`summary`. TextBlock requires a `text` string, escapes it as React text, wraps long lines, and provides a keyboard-focusable scrolling area. Supply a descriptive `aria-label` or `aria-labelledby`; named output defaults to a region, while unnamed output adds no landmark. An explicit role is preserved. It accepts neither children nor HTML injection. IconButton requires a descriptive nonblank `label`, hides its decorative icon from assistive technology, and retains Button's native disabled, non-submit, ref, and focus behavior.
 
-`Dialog`, `DialogTrigger`, `DialogContent`, and `DialogClose` are available at `@littlejay/ui/dialog`. Content requires a nonblank visible `title`, supports an optional `description`, and includes a Close button. `variant="sheet"` uses the same modal behavior in a side layout. Controlled `open`/`onOpenChange` and uncontrolled `defaultOpen` use Radix's portal, focus trap/restoration, and dismiss behavior. Keep the trigger mounted for restoration. Portals inherit tokens at their destination: document themes work directly; scoped overrides need `portalContainer` inside that scope. No modal animation or global reset is added.
+`Dialog`, `DialogTrigger`, `DialogContent`, and `DialogClose` are available at `@littlejay/ui/dialog`. Content requires a nonblank visible `title`, supports an optional `description`, and includes a Close button. `variant="sheet"` uses the same modal behavior in a side layout. Controlled `open`/`onOpenChange` and uncontrolled `defaultOpen` use React Aria's modal interaction machinery. Explicit `dismissOnEscape` and `dismissOnOutsidePress` flags default to true; pending policy remains application-owned. Keep the focused opener mounted for normal restoration; a surviving application owner handles removed-opener fallback. Portals inherit tokens at their destination: document themes work directly; scoped overrides need `portalContainer` inside that scope. No modal animation or global reset is added.
 
-The focused `@radix-ui/react-dialog@1.3.1` package supports React 19; its [documented APIs](https://www.radix-ui.com/primitives/docs/components/dialog) cover this slice without pulling in an entire widget collection. UI now declares React DOM 19 as a peer alongside React. Catalog pages include safe local interactions and a controlled sheet example at `/#/dialog/sheet`.
+Dialog reuses the existing React Aria dependency and React/React DOM 19 peers. Read the [installed UI guide](packages/ui/README.md#dialog) for the Chromium target, response-bound style nonce setup, native section props/ref and breaking migration from vendor lifecycle callbacks. Nonce-authorized styling is not literal self-only style CSP support. Catalog pages include safe local interactions and a controlled sheet example at `/#/dialog/sheet`.
 
 ## Form components
 

@@ -18,6 +18,7 @@ type CatalogRegistration = {
 
 const foundations = lazy(() => import("./foundations/page.js"));
 const actions = lazy(() => import("./button/page.js"));
+const links = lazy(() => import("./link/page.js"));
 const forms = lazy(() => import("./forms/page.js"));
 const feedback = lazy(() => import("./feedback/page.js"));
 const patterns = lazy(() => import("./patterns/page.js"));
@@ -58,6 +59,20 @@ export const catalogPages: readonly CatalogRegistration[] = [
     group: "Components / Actions",
     keywords: "click disabled submit",
     component: actions,
+  },
+  {
+    id: "button-link",
+    title: "ButtonLink",
+    group: "Components / Actions",
+    keywords: "native anchor navigation href button variants",
+    component: links,
+  },
+  {
+    id: "link",
+    title: "Link",
+    group: "Components / Actions",
+    keywords: "native anchor navigation href inline underline",
+    component: links,
   },
   ...[
     "Alert",

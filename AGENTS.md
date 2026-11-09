@@ -12,6 +12,12 @@
 - Preserve unfamiliar changes. The source is hosted on GitHub; do not commit, push, publish packages, change visibility, or deploy unless requested.
 - Serena is optional maintainer tooling: version `.serena/project.yml` and `.serena/.gitignore`, keeping shared settings portable. Keep cache and `project.local.yml` ignored; put machine-specific overrides there. Review project memories before including them in a commit: retain only durable, non-sensitive knowledge and link to authoritative `AGENTS.md`/`docs/` guidance instead of duplicating it. Do not bulk-stage `.serena/` or treat its configuration as consumer-package setup.
 
+## React component direction
+
+- Default to plain React with semantic native HTML for small, straightforward components. Reuse existing Little Jay components and composition before introducing another abstraction or interaction dependency.
+- For complex widgets whose accessible interaction behavior is not worth recreating and maintaining, prefer wrapping React Aria Components (`react-aria-components`) in `@littlejay/ui`. Decide by keyboard, focus, selection, overlay and state complexity, not visual size or line count. See `packages/ui/AGENTS.md` and [library design principles](docs/DESIGN-PRINCIPLES.md#library-architecture).
+- This is guidance for new work, not a blanket migration. Preserve existing component contracts unless replacement is explicitly scoped; dependency changes still require task authorization and normal verification. Dialog and Combobox share React Aria; restrictive-CSP integrations must follow the application-owned nonce contract in `packages/ui/README.md`.
+
 ## Bounded troubleshooting
 
 - Before editing, identify the owning workspace, relevant contract, expected behavior, and smallest useful verification command. Keep discovery proportional to the task; reuse established context instead of repeatedly scanning the repository.

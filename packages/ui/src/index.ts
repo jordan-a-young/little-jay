@@ -1,4 +1,6 @@
 export { Button, type ButtonProps, type ButtonVariant } from "./button/index.js";
+export { Link, type LinkProps } from "./link/index.js";
+export { ButtonLink, type ButtonLinkProps } from "./button-link/index.js";
 export {
   Breadcrumb,
   BreadcrumbList,

@@ -61,6 +61,25 @@ These are usage principles, not additional automatic behavior or new component p
 
 These components own presentation, not authentication, authorization, workflow transitions, network calls, caches, validation schemas, or routing. Disabled controls and accessibility attributes are not security boundaries. The application owns pending state, retries, draft preservation, reset behavior, and safe error reporting; ErrorBoundary is not a catch-all for asynchronous/event-handler failures.
 
+## Link and ButtonLink
+
+Use `Link` for inline navigation and `ButtonLink` when navigation needs button-style emphasis. Both render native anchors, require `href`, and are available from the root or their `@littlejay/ui/link` and `@littlejay/ui/button-link` subpaths.
+
+```tsx
+import { Link, ButtonLink } from "@littlejay/ui";
+
+<Link href="/projects" aria-current="page">
+  Projects
+</Link>;
+<ButtonLink href="/projects/new" variant="secondary">
+  New project form
+</ButtonLink>;
+```
+
+Native anchor attributes, refs, `className` and `style` are forwarded. `ButtonLink` uses the same `ButtonVariant` choices as Button, defaulting to `primary`; `Link` inherits surrounding typography. Compiled reset-free CSS supplies semantic colors, visible focus and long-label wrapping while preserving native `hidden` behavior.
+
+Enter, modified/middle clicks, `target`, `rel` and `download` keep native browser behavior. There is no button role, synthetic Space activation, disabled/loading-link API or router adapter. Applications own routing, destinations and `aria-current`; use Button for actions. Visual variants do not supply confirmation or authorization.
+
 ## Dialog
 
 `Dialog`, `DialogTrigger`, `DialogContent`, `DialogClose` and their Props types are available from the root or `@littlejay/ui/dialog`. Content requires a nonblank visible `title`; an optional `description` explains the task. The built-in Close action remains visible and non-submit by default.
@@ -76,7 +95,82 @@ import { Dialog, DialogTrigger, DialogContent } from "@littlejay/ui/dialog";
 </Dialog>;
 ```
 
-`closeDisabled` defaults to `false`. `closeLabel` supplies a nonblank accessible name for the built-in action while its visible text stays “Close”; omit it to retain the existing name. Neither prop replaces or hides the control. Native Escape and outside-dismiss behavior is unchanged by `closeDisabled`: applications that must prevent dismissal while pending should use their existing controlled `open`/`onOpenChange` and dismissal callbacks. The library does not own pending state, request cancellation or approval policy. Keep the trigger mounted for focus restoration; for subtree themes, put `portalContainer` inside the intended scope.
+Dialog uses the existing React Aria foundation for modal focus containment, background isolation, scroll locking and nested overlay ordering. This increment targets Chromium browsers; iOS, Safari and WebKit are unsupported. Use `open`/`onOpenChange` for controlled state or `defaultOpen` for uncontrolled state. Closing unmounts content: lift drafts/selections into application state when they must survive reopening. `variant="sheet"` changes layout, not modal behavior. No animation is added.
+
+`closeDisabled` defaults to `false` and disables only the built-in action. `closeLabel` supplies its nonblank accessible name while visible text stays “Close”; omit it for the native name. `dismissOnEscape` and `dismissOnOutsidePress` both default to `true` independently of Close. For pending work, set the relevant flags to `false` and guard controlled `onOpenChange`; `DialogClose` buttons need their own `disabled` prop. Keep a reachable recovery action. Pending state, cancellation, persistence and authorization remain application-owned.
+
+Content's native section props, `ref` (`HTMLElement`), `className` and `style` target the named dialog, not its overlay. Keep `portalContainer` mounted inside the intended theme scope; the default destination is `document.body`. A Combobox popup inside a Dialog needs its own `portalContainer` inside the content. The first Escape closes open options, the next follows `dismissOnEscape`.
+
+Initial focus defaults to the dialog section; a descendant's native `autoFocus` can select the initial control. React Aria restores focus to the previously focused control, including controlled opening without `DialogTrigger` and whole-Dialog removal. Focus the actual opening control before setting `open` and keep it connected where practical. There is no custom target/lifecycle override prop. If an application removes that origin, a **surviving application owner** must recover otherwise-lost focus after committed teardown. For example, with current opener/fallback refs and application-owned `open`:
+
+```tsx
+import { useEffect, useRef, useState } from "react";
+import { Button, Dialog, DialogContent } from "@littlejay/ui";
+
+export function LocalFocusRecovery() {
+  const [open, setOpen] = useState(false);
+  const [hasOpener, setHasOpener] = useState(true);
+  const opener = useRef<HTMLButtonElement>(null);
+  const fallback = useRef<HTMLButtonElement>(null);
+  const wasOpen = useRef(false);
+  useEffect(() => {
+    if (wasOpen.current && !open && document.activeElement === document.body) {
+      (opener.current ?? fallback.current)?.focus();
+    }
+    wasOpen.current = open;
+  }, [open]);
+  return (
+    <>
+      <Button ref={fallback}>Refresh</Button>
+      {hasOpener && (
+        <Button
+          ref={opener}
+          onClick={(event) => {
+            event.currentTarget.focus();
+            setOpen(true);
+          }}
+        >
+          Review local item
+        </Button>
+      )}
+      {open && (
+        <Dialog open onOpenChange={setOpen}>
+          <DialogContent title="Local focus recovery">
+            <Button
+              onClick={() => {
+                setHasOpener(false);
+                setOpen(false);
+              }}
+            >
+              Simulate removing the opener and close
+            </Button>
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
+  );
+}
+```
+
+Keep this passive effect in the surviving owner, not inside conditionally removed Dialog content. Modal background-inert cleanup must run before attempting focus; a layout effect can run too early while the fallback is still inert. Resolve a connected, usable card-or-fallback target from the latest application state; skip recovery when reopened or meaningful external focus already exists. Do not schedule an unconditional delayed focus override or use upstream private restoration events. The library cannot guarantee fallback recovery when that application owner also disappears.
+
+The current portal adapter uses React Aria Components' public but deprecated `UNSTABLE_portalContainer` internally. Little Jay does not expose that vendor prop; a future upstream change may require an adapter migration. Keep a scoped portal/theme regression when updating React Aria.
+
+### Content Security Policy
+
+Load `@littlejay/ui/styles.css` as external compiled CSS. React Aria also inserts runtime style elements (including press/scroll-lock support). Under a restrictive CSP, the **application server** must generate a fresh cryptographically random style nonce per HTML response, authorize that nonce in the response header, and expose the same value before any React Aria component mounts:
+
+```html
+<meta property="csp-nonce" content="SERVER_GENERATED_NONCE" />
+```
+
+The matching header includes `style-src 'self' 'nonce-SERVER_GENERATED_NONCE'`; if a more-specific `style-src-elem` directive is present, it must authorize the nonce too. Keep `script-src 'self'` with external scripts. Do not use the placeholder literally, reuse a fixed nonce, authorize scripts with it, add `unsafe-inline`, or patch dependencies. For example, a Node server can generate the value with `randomBytes(32).toString("base64")` from `node:crypto`. Bind header and meta in the same response and prevent caches from replaying stale HTML/nonces (for example, `Cache-Control: no-store`). Preserve the application's other CSP directives and request protections. Little Jay does not generate a nonce or change server policy.
+
+This is **nonce-authorized styling, not literal `style-src 'self'` compatibility**. Missing or mismatched nonces remain blocked by the browser. Verify the real response policy, applied style sheets and CSP violations with mounted components and an open modal, not rendering alone. See [React Aria CSP guidance](https://react-spectrum.adobe.com/react-aria/ssr.html#content-security-policy).
+
+### Migration from the Radix-backed Dialog
+
+Public component names stay the same, but vendor-derived props and lifecycle callbacks are removed. Replace `onEscapeKeyDown`/`onInteractOutside` vetoes with `dismissOnEscape`/`dismissOnOutsidePress` and controlled state. `onOpenAutoFocus`, `onCloseAutoFocus`, `onPointerDownOutside` and `onFocusOutside` are not public contracts. Content refs now target a section (`HTMLElement`), not a div. Load the matching compiled CSS; do not depend on vendor data attributes or internal wrapper markup.
 
 ## EmptyState
 
@@ -123,7 +217,7 @@ The popup portals to the document by default. For subtree themes or an enclosing
 
 When a controlled selection changes externally, its new label replaces any old search query. Ordinary rerenders with the same selection preserve typing. Input width/maxWidth constraints retain embedded icon alignment and determine popup width; use a shrinkable parent on narrow layouts.
 
-Inside the shared Dialog, the first Escape dismisses an open Combobox and restores its selected label while keeping modal focus and local drafts. A subsequent Escape follows normal Dialog dismissal; caller `onEscapeKeyDown` vetoes remain supported. Keep the popup's `portalContainer` inside the modal content.
+Inside the shared Dialog, the first Escape dismisses an open Combobox and restores its selected label while keeping modal focus and local drafts. A subsequent Escape follows `dismissOnEscape`. Keep the popup's `portalContainer` inside the modal content. Restrictive CSP applications need the nonce setup described under Dialog even when a Combobox is mounted without a modal.
 
 ## PasswordField
 

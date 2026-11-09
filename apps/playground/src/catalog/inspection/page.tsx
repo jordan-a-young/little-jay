@@ -320,7 +320,7 @@ const documents: Record<string, CatalogDocument> = {
   },
   dialog: {
     overview:
-      "An accessible modal with a sheet layout variant, built on the focused Radix Dialog primitive. Portal, focus trapping/restoration, and Escape dismissal are primitive-owned; application actions remain application-owned.",
+      "A React Aria-backed modal with a sheet layout variant. Focus containment, background isolation, scroll locking and nested overlay ordering use the existing interaction foundation. Applications own actions and CSP nonce configuration. This increment targets Chromium; Safari/iOS/WebKit are unsupported.",
     usage:
       'import { Dialog, DialogTrigger, DialogContent } from "@littlejay/ui/dialog";\nimport "@littlejay/ui/styles.css";\n\n<Dialog>\n  <DialogTrigger>Inspect</DialogTrigger>\n  <DialogContent title="Draft preview" description="Read-only local data.">Content</DialogContent>\n</Dialog>',
     props: [
@@ -354,15 +354,22 @@ const documents: Record<string, CatalogDocument> = {
           "DialogContent: nonblank accessible name for the built-in button. Blank labels throw. Visible text stays Close; omission preserves its native Close name. Include Close in custom names to match the visible label.",
       },
       {
-        name: "portalContainer / content props",
-        type: "HTMLElement; Radix content props",
+        name: "dismissOnEscape / dismissOnOutsidePress",
+        type: "boolean / default true",
         description:
-          "Defaults to document.body. Use a themed container for scoped overrides; retain primitive focus/dismiss handlers unless deliberately adapting them.",
+          "Explicit dismissal permissions, independent of Close. Controlled onOpenChange remains the final application-owned state decision.",
+      },
+      {
+        name: "portalContainer / content props",
+        type: "HTMLElement; native section props",
+        description:
+          "Defaults to document.body. Use a stable themed destination for scoped overrides. Content ref, className and native events target the dialog section, not the overlay.",
       },
     ],
     accessibility: [
-      "Keep a DialogTrigger mounted for focus restoration. Escape, outside interaction, and Close request dismissal.",
-      "closeDisabled does not implement a pending policy. To prevent dismissal, use controlled open/onOpenChange and deliberately preventDefault in onEscapeKeyDown/onInteractOutside. Keep a reachable control to end a local pending simulation.",
+      "Focus the opening control before opening and keep it mounted for normal restoration. A surviving application owner handles card-or-fallback recovery when the opener is removed; there is no vendor lifecycle/custom-target override. Escape, outside press, and Close request dismissal.",
+      "closeDisabled does not implement a pending policy. Use dismissOnEscape={false}, dismissOnOutsidePress={false} and controlled open/onOpenChange guards where needed. Keep a reachable control to end a local pending simulation.",
+      "For a restrictive style CSP, serve a fresh cryptographic nonce per HTML response in style-src and in a meta property=csp-nonce before React mounts. Keep scripts self-only. Nonce authorization is not literal style-src self-only compatibility.",
       "Tab/Shift+Tab stay inside the modal. Do not remove visible titles or focus indicators.",
       "Portals inherit tokens from their destination. Document-level light/dark themes work by default; scoped themes need portalContainer in that scope.",
       "No animation is added, including under reduced-motion preferences. Sheet is the same modal behavior with a side layout.",
@@ -384,7 +391,7 @@ const documents: Record<string, CatalogDocument> = {
         id: "pending",
         title: "Caller-owned pending simulation",
         component: examples.PendingDialogExample,
-        code: 'const [open, setOpen] = useState(false);\nconst [pending, setPending] = useState(false);\n\n<Dialog open={open} onOpenChange={(nextOpen) => { if (!pending) setOpen(nextOpen); }}>\n  <DialogTrigger>Open pending dialog demo</DialogTrigger>\n  <DialogContent\n    title="Local pending simulation"\n    description="Synthetic state only. Nothing is saved or sent."\n    closeDisabled={pending}\n    closeLabel="Close pending dialog demo"\n    onEscapeKeyDown={(event) => { if (pending) event.preventDefault(); }}\n    onInteractOutside={(event) => { if (pending) event.preventDefault(); }}\n  >\n    <Button aria-pressed={pending} onClick={() => setPending((current) => !current)}>Simulate pending</Button>\n    <p role="status">{pending ? "Pending simulation: toggle off to enable dismissal." : "Ready to dismiss."}</p>\n  </DialogContent>\n</Dialog>',
+        code: 'const [open, setOpen] = useState(false);\nconst [pending, setPending] = useState(false);\n\n<Dialog open={open} onOpenChange={(nextOpen) => { if (!pending) setOpen(nextOpen); }}>\n  <DialogTrigger>Open pending dialog demo</DialogTrigger>\n  <DialogContent\n    title="Local pending simulation"\n    description="Synthetic state only. Nothing is saved or sent."\n    closeDisabled={pending}\n    closeLabel="Close pending dialog demo"\n    dismissOnEscape={!pending}\n    dismissOnOutsidePress={!pending}\n  >\n    <Button aria-pressed={pending} onClick={() => setPending((current) => !current)}>Simulate pending</Button>\n    <p role="status">{pending ? "Pending simulation: toggle off to enable dismissal." : "Ready to dismiss."}</p>\n  </DialogContent>\n</Dialog>',
       },
     ],
   },

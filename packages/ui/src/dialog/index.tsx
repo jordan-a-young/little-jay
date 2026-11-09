@@ -1,13 +1,23 @@
-import * as Primitive from "@radix-ui/react-dialog";
-import type { ComponentProps } from "react";
+import { createContext, use, useId, useState, type ComponentProps, type ReactNode } from "react";
+import { Dialog as AriaDialog, Modal, ModalOverlay } from "react-aria-components/Modal";
 import { Button, type ButtonProps } from "../button/index.js";
 
-export type DialogProps = Omit<ComponentProps<typeof Primitive.Root>, "modal">;
+export interface DialogProps {
+  children?: ReactNode;
+  open?: boolean;
+  defaultOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
 export type DialogTriggerProps = ButtonProps;
 export type DialogCloseProps = ButtonProps;
 export type DialogContentProps = Omit<
-  ComponentProps<typeof Primitive.Content>,
-  "title" | "asChild" | "forceMount" | "aria-label" | "aria-labelledby" | "aria-describedby"
+  ComponentProps<"section">,
+  | "title"
+  | "role"
+  | "aria-label"
+  | "aria-labelledby"
+  | "aria-describedby"
+  | "dangerouslySetInnerHTML"
 > & {
   title: string;
   description?: string;
@@ -17,26 +27,58 @@ export type DialogContentProps = Omit<
   closeDisabled?: boolean;
   /** Optional nonblank accessible name for the built-in button; visible text stays Close. */
   closeLabel?: string;
+  /** Whether Escape requests dismissal. Defaults to true. */
+  dismissOnEscape?: boolean;
+  /** Whether a press outside the modal requests dismissal. Defaults to true. */
+  dismissOnOutsidePress?: boolean;
 };
 
-/** Modal root. Applications own controlled state and any work performed inside it. */
-export function Dialog(props: DialogProps) {
-  return <Primitive.Root {...props} modal />;
+type DialogState = { open: boolean; setOpen: (open: boolean) => void };
+const DialogContext = createContext<DialogState | null>(null);
+
+function useDialogState() {
+  const state = use(DialogContext);
+  if (!state) throw new Error("Dialog components must be rendered within Dialog");
+  return state;
 }
 
-export function DialogTrigger(props: DialogTriggerProps) {
+/** Modal root. Applications own controlled state and any work performed inside it. */
+export function Dialog({ children, open, defaultOpen = false, onOpenChange }: DialogProps) {
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
+  const isOpen = open ?? uncontrolledOpen;
+  function setOpen(nextOpen: boolean) {
+    if (nextOpen === isOpen) return;
+    if (open === undefined) setUncontrolledOpen(nextOpen);
+    onOpenChange?.(nextOpen);
+  }
+  return <DialogContext value={{ open: isOpen, setOpen }}>{children}</DialogContext>;
+}
+
+export function DialogTrigger({ onClick, ...props }: DialogTriggerProps) {
+  const state = useDialogState();
   return (
-    <Primitive.Trigger asChild>
-      <Button {...props} />
-    </Primitive.Trigger>
+    <Button
+      {...props}
+      aria-haspopup="dialog"
+      aria-expanded={state.open}
+      onClick={(event) => {
+        onClick?.(event);
+        if (!event.defaultPrevented) state.setOpen(true);
+      }}
+    />
   );
 }
 
-export function DialogClose(props: DialogCloseProps) {
+export function DialogClose({ onClick, ...props }: DialogCloseProps) {
+  const state = useDialogState();
   return (
-    <Primitive.Close asChild>
-      <Button {...props} />
-    </Primitive.Close>
+    <Button
+      {...props}
+      onClick={(event) => {
+        onClick?.(event);
+        if (!event.defaultPrevented) state.setOpen(false);
+      }}
+    />
   );
 }
 
@@ -48,47 +90,68 @@ export function DialogContent({
   portalContainer,
   closeDisabled = false,
   closeLabel,
+  dismissOnEscape = true,
+  dismissOnOutsidePress = true,
   children,
   className = "",
-  onEscapeKeyDown,
-  ...props
+  ref,
+  id,
+  style,
+  ...nativeProps
 }: DialogContentProps) {
+  const state = useDialogState();
+  const titleId = useId();
+  const descriptionId = useId();
   if (typeof title !== "string" || !title.trim())
     throw new TypeError("DialogContent requires a nonblank title");
   if (closeLabel !== undefined && (typeof closeLabel !== "string" || !closeLabel.trim()))
     throw new TypeError("DialogContent requires a nonblank closeLabel when supplied");
   const hasDescription = typeof description === "string" && Boolean(description.trim());
   return (
-    <Primitive.Portal container={portalContainer}>
-      <Primitive.Overlay className="lj-dialog-overlay" />
-      <Primitive.Content
-        {...props}
-        onEscapeKeyDown={(event) => {
-          onEscapeKeyDown?.(event);
-          const target = event.target;
-          if (
-            target instanceof Element &&
-            target.closest('[role="combobox"][aria-expanded="true"]')
-          ) {
-            event.preventDefault();
-          }
-        }}
-        className={`lj-dialog-content lj-dialog-${variant} ${className}`}
-        {...(!hasDescription ? { "aria-describedby": undefined } : {})}
-      >
-        <Primitive.Title className="lj-dialog-title">{title}</Primitive.Title>
-        {hasDescription && (
-          <Primitive.Description className="lj-dialog-description">
-            {description}
-          </Primitive.Description>
-        )}
-        {children}
-        <div className="lj-dialog-dismiss">
-          <DialogClose disabled={closeDisabled} aria-label={closeLabel}>
-            Close
-          </DialogClose>
-        </div>
-      </Primitive.Content>
-    </Primitive.Portal>
+    <ModalOverlay
+      isOpen={state.open}
+      onOpenChange={state.setOpen}
+      isDismissable={dismissOnOutsidePress}
+      isKeyboardDismissDisabled={!dismissOnEscape}
+      UNSTABLE_portalContainer={portalContainer ?? undefined}
+      className="lj-dialog-overlay"
+    >
+      <Modal className="lj-dialog-modal" data-variant={variant}>
+        <AriaDialog
+          ref={ref}
+          id={id}
+          style={style}
+          className={`lj-dialog-content lj-dialog-${variant} ${className}`}
+          aria-labelledby={titleId}
+          aria-describedby={hasDescription ? descriptionId : undefined}
+          render={(dialogProps) => (
+            <section
+              {...nativeProps}
+              {...dialogProps}
+              tabIndex={nativeProps.tabIndex ?? dialogProps.tabIndex}
+              onBlur={(event) => {
+                nativeProps.onBlur?.(event);
+                dialogProps.onBlur?.(event);
+              }}
+            />
+          )}
+        >
+          <h2 id={titleId} className="lj-dialog-title">
+            {title}
+          </h2>
+          {hasDescription && (
+            <p id={descriptionId} className="lj-dialog-description">
+              {description}
+            </p>
+          )}
+          {children}
+          <div className="lj-dialog-dismiss">
+            <DialogClose disabled={closeDisabled} aria-label={closeLabel}>
+              Close
+            </DialogClose>
+          </div>
+        </AriaDialog>
+      </Modal>
+    </ModalOverlay>
   );
 }
