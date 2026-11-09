@@ -15,6 +15,7 @@
     "test:coverage": "vp test run --coverage && node scripts/check-coverage.mjs",
     "fmt": "vp fmt",
     "test:packages": "node scripts/test-packages.mjs",
+    "test:server-compat": "node scripts/test-server-compatibility.ts",
     "changeset": "changeset",
     "release:validate": "node scripts/release.mjs validate",
     "release:status": "node scripts/release.mjs status",

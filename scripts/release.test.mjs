@@ -1489,10 +1489,30 @@ it.each(["ci.yml", "secrets.yml", "release-pr.yml", "publish.yml", "finalize-rel
       .filter((step) => step.startsWith("uses: actions/setup-node@"));
     expect(nodeSetupSteps.length).toBeGreaterThan(0);
     for (const step of nodeSetupSteps) {
-      expect(step).toContain("node-version-file: .node-version");
+      if (filename === "ci.yml" && step.includes("node-version: 24.18.0")) {
+        expect(step).not.toContain("node-version-file:");
+      } else {
+        expect(step).toContain("node-version-file: .node-version");
+      }
       expect(step).toContain("package-manager-cache: false");
     }
     if (filename === "ci.yml") {
+      expect(nodeSetupSteps).toHaveLength(2);
+      expect(nodeSetupSteps[0]).toContain("node-version: 24.18.0");
+      expect(nodeSetupSteps[1]).toContain("node-version-file: .node-version");
+      const compatibilityRuntime = workflow.indexOf("node-version: 24.18.0");
+      const locateRuntime = workflow.indexOf("name: Locate compatibility runtime");
+      const repositoryRuntime = workflow.indexOf("node-version-file: .node-version");
+      const installation = workflow.indexOf("run: pnpm install --frozen-lockfile");
+      const repositoryGate = workflow.indexOf("run: pnpm ready");
+      const compatibilityGate = workflow.indexOf("run: pnpm test:server-compat");
+      expect(compatibilityRuntime).toBeLessThan(locateRuntime);
+      expect(locateRuntime).toBeLessThan(repositoryRuntime);
+      expect(repositoryRuntime).toBeLessThan(installation);
+      expect(installation).toBeLessThan(repositoryGate);
+      expect(repositoryGate).toBeLessThan(compatibilityGate);
+      expect(workflow).toContain("LITTLEJAY_NODE24=${process.execPath}");
+      expect(workflow).toContain("process.env.GITHUB_ENV");
       expect(workflow).toContain("cache: pnpm");
     } else {
       expect(workflow).not.toMatch(/^\s+cache:\s*(?!false\b)\S+/m);
