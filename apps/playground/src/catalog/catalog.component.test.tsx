@@ -8,6 +8,7 @@ import { catalogRoutePath } from "./navigation.js";
 import { DocumentationPage } from "./DocumentationPage.js";
 import { PreviewContext } from "../shell/PreviewFrame.js";
 import ButtonPage from "./button/page.js";
+import LinkPage from "./link/page.js";
 import FormsPage from "./forms/page.js";
 import FeedbackPage from "./feedback/page.js";
 import FoundationsPage from "./foundations/page.js";
@@ -27,6 +28,14 @@ describe("component catalog", () => {
 
   beforeEach(() => {
     vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+    vi.stubGlobal("CSS", {
+      ...globalThis.CSS,
+      escape: (value: string) =>
+        Array.from(
+          String(value),
+          (character) => `\\${(character.codePointAt(0) || 0xfffd).toString(16)} `,
+        ).join(""),
+    });
     vi.stubGlobal("scrollTo", vi.fn());
     container = document.createElement("div");
     document.body.append(container);
@@ -111,6 +120,39 @@ describe("component catalog", () => {
     expect(document.activeElement).toBe(main);
     expect(router.state.location.pathname).toBe("/tabs");
   });
+
+  it.each(["link", "button-link"])(
+    "deep-links %s examples with native navigation and caller-owned current-page semantics",
+    async (pageId) => {
+      await renderApp(`#/${pageId}/long`);
+      await vi.waitFor(() =>
+        expect(container.querySelector(".catalog-preview a")?.getAttribute("aria-current")).toBe(
+          "page",
+        ),
+      );
+      const current = container.querySelector<HTMLAnchorElement>(".catalog-preview a")!;
+      expect(current.getAttribute("href")).toBe(`#/${pageId}/long`);
+      expect(current.hasAttribute("role")).toBe(false);
+      expect(current.textContent!.length).toBeGreaterThan(150);
+      expect(container.querySelector(".catalog-preview button")).toBeNull();
+      await act(() =>
+        router.navigate({
+          to: "/$pageId/{-$exampleId}",
+          params: { pageId, exampleId: undefined },
+        }),
+      );
+      await vi.waitFor(() =>
+        expect(container.querySelectorAll(".catalog-preview a")).toHaveLength(
+          pageId === "link" ? 2 : 5,
+        ),
+      );
+      expect(container.querySelector('.catalog-preview [aria-current="page"]')).toBeNull();
+      expect(container.querySelector(".catalog-preview a")?.getAttribute("href")).toBe(
+        pageId === "link" ? "#/button" : "#/button/variants",
+      );
+      expect(fetch).not.toHaveBeenCalled();
+    },
+  );
 
   it("retains the native search input and separates empty results feedback, then restores navigation", async () => {
     await renderApp("#/button");
@@ -214,7 +256,7 @@ describe("component catalog", () => {
     expect(modal.querySelector('[role="status"]')?.textContent).toContain("Pending simulation");
     await act(() => {
       close.click();
-      document.dispatchEvent(
+      modal.dispatchEvent(
         new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }),
       );
     });
@@ -357,7 +399,7 @@ describe("component catalog", () => {
       groups.map((group) => Array.from(group.querySelectorAll("a"), (link) => link.textContent)),
     ).toEqual([
       ["Introduction", "Colors & themes", "Branding & Pebble", "Hooks & data fetching"],
-      ["Button"],
+      ["Button", "ButtonLink", "Link"],
       [
         "Alert",
         "EmptyState",
@@ -944,7 +986,9 @@ describe("component catalog", () => {
       Patterns: PatternsPage,
     };
     for (const registration of catalogPages) {
-      const Page = pages[registration.group];
+      const Page = ["link", "button-link"].includes(registration.id)
+        ? LinkPage
+        : pages[registration.group];
       await act(async () =>
         root.render(
           <QueryClientProvider client={client}>

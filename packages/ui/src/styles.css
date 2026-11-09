@@ -19,6 +19,74 @@
 @source "./combobox";
 
 @layer components {
+  .lj-link {
+    color: var(--lj-primary);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    overflow-wrap: anywhere;
+  }
+  .lj-link:hover {
+    text-decoration-thickness: 2px;
+  }
+  .lj-link:focus-visible,
+  .lj-button-link:focus-visible {
+    outline: 2px solid var(--lj-primary);
+    outline-offset: 2px;
+  }
+  .lj-button-link {
+    box-sizing: border-box;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    min-height: 44px;
+    max-width: 100%;
+    padding: 0.5rem 1rem;
+    border: 0;
+    border-radius: var(--lj-radius-control);
+    font-family: var(--lj-font-sans);
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.5;
+    text-align: center;
+    text-decoration: none;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    vertical-align: middle;
+    cursor: pointer;
+  }
+  .lj-button-link:not([hidden]) {
+    display: inline-flex;
+  }
+  .lj-button-link-primary {
+    background: var(--lj-primary);
+    color: var(--lj-on-primary);
+  }
+  .lj-button-link-secondary {
+    background: var(--lj-surface);
+    color: var(--lj-content);
+    box-shadow: inset 0 0 0 1px var(--lj-border);
+  }
+  .lj-button-link-outline {
+    background: transparent;
+    color: var(--lj-primary);
+    box-shadow: inset 0 0 0 1px var(--lj-primary);
+  }
+  .lj-button-link-ghost {
+    background: transparent;
+    color: var(--lj-primary);
+  }
+  .lj-button-link-danger {
+    background: var(--lj-danger);
+    color: var(--lj-background);
+  }
+  .lj-button-link:hover {
+    opacity: 0.9;
+  }
+  .lj-button-link-secondary:hover,
+  .lj-button-link-outline:hover,
+  .lj-button-link-ghost:hover {
+    background: var(--lj-background);
+  }
   .lj-empty-state-title {
     margin: 0;
     font-size: inherit;
@@ -456,10 +524,10 @@
   }
   .lj-dialog-content {
     box-sizing: border-box;
-    position: fixed;
-    z-index: 51;
+    width: 100%;
     padding: 1.5rem;
     overflow: auto;
+    overscroll-behavior: contain;
     overflow-wrap: anywhere;
     color: var(--lj-content);
     background: var(--lj-surface);
@@ -467,19 +535,29 @@
     font-family: var(--lj-font-sans);
     color-scheme: var(--lj-color-scheme);
   }
-  .lj-dialog-dialog {
+  .lj-dialog-modal {
+    position: fixed;
+    z-index: 51;
+  }
+  .lj-dialog-modal[data-variant="dialog"] {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     width: min(32rem, calc(100% - 2rem));
-    max-height: calc(100dvh - 2rem);
-    border-radius: var(--lj-radius-control);
   }
-  .lj-dialog-sheet {
+  .lj-dialog-modal[data-variant="sheet"] {
     top: 0;
     bottom: 0;
     inset-inline-end: 0;
     width: min(28rem, 100%);
+  }
+  .lj-dialog-dialog {
+    max-height: calc(100dvh - 2rem);
+    border-radius: var(--lj-radius-control);
+  }
+  .lj-dialog-sheet {
+    height: 100%;
+    max-height: 100dvh;
   }
   .lj-dialog-title {
     margin: 0 0 0.75rem;

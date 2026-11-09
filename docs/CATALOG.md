@@ -15,6 +15,10 @@ TanStack Router uses hash history, so a same-origin deployment prefix needs no e
 - `/#/button/default`
 - `/#/button/disabled`
 - `/#/button/variants`
+- `/#/button-link`
+- `/#/button-link/long`
+- `/#/link`
+- `/#/link/long`
 - `/#/alert/dismissible`
 - `/#/alert/success`
 - `/#/alert/warning`
@@ -53,6 +57,8 @@ One stable QueryClient is passed to QueryClientProvider and the router's typed c
 **Hooks & data fetching** follows the existing Foundations entries. It documents application/internal hook ownership, stable QueryClient/provider setup, app-owned queryOptions, fetchJson cancellation/decoding, cached refresh, offline pause, safe error copy, and the separate React Actions form lifecycle. Snippets load current health/provider/API-pattern sources as text; visiting the guide does not mount the health query. The guide links to API connection (a live read), Workflow form (local only), and the transport contract in the private source repository. It adds neither a hooks package nor public hook exports.
 
 ## Shared controls
+
+Dialog examples at `/#/dialog`, `/sheet` and `/pending` use the shared React Aria-backed modal. Pending dismissal uses explicit `dismissOnEscape`/`dismissOnOutsidePress` flags and controlled state, not vendor callbacks. The [installed UI guide](../packages/ui/README.md#dialog) defines the Chromium target and application-owned CSP nonce setup; the ordinary development server is not evidence of restrictive-CSP compatibility.
 
 - **Settings:** a quiet button beside the page title opens a nonmodal, named native popover. Tab reaches its controls, Escape and outside clicks dismiss it, and Close provides an explicit dismissal action. Browser-managed focus returns to the trigger when appropriate. Settings do not take a permanent row above the documentation. This uses the Popover API in modern browsers; CSS anchor positioning aligns the panel with its trigger where supported, with a viewport-positioned fallback.
 - **Theme:** one System / Light / Dark selector reuses the existing persisted document-level preference and browser theme-color behavior. Theme changes and opening/closing Settings do not remount the active example.
@@ -100,6 +106,8 @@ apps/playground/src/
 Small related pages currently share a lazy module per category rather than creating many tiny chunks. Only the selected category is requested initially. Large future pages can get a separate lazy import in the registry. PNGs retain their existing lazy public-asset workflow; catalog metadata never eagerly imports every state illustration.
 
 Button's **Theme variants** example shows primary, secondary, outline, ghost, and danger together, including native disabled states and local-only click feedback. Its colors follow the document theme. Primary remains the default; a visual variant never supplies application confirmation or authorization policy.
+
+Link and ButtonLink live in Actions, with native local-catalog navigation and long current-page labels. Link is underlined inline navigation; ButtonLink has the existing Button visual variants without button roles, Space activation or disabled/loading behavior. Both retain native links, names, refs, current-page state and browser navigation. Application routing is not moved into the shared library.
 
 Alert's **Dismissible / caller-owned** example opts in with `onDismiss` and a nonblank `dismissLabel`. The application removes the notice and restores focus to its surviving Show alert control. Alert itself never hides content or moves focus; omitting `onDismiss` preserves non-dismissible rendering. Its close button does not submit a surrounding form or add an Escape shortcut.
 

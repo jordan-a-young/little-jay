@@ -4,6 +4,8 @@ export default defineConfig({
     entry: {
       index: "src/index.ts",
       button: "src/button/index.tsx",
+      link: "src/link/index.tsx",
+      "button-link": "src/button-link/index.tsx",
       card: "src/card/index.tsx",
       table: "src/table/index.tsx",
       breadcrumb: "src/breadcrumb/index.tsx",

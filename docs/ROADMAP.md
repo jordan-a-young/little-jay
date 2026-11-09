@@ -14,7 +14,7 @@ Build small, useful pieces for Graph Workbench first. Other project consumers ar
 - Local workflow form using React 19 Actions, useActionState/useFormStatus, and draft-preserving validation. No workflow is saved or started.
 - Playground examples for workflow feedback and isolated rendering failures.
 - Native DescriptionList/Disclosure, inert escaped TextBlock, and named IconButton with local catalog consumers.
-- Focused Radix Dialog modal foundation and sheet variant, with controlled dismissal, portal, keyboard/focus coverage, and reset-free theme styling.
+- React Aria-backed Dialog and sheet variant with explicit controlled dismissal, theme portals and reset-free styling. The [UI guide](../packages/ui/README.md#dialog) describes Chromium support, application-owned CSP style nonces and the breaking migration from vendor lifecycle callbacks; literal self-only CSP remains unsupported.
 - Accessible horizontal Tabs with manual activation, controlled/uncontrolled selection, disabled/RTL keyboard navigation, lazily mounted preserved panels and local catalog examples. No consumer migration is included.
 - Lightweight Card with optional native-div Header/Content/Footer composition, semantic reset-free styling and real catalog outer-preview adoption. Headings, actions, width and reset state stay caller-owned; final review status is recorded under UI-010 in the backlog.
 - `@littlejay/http`: bounded platform-fetch JSON transport, cancellation/deadlines, runtime decoders, and safe structured errors; consumed by the existing TanStack Query health read.

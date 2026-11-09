@@ -391,7 +391,7 @@ body {
 .catalog-props-table .lj-table-cell {
   min-width: 9rem;
 }
-.catalog-document a {
+.catalog-document a:not(.lj-button-link) {
   color: var(--lj-primary);
   text-decoration: underline;
   text-underline-offset: 0.2em;

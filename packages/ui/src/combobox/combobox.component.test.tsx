@@ -345,17 +345,12 @@ describe("Combobox", () => {
   });
 
   it("dismisses the popup before its enclosing Dialog on Escape and restores modal trigger focus", async () => {
-    const escape = vi.fn();
     function ModalExample() {
       const [portal, setPortal] = useState<HTMLDivElement | null>(null);
       return (
         <Dialog>
           <DialogTrigger>Choose project</DialogTrigger>
-          <DialogContent
-            title="Project choice"
-            portalContainer={container}
-            onEscapeKeyDown={escape}
-          >
+          <DialogContent title="Project choice" portalContainer={container}>
             <div ref={setPortal}>
               <Combobox
                 aria-label="Project"
@@ -370,6 +365,7 @@ describe("Combobox", () => {
     }
     await act(() => root.render(<ModalExample />));
     const trigger = container.querySelector("button")!;
+    trigger.focus();
     await act(() => trigger.click());
     await edit("be");
     expect(document.querySelector('[role="listbox"]')).not.toBeNull();
@@ -378,10 +374,8 @@ describe("Combobox", () => {
     expect(document.querySelector('[role="dialog"]')).not.toBeNull();
     expect(input().value).toBe("Cedar");
     expect(document.activeElement).toBe(input());
-    expect(escape).toHaveBeenCalledTimes(1);
     await key("Escape");
     expect(document.querySelector('[role="dialog"]')).toBeNull();
-    expect(escape).toHaveBeenCalledTimes(2);
     await vi.waitFor(() => expect(document.activeElement).toBe(trigger));
   });
 

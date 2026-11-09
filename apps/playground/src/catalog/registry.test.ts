@@ -1,7 +1,24 @@
+import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vite-plus/test";
 import { catalogPages, filterCatalog } from "./registry.js";
 
 describe("catalog registry and links", () => {
+  it("keeps documentation anchor styling from overriding shared button-link variants", async () => {
+    const stylesheet = await readFile("apps/playground/src/styles.css", "utf8");
+    expect(/\.catalog-document a\s*\{/.test(stylesheet)).toBe(false);
+    expect(/\.catalog-document a:not\(\.lj-button-link\)\s*\{/.test(stylesheet)).toBe(true);
+  });
+
+  it("registers native navigation components as searchable action pages", () => {
+    expect(filterCatalog("native navigation").map((page) => page.id)).toEqual([
+      "button-link",
+      "link",
+    ]);
+    for (const id of ["button-link", "link"]) {
+      expect(catalogPages.find((page) => page.id === id)?.group).toBe("Components / Actions");
+    }
+  });
+
   it("alphabetizes component groups and display names without reordering guides or patterns", () => {
     expect([...new Set(catalogPages.map((page) => page.group))]).toEqual([
       "Foundations",
@@ -17,6 +34,8 @@ describe("catalog registry and links", () => {
       "branding",
       "hooks",
       "button",
+      "button-link",
+      "link",
       "alert",
       "empty-state",
       "error-boundary",
@@ -56,12 +75,16 @@ describe("catalog registry and links", () => {
     ]);
   });
   it("has stable unique pages for all foundations, components, and patterns", () => {
-    expect(catalogPages).toHaveLength(30);
+    expect(catalogPages).toHaveLength(32);
     expect(new Set(catalogPages.map((page) => page.id)).size).toBe(catalogPages.length);
     expect(catalogPages.some((page) => page.id === "native-select")).toBe(true);
   });
   it("searches case-insensitively across names, groups, and keywords", () => {
-    expect(filterCatalog("  BUTTON ").map((page) => page.id)).toEqual(["button", "icon-button"]);
+    expect(filterCatalog("  BUTTON ").map((page) => page.id)).toEqual([
+      "button",
+      "button-link",
+      "icon-button",
+    ]);
     expect(filterCatalog("forms native").map((page) => page.id)).toContain("native-select");
     expect(filterCatalog("spinner").map((page) => page.id)).toEqual(["loading-indicator"]);
     expect(filterCatalog("toggle").map((page) => page.id)).toEqual(["switch"]);

@@ -299,12 +299,8 @@ export function PendingDialogExample() {
         description="Toggle synthetic pending state. Nothing is saved or sent."
         closeDisabled={pending}
         closeLabel="Close pending dialog demo"
-        onEscapeKeyDown={(event) => {
-          if (pending) event.preventDefault();
-        }}
-        onInteractOutside={(event) => {
-          if (pending) event.preventDefault();
-        }}
+        dismissOnEscape={!pending}
+        dismissOnOutsidePress={!pending}
       >
         <Button aria-pressed={pending} onClick={() => setPending((current) => !current)}>
           Simulate pending
@@ -316,7 +312,7 @@ export function PendingDialogExample() {
         </p>
         <p>
           closeDisabled affects only the built-in Close button. This example separately prevents
-          Escape and outside dismissal in its callbacks and guards controlled open state. All
+          Escape and outside dismissal with explicit flags and guards controlled open state. All
           dismissal decisions remain application-owned.
         </p>
       </DialogContent>
