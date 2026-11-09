@@ -763,6 +763,35 @@ describe("publication boundaries without registry writes", () => {
 });
 
 describe("staging receipts and uncertain uploads", () => {
+  it("keeps retry diagnostics on stderr instead of mixing them into the JSON receipt", async () => {
+    await release().check();
+    const executable = path.join(root, "pnpm-reporter-fixture.mjs");
+    await writeFile(
+      executable,
+      `
+const output = process.argv.includes("--reporter=ndjson") ? process.stderr : process.stdout;
+output.write("GET https://registry.example.test/fixture error (temporary failure)\\n");
+process.stdout.write(process.argv.at(-1));
+`,
+    );
+    const original = execute.getMockImplementation();
+    execute.mockImplementation((command, arguments_, capture) => {
+      const result = original(command, arguments_);
+      if (arguments_[0] !== "stage") return result;
+      expect(capture).toBe(true);
+      return execFileSync(process.execPath, [executable, ...arguments_, result], {
+        cwd: root,
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "pipe"],
+      }).trim();
+    });
+    const receipt = await release().stage({ confirmation: commit, verifiedArtifacts: true });
+    expect(receipt.complete).toBe(true);
+    expect(receipt.packages.every((entry) => entry.state === "staged")).toBe(true);
+    expect(stageCommands()).toHaveLength(5);
+    expect(stageCommands().every((command) => command.includes("--reporter=ndjson"))).toBe(true);
+  });
+
   it("binds successful stage IDs to the exact artifact and records attempting before upload", async () => {
     await release().check();
     const original = execute.getMockImplementation();
@@ -785,38 +814,46 @@ describe("staging receipts and uncertain uploads", () => {
     ).toBe(false);
   });
 
-  it.each(["malformed", "uuid", "name", "version", "filename", "integrity", "duplicate"])(
-    "stops with an unknown outcome on an invalid %s staging response",
-    async (change) => {
-      await release().check();
-      const original = execute.getMockImplementation();
-      execute.mockImplementation((command, arguments_) => {
-        const result = original(command, arguments_);
-        if (arguments_[0] !== "stage") return result;
-        if (change === "malformed") return "not JSON";
-        const response = JSON.parse(result);
-        const receipt = Object.values(response)[0];
-        if (change === "uuid") receipt.stageId = "not-a-stage-id";
-        if (change === "name") receipt.name = "@littlejay/other";
-        if (change === "version") receipt.version = "9.9.9";
-        if (change === "filename") receipt.filename = "other.tgz";
-        if (change === "integrity") receipt.integrity = "sha512-wrong";
-        if (change === "duplicate") receipt.stageId = "00000000-0000-0000-0000-000000000001";
-        return JSON.stringify(response);
-      });
-      await expect(
-        release().stage({ confirmation: commit, verifiedArtifacts: true }),
-      ).rejects.toThrow();
-      const receipt = JSON.parse(await readFile(path.join(root, ".release/staging.json"), "utf8"));
-      expect(receipt.complete).toBe(false);
-      expect(receipt.packages.some((entry) => entry.state === "unknown")).toBe(true);
-      const attempted = stageCommands().length;
-      await expect(
-        release().stage({ confirmation: commit, verifiedArtifacts: true }),
-      ).rejects.toThrow("existing staging receipt");
-      expect(stageCommands()).toHaveLength(attempted);
-    },
-  );
+  it.each([
+    "malformed",
+    "diagnostic-prefix",
+    "uuid",
+    "name",
+    "version",
+    "filename",
+    "integrity",
+    "duplicate",
+  ])("stops with an unknown outcome on an invalid %s staging response", async (change) => {
+    await release().check();
+    const original = execute.getMockImplementation();
+    execute.mockImplementation((command, arguments_) => {
+      const result = original(command, arguments_);
+      if (arguments_[0] !== "stage") return result;
+      if (change === "malformed") return "not JSON";
+      if (change === "diagnostic-prefix")
+        return `GET https://registry.example.test/fixture error (temporary failure)\n${result}`;
+      const response = JSON.parse(result);
+      const receipt = Object.values(response)[0];
+      if (change === "uuid") receipt.stageId = "not-a-stage-id";
+      if (change === "name") receipt.name = "@littlejay/other";
+      if (change === "version") receipt.version = "9.9.9";
+      if (change === "filename") receipt.filename = "other.tgz";
+      if (change === "integrity") receipt.integrity = "sha512-wrong";
+      if (change === "duplicate") receipt.stageId = "00000000-0000-0000-0000-000000000001";
+      return JSON.stringify(response);
+    });
+    await expect(
+      release().stage({ confirmation: commit, verifiedArtifacts: true }),
+    ).rejects.toThrow();
+    const receipt = JSON.parse(await readFile(path.join(root, ".release/staging.json"), "utf8"));
+    expect(receipt.complete).toBe(false);
+    expect(receipt.packages.some((entry) => entry.state === "unknown")).toBe(true);
+    const attempted = stageCommands().length;
+    await expect(
+      release().stage({ confirmation: commit, verifiedArtifacts: true }),
+    ).rejects.toThrow("existing staging receipt");
+    expect(stageCommands()).toHaveLength(attempted);
+  });
 
   it("never automatically repeats an upload after its command fails", async () => {
     await release().check();
