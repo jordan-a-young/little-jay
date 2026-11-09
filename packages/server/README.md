@@ -1,6 +1,16 @@
 # @littlejay/server
 
-Node ESM Fastify foundations prepared for public npm distribution, currently using Fastify 5.12.8 and fastify-plugin 6.0.1. The repository validates Node 26.13.0; verify other supported Fastify runtimes in your application. No browser runtime, React, CSS, or CommonJS entry point is provided. See [package.json](package.json) and shipped declarations for public exports and Fastify types.
+Node ESM Fastify foundations with consumer-owned Fastify. Install Fastify explicitly alongside this package; the peer range is `~5.12.7`, and development uses exactly 5.12.8. The package retains fastify-plugin 6.0.1. No browser runtime, React, CSS, or CommonJS entry point is provided. See [package.json](package.json) and shipped declarations for public exports and Fastify types.
+
+```sh
+pnpm add -E @littlejay/server fastify@5.12.8
+```
+
+## Compatibility
+
+Packed ESM artifacts and strict NodeNext consumers are checked in all four combinations of Node **24.18.0 / 26.13.0** and Fastify **5.12.7 / 5.12.8**. Applications supply the compatible Fastify installation, including its native plugin and type identity. This change moves Fastify out of this package's runtime dependencies; existing consumers should declare it directly rather than rely on a transitive installation.
+
+The Node 24 consumer uses `@types/node@24.19.2`; those typings do not establish the availability of every declared API on Node 24.18.0. Runtime checks execute on the exact target versions. The matrix covers plugins, module augmentation, typed requests/replies/decorators, hooks, readiness, injection, closing and bounded loopback listening. Other Node/Fastify versions, downstream plugins and production behavior require application-specific verification. The peer range is not a claim that every later Fastify patch has been tested. The repository's own toolchain remains Node 26.13.0.
 
 OpenCode and Codex: have the consuming project's `AGENTS.md` explicitly request this installed README for server tasks. See the [shared setup/template](https://github.com/jordan-a-young/little-jay/blob/main/docs/CONSUMER-AGENTS.md); installation alone does not activate agent instructions.
 

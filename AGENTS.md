@@ -53,7 +53,7 @@ Select browser checks using the matrix's risk policy: changed rendering/styles, 
 | `pnpm test:coverage`                      | Full suite with V8 coverage and source-inventory validation; build first                                                       |
 | `pnpm test <file-or-path>`                | Focused tests through the root configuration; packages do not have test scripts                                                |
 | `TMPDIR=/tmp/opencode pnpm test:packages` | Packs five libraries and tests an isolated consumer; retains temporary artifacts and may need registry access; never publishes |
-| `pnpm ready`                              | Full CI gate: changeset validation, check, build, typecheck, coverage tests, and package-consumer checks                       |
+| `pnpm ready`                              | Repository integration gate: changeset validation, check, build, typecheck, coverage tests, and package-consumer checks        |
 | `pnpm fmt`                                | Formats in place; prefer `pnpm exec vp fmt <changed-paths>` to avoid unrelated edits                                           |
 
 - Add regression coverage for observable behavior using existing colocated tests. `vite.config.ts` defines Node and jsdom component projects; do not add another test runner.
@@ -84,6 +84,7 @@ Select browser checks using the matrix's risk policy: changed rendering/styles, 
 - Run `pnpm test:coverage` for the full-suite coverage gate, not every focused edit. Each aggregate metric (statements, branches, functions, lines) must be **at least 90%**; this is not a per-file threshold. Coverage includes unimported authored app/package source, and source maps attribute built-library execution back to source. See [the coverage contract](README.md#test-coverage) for exclusions and reporting limits.
 - Inspect `coverage/index.html` or `coverage/coverage-summary.json` to choose meaningful missing scenarios. Do not lower thresholds, exclude executable source, or weaken assertions to make the gate pass. A below-target baseline remains a reported failure until improved; passing focused tests does not waive it.
 - Use `TMPDIR=/tmp/opencode pnpm ready` once for final integration when required by the verification matrix; it already includes coverage, so do not immediately repeat the full suite. Focused test runs, browser checks, and package-consumer checks establish different evidence and do not substitute for one another.
+- CI runs `pnpm test:server-compat` separately from `pnpm ready`. Server/Fastify ownership or compatibility changes also require this four-combination packed-consumer gate under `docs/VERIFICATION.md`; keep the host on pinned Node 26 and set `LITTLEJAY_NODE24` to an installed exact Node 24.18.0 executable. Do not treat the ordinary consumer's current-runtime check as Node 24 evidence.
 
 ## Safety and local services
 

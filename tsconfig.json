@@ -1,4 +1,12 @@
 {
   "extends": "./tsconfig.base.json",
-  "include": ["vite.config.ts", "scripts/check-coverage.test.ts"]
+  "compilerOptions": {
+    "allowImportingTsExtensions": true
+  },
+  "include": [
+    "vite.config.ts",
+    "scripts/check-coverage.test.ts",
+    "scripts/test-server-compatibility.ts",
+    "scripts/test-server-compatibility.test.ts"
+  ]
 }

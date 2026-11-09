@@ -12,8 +12,15 @@ jobs:
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
         with:
+          node-version: 24.18.0
+          package-manager-cache: false
+      - name: Locate compatibility runtime
+        run: node --input-type=module -e 'import { appendFileSync } from "node:fs"; appendFileSync(process.env.GITHUB_ENV, `LITTLEJAY_NODE24=${process.execPath}\n`)'
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        with:
           node-version-file: .node-version
           package-manager-cache: false
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm ready
+      - run: pnpm test:server-compat
