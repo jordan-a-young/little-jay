@@ -1,6 +1,5 @@
 import { act, lazy, type ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
 import { createMemoryHistory, RouterContextProvider, RouterProvider } from "@tanstack/react-router";
 import { createCatalogRouter } from "../router.js";
@@ -23,7 +22,6 @@ vi.mock("../use-theme.js", () => ({
 describe("component catalog", () => {
   let container: HTMLDivElement;
   let root: Root;
-  let client: QueryClient;
   let router: ReturnType<typeof createCatalogRouter>;
 
   beforeEach(() => {
@@ -40,16 +38,16 @@ describe("component catalog", () => {
     container = document.createElement("div");
     document.body.append(container);
     root = createRoot(container);
-    client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    router = createCatalogRouter(client, createMemoryHistory({ initialEntries: ["/"] }));
+    router = createCatalogRouter(createMemoryHistory({ initialEntries: ["/"] }));
     vi.stubGlobal(
       "fetch",
-      vi.fn(async () => Response.json({ status: "ok" })),
+      vi.fn(async () => {
+        throw new Error("Unexpected catalog network request");
+      }),
     );
   });
   afterEach(async () => {
     await act(() => root.unmount());
-    client.clear();
     router.history.destroy();
     container.remove();
     vi.unstubAllGlobals();
@@ -58,13 +56,7 @@ describe("component catalog", () => {
   async function renderApp(hash = "#/button/default") {
     router.history.replace(hash.slice(1) || "/");
     await router.load();
-    await act(async () =>
-      root.render(
-        <QueryClientProvider client={client}>
-          <RouterProvider router={router} />
-        </QueryClientProvider>,
-      ),
-    );
+    await act(async () => root.render(<RouterProvider router={router} />));
   }
 
   it("reuses LoadingIndicator in one page-loading status without moving focus or remounting the shell", async () => {
@@ -430,7 +422,7 @@ describe("component catalog", () => {
         "Tabs",
         "TextBlock",
       ],
-      ["Workflow form", "API connection"],
+      ["Workflow form", "Local server demo"],
     ]);
     const search = container.querySelector('input[type="search"]')!;
     await act(() => {
@@ -874,13 +866,16 @@ describe("component catalog", () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 
-  it("shares the QueryClient with routes and retains fresh health data across navigation", async () => {
+  it("keeps the legacy API link and hooks navigation entirely static without a backend", async () => {
     await renderApp("#/api-connection");
-    await vi.waitFor(() => expect(container.textContent).toContain("API is healthy"));
-    expect(fetch).toHaveBeenCalledOnce();
-    expect(router.options.context?.queryClient).toBe(client);
-    expect(router.state.matches.at(-1)?.context.queryClient).toBe(client);
-    expect(client.getQueryData(["api", "health"])).toBe("ok");
+    await vi.waitFor(() =>
+      expect(container.querySelector("h1")?.textContent).toBe("Local server demo"),
+    );
+    expect(container.querySelector(".catalog-preview")?.textContent).toContain("pnpm dev:server");
+    expect(container.querySelector(".catalog-preview")?.textContent).not.toContain(
+      "API is healthy",
+    );
+    expect(fetch).not.toHaveBeenCalled();
     await act(() =>
       router.navigate({ to: catalogRoutePath, params: { pageId: "hooks", exampleId: "query" } }),
     );
@@ -892,8 +887,10 @@ describe("component catalog", () => {
         .querySelector<HTMLAnchorElement>('.catalog-preview a[href="/api-connection"]')!
         .click(),
     );
-    await vi.waitFor(() => expect(container.textContent).toContain("API is healthy"));
-    expect(fetch).toHaveBeenCalledOnce();
+    await vi.waitFor(() =>
+      expect(container.querySelector("h1")?.textContent).toBe("Local server demo"),
+    );
+    expect(fetch).not.toHaveBeenCalled();
   });
 
   it("handles unknown pages and named examples with recovery navigation", async () => {
@@ -992,18 +989,17 @@ describe("component catalog", () => {
         : pages[registration.group];
       await act(async () =>
         root.render(
-          <QueryClientProvider client={client}>
-            <RouterContextProvider router={router}>
-              <PreviewContext value={{ width: "fluid", resetCount: 0 }}>
-                <Page key={registration.id} pageId={registration.id} />
-              </PreviewContext>
-            </RouterContextProvider>
-          </QueryClientProvider>,
+          <RouterContextProvider router={router}>
+            <PreviewContext value={{ width: "fluid", resetCount: 0 }}>
+              <Page key={registration.id} pageId={registration.id} />
+            </PreviewContext>
+          </RouterContextProvider>,
         ),
       );
       expect(container.querySelector(".catalog-preview"), registration.id).not.toBeNull();
       expect(container.querySelector('[aria-label="Usage code"]'), registration.id).not.toBeNull();
       expect(container.textContent, registration.id).toContain("Accessibility & behavior");
+      expect(fetch, registration.id).not.toHaveBeenCalled();
     }
   });
 });

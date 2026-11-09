@@ -1,15 +1,14 @@
 import {
-  createRootRouteWithContext,
+  createRootRoute,
   createRoute,
   createRouter,
   type RouterHistory,
 } from "@tanstack/react-router";
-import type { QueryClient } from "@tanstack/react-query";
 import { CatalogApp, CatalogPage, CatalogNotFound } from "./CatalogApp.js";
 import { catalogRoutePath, CatalogLink } from "./catalog/navigation.js";
 import { catalogHistory, createCatalogHashHistory } from "./routing-history.js";
 
-const rootRoute = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+const rootRoute = createRootRoute({
   component: CatalogApp,
   notFoundComponent: CatalogNotFound,
   errorComponent: () => (
@@ -31,14 +30,10 @@ const pageRoute = createRoute({
 });
 const routeTree = rootRoute.addChildren([indexRoute, pageRoute]);
 
-export function createCatalogRouter(
-  queryClient: QueryClient,
-  history: RouterHistory = createCatalogHashHistory(),
-) {
+export function createCatalogRouter(history: RouterHistory = createCatalogHashHistory()) {
   return createRouter({
     routeTree,
     history: catalogHistory(history),
-    context: { queryClient },
     defaultPreload: false,
     defaultPreloadStaleTime: 0,
   });

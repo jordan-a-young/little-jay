@@ -4,7 +4,7 @@ The existing playground is a lightweight component-and-documentation catalog, no
 
 ## Viewing and navigation
 
-Run `pnpm dev` and open the printed playground URL. The catalog starts at **Introduction**. Search the sidebar by component name, category, or keyword. Groups are Foundations, Components / Actions, Components / Feedback, Components / Forms, Components / Inspection, and Patterns. Component sections and their entries are alphabetical by display name; Foundations and Patterns retain their authored order. Search preserves this catalog order, and page/example links stay stable.
+Run `pnpm dev` and open the printed playground URL. This starts only the frontend catalog, with no API watcher, proxy or backend requirement. The catalog starts at **Introduction**. Search the sidebar by component name, category, or keyword. Groups are Foundations, Components / Actions, Components / Feedback, Components / Forms, Components / Inspection, and Patterns. Component sections and their entries are alphabetical by display name; Foundations and Patterns retain their authored order. Search preserves this catalog order, and page/example links stay stable.
 
 Each page combines overview, named examples, example code, usage/import code, a concise props reference, and accessibility/behavior notes. Copy buttons use the browser clipboard API and offer manual-copy guidance if permission or secure-context requirements prevent copying. Props and snippets are explicitly authored, not automatically generated from TypeScript; update them when changing a component contract.
 
@@ -55,9 +55,11 @@ The earlier `#pebble-states` URL remains an alias for the all-states showcase. B
 
 `routing-history.ts` is a small application compatibility boundary, not another router: it retains existing history state, adapts the exact legacy fragment, and rejects malformed percent encoding or extra path segments before router matching. Generated links retain the deployment pathname/query outside the fragment. Do not set the asset deployment prefix as a router basepath inside the fragment. The skip link still focuses documentation without changing the route.
 
-One stable QueryClient is passed to QueryClientProvider and the router's typed context. Routes/hooks can use TanStack Router APIs; future loaders can use `context.queryClient` with existing app-owned query options, but React hooks must stay inside React components. This migration adds no loaders, health prefetch, or duplicate data cache. Automatic link preloading is disabled, and Query continues to own health freshness/cancellation/offline state.
+The router has no data-query context or QueryClient provider. Routes/hooks can use TanStack Router APIs, but React hooks must stay inside React components. Automatic link preloading is disabled. Catalog navigation, including the legacy `/#/api-connection` link, makes no API requests.
 
-**Hooks & data fetching** follows the existing Foundations entries. It documents application/internal hook ownership, stable QueryClient/provider setup, app-owned queryOptions, fetchJson cancellation/decoding, cached refresh, offline pause, safe error copy, and the separate React Actions form lifecycle. Snippets load current health/provider/API-pattern sources as text; visiting the guide does not mount the health query. The guide links to API connection (a live read), Workflow form (local only), and the transport contract in the private source repository. It adds neither a hooks package nor public hook exports.
+**Hooks & data fetching** follows the existing Foundations entries. It documents application/internal hook ownership, stable QueryClient/provider setup, app-owned queryOptions, fetchJson cancellation/decoding, cached refresh, offline pause, safe error copy, and the separate React Actions form lifecycle. Query/HTTP snippets are explicitly illustrative strings, not executed imports or installed catalog runtime dependencies. The guide links to Local server demo (static instructions), Workflow form (local only), and the transport contract. It adds neither a hooks package nor public hook exports.
+
+**Local server demo** retains `/#/api-connection` and its `/default` example ID. It explains separate clone/install/frontend/server commands and terminal-only health/example requests without a live status indicator, simulated success or browser API call. `pnpm dev:server` starts the optional synthetic loopback demo independently; see [server ownership and configuration](SERVER.md#async-application-and-local-demo). The catalog continues working when that process is stopped.
 
 ## Shared controls
 
@@ -66,7 +68,7 @@ Dialog examples at `/#/dialog`, `/sheet` and `/pending` use the shared React Ari
 - **Settings:** a quiet button beside the page title opens a nonmodal, named native popover. Tab reaches its controls, Escape and outside clicks dismiss it, and Close provides an explicit dismissal action. Browser-managed focus returns to the trigger when appropriate. Settings do not take a permanent row above the documentation. This uses the Popover API in modern browsers; CSS anchor positioning aligns the panel with its trigger where supported, with a viewport-positioned fallback.
 - **Theme:** one System / Light / Dark selector reuses the existing persisted document-level preference and browser theme-color behavior. Theme changes and opening/closing Settings do not remount the active example.
 - **Preview width:** inside Settings, choose available width, 640 px, or 320 px, constrained by the actual available space. This resizes a content box, **not an iframe viewport**; CSS media queries still follow the browser. Its explanation stays inside the popover. Use a real narrow browser viewport for responsive checks.
-- **Reset preview:** remounts only the active preview, restoring local demo state. It leaves theme, selected page/example, search, and documentation intact. It does not clear the shared Query cache; use Refresh API for fresh health data.
+- **Reset preview:** remounts only the active preview, restoring local demo state. It leaves theme, selected page/example, search, and documentation intact. There is no shared data-query cache or server operation to reset.
 - **Example:** an underline tab strip chooses a named, URL-addressable example. ArrowLeft/ArrowRight (RTL-aware), Home and End move focus without navigating; native Enter/Space or a click activates the focused tab. Tab leaves the strip for the active named panel. Only the active preview and example code are mounted, so switching away and back resets local example state just as before. Clicking the already-selected tab does not navigate or reset it. Button also demonstrates an explicit local state control rather than a generic automatic props editor.
 
 The example strip scrolls horizontally rather than wrapping tabs into multiple rows. Individual long labels may wrap within a bounded tab; focus remains visibly inset and native focus scrolling exposes offscreen tabs. Selected tabs use a semantic-color underline as well as color, and the same behavior is retained in both themes. Missing example routes show the existing recovery message with no selected tab or mounted preview; the first tab remains keyboard-reachable. This is app-owned route presentation in `catalog/ExampleTabs.tsx`, not an extension of the shared Tabs API: shared Tabs intentionally preserves visited panels, while catalog examples must unmount when inactive. No dependency, shared API or URL format change is included.
@@ -84,7 +86,7 @@ Pane scrollbars are transparent at rest and reveal a thin semantic-color thumb o
 ```text
 apps/playground/src/
   CatalogApp.tsx                 persistent shell, routed documents, focus boundaries
-  router.tsx                     TanStack route tree and typed QueryClient context
+  router.tsx                     TanStack route tree without data-query context
   routing-history.ts             legacy/malformed-location compatibility
   shell/
     Sidebar.tsx                 searchable grouped navigation
@@ -98,7 +100,7 @@ apps/playground/src/
     ExampleTabs.tsx              manual route-controlled underline tabs, active-only preview
     CatalogBreadcrumb.tsx       app-owned home/page/explicit-example hierarchy
     foundations/{page,examples}.tsx
-    foundations/hooks.tsx          hook ownership and source-based Query guide
+    foundations/hooks.tsx          hook ownership and illustrative Query guide
     button/{page,examples}.tsx
     forms/{page,examples}.tsx
     feedback/{page,examples}.tsx
@@ -142,10 +144,10 @@ Combobox lives alphabetically in Forms with a fictional local “Choose a projec
 
 1. Add a stable page ID/title/group/search keywords to `catalog/registry.ts` and point its component to an appropriate lazy module.
 2. In that module's `page.tsx`, author a `CatalogDocument` with overview, usage, props, accessibility notes, and at least one named example. Use stable example IDs for links.
-3. Put executable examples in the adjacent `examples.tsx`. Keep them local-only unless explicitly demonstrating a real read such as API health. Label simulated behavior; do not start workflows or create real records.
+3. Put executable examples in the adjacent `examples.tsx`. Keep them local-only; adding a real API operation requires explicit scope and a reconsidered frontend-only contract. Label simulated behavior; do not start workflows or create real records.
 4. Render with `DocumentationPage`, passing the selected `pageId` and `exampleId`. Example components own local state, while the shared preview frame provides reset behavior.
 5. Add meaningful tests for changed behavior and documentation wiring. No artwork snapshots are needed. Select browser checks using the [risk policy and representative checklist](VERIFICATION.md#browser-risk-policy): exercise changed behavior once, sample affected theme/layout dimensions, and record evidence for low-risk skips rather than checking every combination.
 
-The workflow form, workflow feedback, isolated ErrorBoundary failure, Pebble Retry/Create demos, and Fastify health check are preserved as dedicated catalog entries. Inspection adds native metadata/disclosure, inert TextBlock, named IconButton, and Dialog/Sheet. Modal previews use a document-level portal and viewport, so the preview width control does not resize the modal; check a real narrow viewport. Only the API connection page mounts the real health query, now through `@littlejay/http`. The existing health contract and port remain intact; `/api/ready` and the stateless TypeBox `/api/text-preview` endpoint are added locally. Production still needs the application's API reverse proxy.
+The workflow form, workflow feedback, isolated ErrorBoundary failure and Pebble Retry/Create demos remain dedicated catalog entries; the old API entry is now the static server guide. Inspection adds native metadata/disclosure, inert TextBlock, named IconButton, and Dialog/Sheet. Modal previews use a document-level portal and viewport, so the preview width control does not resize the modal; check a real narrow viewport. Existing API health/readiness/TypeBox routes remain in the separate API workspace. Development and static production catalog builds need no API reverse proxy.
 
 `pnpm ready` runs the existing formatting/lint, builds, TypeScript, tests, and external package-consumer checks. The catalog adds tests for registry/search/links, docs wiring, reset/width state, missing routes/examples, clipboard failure, and local navigation. Explicit browser checks remain necessary for the risks identified in the verification policy; a constrained preview is not full responsive or accessibility validation.

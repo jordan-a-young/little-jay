@@ -25,9 +25,11 @@ On this workstation, both required tools are already installed. From a fresh che
 The secret-scanner installer downloads checksum-pinned Gitleaks into ignored `.tools/` (Linux/macOS x64 or ARM64; requires curl, tar, and SHA-256 tooling). Hooks must be enabled in each clone; Git does not activate cloned hooks automatically. Commit scans check staged additions; push scans check all local Git history. Both refuse to proceed if the scanner is missing or ignored files are tracked. Run `pnpm secrets:staged` before committing and `pnpm secrets:scan` to audit history. See [secret handling and limitations](docs/PUBLISHING.md#secret-prevention-and-response).
 
 - Playground: http://localhost:5173
-- API: http://127.0.0.1:5050/api/health
+- Optional server demo: run `pnpm dev:server` separately, then inspect http://127.0.0.1:5050/api/health or `/api/example`.
 
-`pnpm dev` generates tokens and builds the UI, HTTP, and server packages first, then runs the React playground and API watcher. Playground and UI component source edits hot-reload, including their Tailwind classes and component CSS: UI `development` exports resolve component source, and the playground aliases the UI stylesheet to its workspace source during development only. No manual rebuild or restart is needed for ordinary UI edits. Production/preview builds still consume packaged output; hot reload does not regenerate `dist` declarations or tarballs for verification. API app edits restart the backend automatically. After editing token sources, HTTP/server libraries, or UI package/build configuration, restart `pnpm dev` to rebuild them. Branding browser files synchronize automatically on development and production startup.
+`pnpm dev` generates tokens, builds the UI and its dependencies, and starts only the frontend catalog. No backend, API proxy or connection check is required. Playground and UI component source edits hot-reload, including their Tailwind classes and component CSS: UI `development` exports resolve component source, and the playground aliases the UI stylesheet to its workspace source during development only. No manual rebuild or restart is needed for ordinary UI edits. Production/preview builds still consume packaged output; hot reload does not regenerate `dist` declarations or tarballs for verification. After editing token sources or UI package/build configuration, restart `pnpm dev` to rebuild them. Branding browser files synchronize automatically on development and production startup.
+
+`pnpm dev:server` builds the server library and starts a separate API-demo watcher with synthetic dependencies and loopback-only configuration. API app edits restart that process automatically; server-library edits require restarting its command to rebuild. Ctrl+C stops each command independently. See [the async application example](docs/SERVER.md#async-application-and-local-demo) for configuration, injection and cleanup ownership. The original API entry point remains available through `pnpm --filter @littlejay/api dev` after building its server dependency.
 
 Stop development with Ctrl+C before running `pnpm build` or `pnpm ready`: clean library builds replace the generated files that the running apps consume.
 
@@ -93,7 +95,7 @@ Layers are introduced only when they contain useful code. React Aria supports co
 
 The [component catalog](docs/CATALOG.md) organizes Foundations, Components, and Patterns with searchable navigation, deep-linked examples, usage snippets, props, and accessibility notes. Run `pnpm dev`, then open the printed playground URL. For example, `/#/button/disabled` opens Button's disabled example.
 
-Navigation uses TanStack Router directly in the playground with hash history, preserving static-host deep links. The router's typed context shares the application's existing QueryClient for future loader/hook integration; no shared router package or extra query cache is introduced. See `apps/playground/src/router.tsx` and the [routing contract](docs/CATALOG.md#viewing-and-navigation).
+Navigation uses TanStack Router directly in the playground with hash history, preserving static-host deep links. The catalog has no QueryClient or data-query route context. See `apps/playground/src/router.tsx` and the [routing contract](docs/CATALOG.md#viewing-and-navigation).
 
 ```tsx
 import { Button } from "@littlejay/ui/button";
@@ -142,7 +144,7 @@ Subpath imports also work: `@littlejay/ui/alert`, `@littlejay/ui/empty-state`, `
 
 Boundaries do not catch server-rendering errors, ordinary event-handler/async failures, or failures in their own fallback. Expected network/validation failures normally belong in `Alert`, preserving drafts and existing data. With TanStack Query's `throwOnError` or suspense queries, pair the boundary's `onReset` with `QueryErrorResetBoundary`'s reset callback. Core UI has no dependency on TanStack Query.
 
-The playground demonstrates a render failure without taking down sibling controls. Its health read uses `@littlejay/http` over native `fetch`, the Query-provided abort signal, and TanStack React Query with a 30-second stale window; explicit Refresh requests fresh data. Responses are bounded to 4 KiB, decoded at runtime, and time out after 10 seconds. When offline, Query pauses the request and the UI labels the cached result rather than claiming a fresh check; it resumes on reconnection. No library-owned cache or automatic mutation retries are introduced. See [the transport contract](docs/HTTP.md).
+The playground demonstrates a render failure without taking down sibling controls. Its hooks guide contains explicitly illustrative Query/HTTP snippets, not live requests or catalog runtime dependencies. The legacy `/#/api-connection` link opens static local-server instructions and reports no connection status. Applications using the transport still own caching, cancellation and retry policy; see [the transport contract](docs/HTTP.md).
 
 ## Inspection and modals
 
@@ -233,21 +235,22 @@ The factory returns a normal Fastify instance. It does not bind a port, add rout
 
 ## Ports
 
-Defaults: API 5050 on `127.0.0.1`, playground 5173 (tries the next available port if occupied; check the terminal for its URL). Override `PORT` and `HOST` for the API; `WEB_PORT` for the playground; `API_PROXY_TARGET` if the API URL changes. For example, on Linux/macOS:
+Defaults: optional server demo 5050 on `127.0.0.1`, playground 5173 (tries the next available port if occupied; check the terminal for its URL). Override `PORT` and `HOST` for the server demo (`HOST` accepts only `127.0.0.1` or `::1`); use `WEB_PORT` for the playground. Run these in separate terminals on Linux/macOS:
 
 ```sh
-PORT=8080 WEB_PORT=5174 API_PROXY_TARGET=http://127.0.0.1:8080 pnpm dev
+WEB_PORT=5174 pnpm dev
+PORT=8080 HOST=127.0.0.1 pnpm dev:server
 ```
 
 In PowerShell:
 
 ```powershell
 $env:PORT = '8080'
-$env:API_PROXY_TARGET = 'http://127.0.0.1:8080'
-pnpm dev
+$env:HOST = '127.0.0.1'
+pnpm dev:server
 ```
 
-The Vite proxy is development-only. Production deployments need a matching reverse proxy or an explicitly configured API URL.
+In a separate PowerShell terminal, use `$env:WEB_PORT = '5174'` followed by `pnpm dev` for the catalog. The frontend has no API proxy in development or production; static catalog hosting does not require an API. Any application built from the server example owns its own deployment and transport configuration.
 
 ## Tooling and distribution
 

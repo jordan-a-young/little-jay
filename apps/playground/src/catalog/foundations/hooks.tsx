@@ -1,16 +1,52 @@
 import { DescriptionList } from "@littlejay/ui";
-import healthQuerySource from "../../health.ts?raw";
-import applicationSource from "../../main.tsx?raw";
-import apiConnectionSource from "../patterns/examples.tsx?raw";
 import { CatalogLink } from "../navigation.js";
 import type { CatalogDocument } from "../types.js";
+
+const healthQueryExample = `import { queryOptions } from "@tanstack/react-query";
+import { fetchJson } from "@littlejay/http";
+
+export const healthQueryOptions = queryOptions({
+  queryKey: ["api", "health"],
+  queryFn: ({ signal }) => fetchJson("/api/health", {
+    signal,
+    maxResponseBytes: 4096,
+    decode: (value) => {
+      if (typeof value !== "object" || value === null ||
+          !("status" in value) || value.status !== "ok") {
+        throw new Error("Unexpected health response");
+      }
+      return value.status;
+    },
+  }),
+  staleTime: 30_000,
+  retry: false,
+});`;
+const providerExample = `import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { ReactNode } from "react";
+
+const queryClient = new QueryClient();
+
+function Application({ children }: { children: ReactNode }) {
+  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+}`;
+const queryViewExample = `import { useQuery } from "@tanstack/react-query";
+import { healthQueryOptions } from "./health-query";
+
+export function ConnectionMessage() {
+  const health = useQuery(healthQueryOptions);
+  const message = health.isPaused ? "Waiting for connection…"
+    : health.isPending ? "Checking API…"
+    : health.isError ? "Unable to reach the API"
+    : "API is healthy";
+  return <p>{message}</p>;
+}`;
 
 function RelatedPatterns() {
   return (
     <ul className="space-y-2">
       <li>
-        <CatalogLink pageId="api-connection">Open the live API connection pattern</CatalogLink>{" "}
-        (opening that pattern starts the health read).
+        <CatalogLink pageId="api-connection">Read the local server demo guide</CatalogLink> (static
+        instructions; no requests or server required).
       </li>
       <li>
         <CatalogLink pageId="workflow-form">
@@ -22,7 +58,7 @@ function RelatedPatterns() {
         <a href="https://github.com/jordan-a-young/little-jay/blob/main/docs/HTTP.md">
           Read the JSON transport contract
         </a>{" "}
-        (source repository access required).
+        (external documentation).
       </li>
     </ul>
   );
@@ -55,14 +91,14 @@ function HookOwnershipGuide() {
         </dd>
       </DescriptionList>
       <p>
-        Keep a stable QueryClient and share it through QueryClientProvider, as in the application
-        source below. Opening this guide does not create a query observer or make a request.
+        In an application that fetches server state, keep a stable QueryClient and share it through
+        QueryClientProvider, as in the illustrative code below. This frontend-only catalog does not
+        install those runtime dependencies or create a query observer.
       </p>
       <p>
-        TanStack Router is configured directly in this application with hash history. Its typed
-        route context receives that same QueryClient, so future loaders can reuse app-owned query
-        options without adding a router or hooks package. React hooks such as useNavigate belong
-        inside routed React components, not loader functions.
+        This catalog uses TanStack Router with hash history and no data-query context. In
+        applications that need loaders, an app-owned QueryClient can be shared explicitly. React
+        hooks such as useNavigate belong inside routed React components, not loader functions.
       </p>
       <RelatedPatterns />
     </div>
@@ -97,13 +133,13 @@ function QueryOwnershipGuide() {
         </dd>
       </DescriptionList>
       <p>
-        The health options below use a 30-second stale window, no automatic retries, and a 4 KiB
-        response bound. Refresh API explicitly refetches. These are local health-read policies, not
-        defaults for every endpoint.
+        The illustrative health options use a 30-second stale window, no automatic retries, and a 4
+        KiB response bound. An application can explicitly refetch when requested. These are example
+        policies, not defaults for every endpoint or live behavior of this catalog.
       </p>
       <p>
-        This is a source walkthrough, not a live query. useFormStatus and Actions remain responsible
-        for the separate local validation form.
+        This is a non-executing guide, not a live query. useFormStatus and Actions remain
+        responsible for the separate local validation form.
       </p>
       <RelatedPatterns />
     </div>
@@ -112,30 +148,30 @@ function QueryOwnershipGuide() {
 
 export const hooksDocument: CatalogDocument = {
   overview:
-    "A guide to app-owned hooks, internal UI composition, and TanStack Query data reads. No hooks package or new public hook is introduced. This page documents existing code without making API requests.",
-  usage: healthQuerySource.trim(),
+    "A guide to app-owned hooks, internal UI composition, and TanStack Query data reads. The snippets are illustrative application code, not imports or live data requests in this frontend-only catalog. No hooks package or new public hook is introduced.",
+  usage: healthQueryExample,
   props: [],
   accessibility: [
-    "The Usage snippet is the current health.ts source; example snippets are the current application/provider and API pattern sources. Their relative imports belong to this playground: adapt URLs, keys, decoders, and credentials policy to your application.",
+    "All Query/HTTP snippets are explicitly illustrative and are not executed or installed as catalog runtime dependencies. Applications using them must supply the shown dependencies and adapt URLs, keys, decoders and credentials policy.",
     "Create a stable QueryClient at the application boundary and supply QueryClientProvider; do not recreate the cache during component renders. Reuse queryOptions directly rather than adding a wrapper hook solely for naming consistency.",
-    "The application passes that QueryClient to createCatalogRouter and RouterProvider. Route context makes it available to future loaders; no health loader or automatic link prefetch is enabled. Keep Query as the data cache rather than duplicating request state in the router.",
+    "The catalog router needs no QueryClient. Applications that do use server-state loaders may share their own client through route context rather than create a second data cache. Hooks still belong inside React components.",
     "Query owns cache freshness, cancellation, offline pause/resume, and invalidation. fetchJson owns bounded transport and runtime decoding, not React state, caching, authentication, or authorization. Include relevant data identity/auth scope in application query keys; do not put secrets in keys or logs.",
     "Choose announcement roles and aria-busy at the application boundary. Preserve cached data during background work, communicate offline/error/loading states in text, and avoid duplicate live regions or forced focus changes.",
     "Form validation/pending state uses React Actions, useActionState, and useFormStatus in the workflow example. Mutation approval, draft preservation, retries, and permissions remain app policy; this guide does not replace generated clients or introduce mutation abstractions.",
-    "Only follow the live API connection link when its matching API/proxy is available. This guide itself has no network dependency; the JSON transport contract link requires access to the private source repository.",
+    "The local server demo link opens static instructions. Neither that page nor this guide needs a backend or API proxy. External documentation links navigate only when followed.",
   ],
   examples: [
     {
       id: "default",
       title: "Hook ownership and provider setup",
       component: HookOwnershipGuide,
-      code: applicationSource.trim(),
+      code: providerExample,
     },
     {
       id: "query",
       title: "Cached API reads and lifecycle",
       component: QueryOwnershipGuide,
-      code: apiConnectionSource.trim(),
+      code: queryViewExample,
     },
   ],
 };
