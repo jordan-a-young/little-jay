@@ -504,6 +504,7 @@ export function createRelease({
                 "0",
                 "--ignore-scripts",
                 "--json",
+                "--reporter=ndjson",
               ],
               true,
             ),
