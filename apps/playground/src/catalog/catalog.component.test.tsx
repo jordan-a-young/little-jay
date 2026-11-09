@@ -414,6 +414,7 @@ describe("component catalog", () => {
         "Field",
         "Input",
         "NativeSelect",
+        "NumericInput",
         "PasswordField",
         "Switch",
         "Textarea",

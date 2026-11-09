@@ -37,6 +37,11 @@
       "development": "./src/input/index.tsx",
       "import": "./dist/input.js"
     },
+    "./numeric-input": {
+      "types": "./dist/numeric-input.d.ts",
+      "development": "./src/numeric-input/index.tsx",
+      "import": "./dist/numeric-input.js"
+    },
     "./combobox": {
       "types": "./dist/combobox.d.ts",
       "development": "./src/combobox/index.tsx",

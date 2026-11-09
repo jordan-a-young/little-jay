@@ -97,6 +97,7 @@ export const catalogPages: readonly CatalogRegistration[] = [
     "Field",
     "Input",
     "NativeSelect",
+    "NumericInput",
     "PasswordField",
     "Switch",
     "Textarea",
@@ -107,11 +108,13 @@ export const catalogPages: readonly CatalogRegistration[] = [
     keywords:
       title === "Combobox"
         ? "search selection options filter local form"
-        : title === "PasswordField"
-          ? "password reveal show hide current new native form control"
-          : title === "Switch"
-            ? "toggle on off boolean native form control"
-            : "label validation native form control",
+        : title === "NumericInput"
+          ? "integer number draft commit restore native form control"
+          : title === "PasswordField"
+            ? "password reveal show hide current new native form control"
+            : title === "Switch"
+              ? "toggle on off boolean native form control"
+              : "label validation native form control",
     component: forms,
   })),
   ...[

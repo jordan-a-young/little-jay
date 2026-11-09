@@ -6,6 +6,7 @@ import {
   Field,
   Input,
   NativeSelect,
+  NumericInput,
   PasswordField,
   Switch,
   Textarea,
@@ -28,6 +29,104 @@ const projectOptions = [
     label: "A deliberately long fictional project name that wraps without widening the page",
   },
 ];
+
+export function NumericInputExample() {
+  const [committed, setCommitted] = useState(30);
+  const [submitted, setSubmitted] = useState<string>();
+  return (
+    <form
+      className="grid gap-4"
+      onSubmit={(event) => {
+        event.preventDefault();
+        setSubmitted(String(new FormData(event.currentTarget).get("duration") ?? ""));
+      }}
+      onReset={() => {
+        setCommitted(30);
+        setSubmitted(undefined);
+      }}
+    >
+      <Field
+        label="Slideshow duration in seconds"
+        description="Local integer example: 5–3600 seconds. Blur or press Enter to commit; invalid entries restore the previous value."
+        required
+      >
+        <NumericInput
+          name="duration"
+          defaultValue={30}
+          min={5}
+          max={3600}
+          step={1}
+          onValueChange={setCommitted}
+        />
+      </Field>
+      <div className="flex flex-wrap gap-2">
+        <Button type="submit">Inspect local duration</Button>
+        <Button type="reset">Reset local duration</Button>
+      </div>
+      <p role="status">Committed duration: {committed} seconds. Nothing is saved or sent.</p>
+      <p>
+        {submitted === undefined ? "No local submission yet." : `Submitted duration: ${submitted}`}
+      </p>
+    </form>
+  );
+}
+
+export function ControlledNumericInput() {
+  const [duration, setDuration] = useState(30);
+  const [renders, setRenders] = useState(0);
+  return (
+    <form
+      className="grid gap-4"
+      onSubmit={(event) => event.preventDefault()}
+      onReset={() => setDuration(30)}
+    >
+      <Field
+        label="Controlled duration in seconds"
+        description="The app owns the committed number. Press F2 while editing to rerender without changing that number."
+      >
+        <NumericInput
+          name="controlled-duration"
+          value={duration}
+          onValueChange={setDuration}
+          min={5}
+          max={3600}
+          onKeyDown={(event) => {
+            if (event.key === "F2") {
+              event.preventDefault();
+              setRenders((count) => count + 1);
+            }
+          }}
+        />
+      </Field>
+      <div className="flex flex-wrap gap-2">
+        <Button onClick={() => setDuration(90)}>Set 90 seconds externally</Button>
+        <Button type="reset">Reset controlled duration</Button>
+      </div>
+      <p role="status">
+        Committed duration: {duration} seconds. Unrelated renders: {renders}.
+      </p>
+    </form>
+  );
+}
+
+export function NumericInputStates() {
+  return (
+    <div className="grid gap-4">
+      <fieldset disabled>
+        <legend>Disabled native fieldset</legend>
+        <Field label="Unavailable duration">
+          <NumericInput name="unavailable-duration" defaultValue={30} min={5} max={3600} />
+        </Field>
+      </fieldset>
+      <Field label="Read-only duration">
+        <NumericInput name="readonly-duration" defaultValue={30} readOnly />
+      </Field>
+      <Field label="Duration with application feedback" error="Example application-owned message.">
+        <NumericInput defaultValue={30} min={5} max={3600} />
+      </Field>
+    </div>
+  );
+}
 
 export function ComboboxExample() {
   const [submitted, setSubmitted] = useState<string>();

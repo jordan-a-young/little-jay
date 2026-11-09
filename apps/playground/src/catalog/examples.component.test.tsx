@@ -8,6 +8,8 @@ import {
   DisabledSelect,
   DisabledTextarea,
   InvalidField,
+  NumericInputExample,
+  ControlledNumericInput,
 } from "./forms/examples.js";
 import {
   BoundaryExample,
@@ -84,6 +86,56 @@ describe("catalog example behavior", () => {
     expect(container.querySelector('[role="status"]')?.textContent).toBe(
       "Local submissions: 2. Nothing is saved.",
     );
+  });
+
+  it("demonstrates integer commits, invalid restoration and local FormData without requests", async () => {
+    await act(() => root.render(<NumericInputExample />));
+    const input = container.querySelector<HTMLInputElement>('input[name="duration"]')!;
+    const form = container.querySelector("form")!;
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!;
+    expect(input.labels?.[0]?.textContent).toContain("Slideshow duration in seconds");
+    await act(() => {
+      input.focus();
+      setter.call(input, "60");
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    expect(container.querySelector('[role="status"]')?.textContent).toContain("30 seconds");
+    await act(() =>
+      input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true })),
+    );
+    expect(container.querySelector('[role="status"]')?.textContent).toContain("60 seconds");
+    await act(() => {
+      setter.call(input, "4000");
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    expect(input.validity.rangeOverflow).toBe(true);
+    await act(() => input.blur());
+    expect(input.value).toBe("60");
+    expect(input.checkValidity()).toBe(true);
+    await act(() => form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })));
+    expect(container.textContent).toContain("Submitted duration: 60");
+    await act(() => container.querySelector<HTMLButtonElement>('button[type="reset"]')!.click());
+    expect(input.value).toBe("30");
+    expect(container.textContent).toContain("No local submission yet.");
+  });
+
+  it("preserves the controlled numeric draft during the example's same-value app rerender", async () => {
+    await act(() => root.render(<ControlledNumericInput />));
+    const input = container.querySelector<HTMLInputElement>('input[name="controlled-duration"]')!;
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!;
+    await act(() => {
+      input.focus();
+      setter.call(input, "75");
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.dispatchEvent(new KeyboardEvent("keydown", { key: "F2", bubbles: true }));
+    });
+    expect(input.value).toBe("75");
+    expect(document.activeElement).toBe(input);
+    expect(container.querySelector('[role="status"]')?.textContent).toContain("30 seconds");
+    expect(container.textContent).toContain("Unrelated renders: 1");
+    await act(() => container.querySelector<HTMLButtonElement>('button[type="button"]')!.click());
+    expect(input.value).toBe("90");
+    expect(container.querySelector('[role="status"]')?.textContent).toContain("90 seconds");
   });
 
   it.each([
