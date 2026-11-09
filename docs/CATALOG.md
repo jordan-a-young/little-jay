@@ -43,6 +43,9 @@ TanStack Router uses hash history, so a same-origin deployment prefix needs no e
 - `/#/password-field`
 - `/#/password-field/controlled`
 - `/#/password-field/states`
+- `/#/numeric-input`
+- `/#/numeric-input/controlled`
+- `/#/numeric-input/states`
 - `/#/combobox`
 - `/#/combobox/controlled`
 - `/#/combobox/states`
@@ -130,6 +133,8 @@ Breadcrumb lives alphabetically in Inspection, with native/router-aware ancestor
 Components stay in `packages/ui`, canonical artwork in `packages/brand`, and tokens in `packages/tokens`. Catalog docs, controls, preview state, and application patterns remain in the playground. Do not make a UI component import catalog code or add domain policy to the library.
 
 PasswordField lives alphabetically in Forms. Its synthetic local-only examples cover current-password visibility/native reset, caller-owned controlled new-password input/reset, and native disabled-fieldset/read-only/invalid presentation. The shared control owns only reveal state; Input/Field preserve the primary control's label/messages/native props, while the auxiliary action has its own changing name. Values are never echoed, logged, persisted or sent, and no authentication, password-strength policy or clipboard interception is added. Themes/preview width/viewport changes retain input/reveal state; explicit Reset preview remounts the example.
+
+NumericInput lives alphabetically in Forms with local integer duration, controlled-value and native-state examples. Blur/Enter commits valid integers; empty/invalid commits restore the last committed value rather than clamping. F2 in the controlled example triggers an unrelated app rerender while editing; a separate action supplies a genuinely changed committed value. Native FormData/reset and disabled/read-only controls remain visible examples. These synthetic settings make no requests and save nothing.
 
 ## Adding a page or example
 

@@ -50,7 +50,7 @@ const documents: Record<string, CatalogDocument> = {
   },
   branding: {
     overview:
-      "Little Jay is the brand; Pebble is the cozy seated young blue jay. Canonical logos, mascot, icons, banners, and static state PNGs live in the private framework-independent @littlejay/brand package.",
+      "Little Jay is the brand; Pebble is the cozy seated young blue jay. Canonical logos, mascot, icons, banners, and static state PNGs live in the framework-independent @littlejay/brand package.",
     usage:
       'import logoLight from "@littlejay/brand/logos/lockup-light.svg";\nimport logoDark from "@littlejay/brand/logos/lockup-dark.svg";\n\n<img src={theme === "dark" ? logoDark : logoLight}\n  alt="Little Jay" width={275} height={75} />',
     props: [],

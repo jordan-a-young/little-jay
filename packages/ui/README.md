@@ -219,6 +219,31 @@ When a controlled selection changes externally, its new label replaces any old s
 
 Inside the shared Dialog, the first Escape dismisses an open Combobox and restores its selected label while keeping modal focus and local drafts. A subsequent Escape follows `dismissOnEscape`. Keep the popup's `portalContainer` inside the modal content. Restrictive CSP applications need the nonce setup described under Dialog even when a Combobox is mounted without a modal.
 
+## NumericInput
+
+`NumericInput` and `NumericInputProps` are available from the root and `@littlejay/ui/numeric-input`. It composes the existing Input as a native number control for integer settings; values and application saves are separate:
+
+```tsx
+import { Field, NumericInput } from "@littlejay/ui";
+import "@littlejay/ui/styles.css";
+
+<Field label="Duration in seconds" required>
+  <NumericInput name="duration" defaultValue={30} min={5} max={3600} step={1} />
+</Field>;
+```
+
+Supply `value` for a caller-owned committed integer or `defaultValue` for an uncontrolled initial/reset integer. Native `onChange` observes editing events; `onValueChange` requests a valid changed integer only when the input blurs or Enter commits. Empty, invalid, fractional, step-mismatched or out-of-range commits restore the last committed value instead of truncating or clamping it. Restoration, unchanged commits, resets and external prop changes do not request a new number. A numeric commit is not persistence, domain validation or server authorization.
+
+Exactly one of `value` or `defaultValue` is required. Values and bounds must be safe integers, `min` must not exceed `max`, and `step` must be a positive safe integer (default `1`); unsupported configuration throws a `TypeError`. Do not switch controlled/uncontrolled mode. Native step validation uses `min`, otherwise the input's value attribute, otherwise zero as its base; supply `min` when a stable step grid matters. An externally supplied integer remains authoritative even when it is outside the current constraints; the native input then reports invalid rather than silently correcting application state.
+
+Normal numeric editing can be temporarily empty. Unrelated renders with the same controlled number preserve the draft; a genuinely changed number is authoritative and replaces it. Browser number controls may reject or normalize incomplete numeric text; this is not an arbitrary-text buffer. Native bounds and integer step validity still apply. Keep drafts, application errors, committed values and saved server values conceptually separate.
+
+A controlled callback requests a commit: echo its number through `value` to acknowledge it. Until then, the candidate stays displayed across same-value renders and Enter followed by blur does not duplicate the request. An invalid later commit restores the actual parent-committed number. Native `onBlur` and `onKeyDown` run before internal commit handling; `preventDefault()` opts out of that commit, not native focus movement. Enter's submission default is preserved, and composition Enter does not commit. Caller-owned custom validity is not cleared.
+
+The ref, `className`, `style`, ID, `name`, `form` and native events target the actual number input. Field provides the label, description/error associations and default required/disabled/invalid flags. Native spinbutton keyboard behavior, disabled fieldsets and read-only submission remain platform-owned. Uncancelled reset restores the uncontrolled default or current controlled value; cancelling a reset preserves the draft. Applications may deliberately change their controlled value in `onReset`.
+
+`disableWheelChange` defaults to `false`. Opting in cancels vertical wheel defaults over the focused, editable, effectively enabled input without blurring it. **This also stops page scrolling over that input.** Scrolling elsewhere remains native; Ctrl-wheel zoom and horizontal-only wheel events are not intercepted. React `onWheel` still runs and observes the native cancellation. Reset settles after event dispatch in a microtask; inspect reset FormData after that work has settled.
+
 ## PasswordField
 
 `PasswordField` and `PasswordFieldProps` are available from the root and `@littlejay/ui/password-field`. It composes Input with a native non-submit Button; the input starts masked. Load the stylesheet once:

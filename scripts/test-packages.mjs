@@ -300,6 +300,8 @@ import { LoadingIndicator, type LoadingIndicatorProps } from "@littlejay/ui/load
 import { ErrorBoundary } from "@littlejay/ui/error-boundary";
 import { Field } from "@littlejay/ui/field";
 import { Input, type InputProps } from "@littlejay/ui/input";
+import { NumericInput, type NumericInputProps } from "@littlejay/ui/numeric-input";
+import { NumericInput as RootNumericInput, type NumericInputProps as RootNumericInputProps } from "@littlejay/ui";
 import { Combobox, type ComboboxProps, type ComboboxOption } from "@littlejay/ui/combobox";
 import { Combobox as RootCombobox, type ComboboxProps as RootComboboxProps, type ComboboxOption as RootComboboxOption } from "@littlejay/ui";
 import { PasswordField, type PasswordFieldProps } from "@littlejay/ui/password-field";
@@ -363,6 +365,10 @@ type MatchingPasswordFieldProps = Assert<RootPasswordFieldProps extends Password
 type FixedPasswordType = Assert<Extract<"type", keyof PasswordFieldProps> extends never ? true : false>;
 const passwordFieldContracts: [MatchingPasswordFieldProps, FixedPasswordType] = [true, true];
 void passwordFieldContracts;
+type MatchingNumericInputProps = Assert<RootNumericInputProps extends NumericInputProps ? NumericInputProps extends RootNumericInputProps ? true : false : false>;
+type FixedNumericInputType = Assert<Extract<"type", keyof NumericInputProps> extends never ? true : false>;
+const numericInputContracts: [MatchingNumericInputProps, FixedNumericInputType] = [true, true];
+void numericInputContracts;
 type SubpathBreadcrumbContracts = [BreadcrumbProps, BreadcrumbListProps, BreadcrumbItemProps, BreadcrumbSeparatorProps, BreadcrumbPageProps];
 type RootBreadcrumbContracts = [RootBreadcrumbProps, RootBreadcrumbListProps, RootBreadcrumbItemProps, RootBreadcrumbSeparatorProps, RootBreadcrumbPageProps];
 type MatchingBreadcrumbContracts = Assert<RootBreadcrumbContracts extends SubpathBreadcrumbContracts ? SubpathBreadcrumbContracts extends RootBreadcrumbContracts ? true : false : false>;
@@ -503,6 +509,38 @@ function ExternalPasswordFields() {
     <Button onClick={() => passwordReference.current?.focus()}>Focus password ref</Button>
     <Field label="Disabled external password" disabled><PasswordField defaultValue="sample-only" /></Field>
     <PasswordField aria-label="Hidden external password" defaultValue="sample-only" hidden />
+  </section>;
+}
+
+function ExternalNumericSetting({ theme }: { theme: "light" | "dark" }) {
+  const [value, setValue] = useState(30);
+  const [commits, setCommits] = useState(0);
+  const [renders, setRenders] = useState(0);
+  const [submitted, setSubmitted] = useState("");
+  const reference = useRef<HTMLInputElement>(null);
+  const NumberInput = theme === "light" ? NumericInput : RootNumericInput;
+  return <section data-consumer-numeric={theme} data-theme={theme}>
+    <form onSubmit={event => {
+      event.preventDefault();
+      setSubmitted(String(new FormData(event.currentTarget).get("duration") ?? ""));
+    }} onReset={() => { setValue(30); setCommits(0); setSubmitted(""); }}>
+      <Field label={theme + " consumer duration"} description="Local integer: 5–3600 seconds; invalid commits restore the last committed value." required>
+        <NumberInput ref={reference} name="duration" value={value} min={5} max={3600} step={1} disableWheelChange onValueChange={next => { setValue(next); setCommits(count => count + 1); }} onKeyDown={event => {
+          if (event.key === "F2") { event.preventDefault(); setRenders(count => count + 1); }
+        }} />
+      </Field>
+      <Button data-numeric-external onClick={() => setValue(90)}>Set consumer duration to 90</Button>
+      <Button data-numeric-focus onClick={() => reference.current?.focus()}>Focus consumer duration</Button>
+      <Button type="submit">Inspect consumer duration</Button>
+      <Button type="reset">Reset consumer duration</Button>
+      <p data-numeric-value>{value}</p><p data-numeric-commits>{commits}</p><p data-numeric-renders>{renders}</p><p data-numeric-submitted>{submitted}</p>
+    </form>
+    <form>
+      <Field label={theme + " uncontrolled consumer integer"}><NumericInput name="uncontrolled" defaultValue={5} min={0} max={10} /></Field>
+      <Button type="reset">Reset uncontrolled consumer integer</Button>
+    </form>
+    <fieldset disabled><legend>Unavailable consumer numeric setting</legend><Field label={theme + " disabled consumer integer"}><NumericInput name="disabled-integer" defaultValue={5} /></Field></fieldset>
+    <Field label={theme + " read-only consumer integer"}><NumericInput name="readonly-integer" defaultValue={5} readOnly /></Field>
   </section>;
 }
 function NativeForm() {
@@ -680,6 +718,8 @@ function App() {
     <NativeForm />
     <ExternalHiddenComponents />
     <ExternalPasswordFields />
+    <ExternalNumericSetting theme="light" />
+    <ExternalNumericSetting theme="dark" />
     <ExternalComboboxes />
     <ExternalComboboxValidation />
     <section aria-label="External breadcrumbs">

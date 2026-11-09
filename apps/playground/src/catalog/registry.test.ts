@@ -19,6 +19,13 @@ describe("catalog registry and links", () => {
     }
   });
 
+  it("registers numeric draft and commit editing as a searchable form page", () => {
+    expect(filterCatalog("integer draft commit").map((page) => page.id)).toEqual(["numeric-input"]);
+    expect(catalogPages.find((page) => page.id === "numeric-input")?.group).toBe(
+      "Components / Forms",
+    );
+  });
+
   it("alphabetizes component groups and display names without reordering guides or patterns", () => {
     expect([...new Set(catalogPages.map((page) => page.group))]).toEqual([
       "Foundations",
@@ -47,6 +54,7 @@ describe("catalog registry and links", () => {
       "field",
       "input",
       "native-select",
+      "numeric-input",
       "password-field",
       "switch",
       "textarea",
@@ -75,7 +83,7 @@ describe("catalog registry and links", () => {
     ]);
   });
   it("has stable unique pages for all foundations, components, and patterns", () => {
-    expect(catalogPages).toHaveLength(32);
+    expect(catalogPages).toHaveLength(33);
     expect(new Set(catalogPages.map((page) => page.id)).size).toBe(catalogPages.length);
     expect(catalogPages.some((page) => page.id === "native-select")).toBe(true);
   });

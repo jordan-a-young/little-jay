@@ -11,6 +11,7 @@ Build small, useful pieces for Graph Workbench first. Other project consumers ar
 - Framework-independent light/dark tokens and semantic feedback colors.
 - Native Button; Alert, EmptyState, StatusIndicator, and resettable ErrorBoundary.
 - Field, Input, Textarea, NativeSelect, and Checkbox, with per-field React 19 context, native refs/constraints, controlled/uncontrolled support, and no shared value store.
+- NumericInput composes native number editing with valid integer blur/Enter commits, invalid/empty restoration without clamping, Field integration and local-only catalog examples. Saving and domain validation remain application-owned.
 - Local workflow form using React 19 Actions, useActionState/useFormStatus, and draft-preserving validation. No workflow is saved or started.
 - Playground examples for workflow feedback and isolated rendering failures.
 - Native DescriptionList/Disclosure, inert escaped TextBlock, and named IconButton with local catalog consumers.

@@ -14,6 +14,64 @@ const controlAccessibility = [
   "Use name for FormData. Disabled controls are omitted; preserve submitted drafts when using React Actions.",
 ];
 const documents: Record<string, CatalogDocument> = {
+  "numeric-input": {
+    overview:
+      "A native number input for integer settings with separate drafts and committed values. Normal numeric editing may be temporarily empty; blur or Enter commits a valid integer, otherwise the previous committed value is restored. Domain validation, saving and conflicts stay application-owned.",
+    usage:
+      'import { Field, NumericInput } from "@littlejay/ui";\nimport "@littlejay/ui/styles.css";\n\n<Field label="Duration in seconds" required>\n  <NumericInput name="duration" defaultValue={30} min={5} max={3600} step={1} />\n</Field>',
+    props: [
+      {
+        name: "value / defaultValue / onValueChange",
+        type: "number / (value: number) => void",
+        description:
+          "Supply a committed integer or an uncontrolled initial integer. onValueChange requests a valid changed commit, not every draft keystroke or a server save. Empty/invalid restoration, reset and unchanged commits do not request a new number.",
+      },
+      {
+        name: "min / max / step",
+        type: "number / integer constraints",
+        description:
+          "Use native integer bounds and step validity. Invalid or out-of-range commits restore the latest committed value; they are not silently clamped or truncated.",
+      },
+      {
+        name: "disableWheelChange",
+        type: "boolean (default false)",
+        description:
+          "Opt in to cancelling vertical wheel defaults over the focused editable input without losing focus. This also stops page scrolling over that input; Ctrl-wheel zoom is not intercepted.",
+      },
+      {
+        name: "Native input props, ref and Field",
+        type: "NumericInputProps",
+        description:
+          "The actual number input owns its ref, name/form, events, className and style. Field provides its label/messages/default flags. Native onChange observes drafts; onValueChange requests a numeric commit.",
+      },
+    ],
+    accessibility: [
+      "Provide a Field or native label. Preserve native spinbutton semantics, arrow stepping, focus, required/disabled/read-only behavior and fieldset rules.",
+      "Ordinary same-value rerenders preserve editing. A genuinely changed controlled number replaces the draft; reset deliberately restores the current committed value or uncontrolled default.",
+      "Native number controls may normalize or reject incomplete numeric text. Arbitrary invalid strings are not retained after commit. Existing application errors and saving/authorization policy remain caller-owned.",
+      ...controlAccessibility,
+    ],
+    examples: [
+      {
+        id: "default",
+        title: "Integer draft, commit and native reset",
+        component: examples.NumericInputExample,
+        code: '<Field label="Duration in seconds" required>\n  <NumericInput name="duration" defaultValue={30} min={5} max={3600} onValueChange={setCommittedDuration} />\n</Field>',
+      },
+      {
+        id: "controlled",
+        title: "Caller-owned committed value",
+        component: examples.ControlledNumericInput,
+        code: 'const [duration, setDuration] = useState(30);\n<NumericInput aria-label="Duration in seconds" value={duration} onValueChange={setDuration} min={5} max={3600} />',
+      },
+      {
+        id: "states",
+        title: "Disabled, read-only and application feedback",
+        component: examples.NumericInputStates,
+        code: '<fieldset disabled><legend>Unavailable</legend><NumericInput aria-label="Duration" defaultValue={30} /></fieldset>\n<Field label="Read-only duration"><NumericInput defaultValue={30} readOnly /></Field>',
+      },
+    ],
+  },
   combobox: {
     overview:
       "Search a longer local option list and select one known value. React Aria supplies the interaction model; Little Jay supplies the input, Field integration and themed presentation. Requests, option data and selection policy stay application-owned.",
