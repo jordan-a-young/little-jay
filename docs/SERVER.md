@@ -76,8 +76,57 @@ curl http://127.0.0.1:5050/api/example
 
 For isolated bindings, use `HOST=127.0.0.1 PORT=5051 pnpm dev:server` on Unix, or set those environment variables in PowerShell before running the command. See [isolated application startup](../apps/AGENTS.md#isolated-development). Tests under the example directory use synthetic dependencies and Fastify injection; the real startup/shutdown check must also verify listener and process cessation.
 
+## Native application policy example
+
+`apps/api/src/examples/policy-app/` is a sibling injectable example for native security hooks and application-defined validation/errors. It is **not** a production identity system, a shared authentication library or part of either existing server startup. `pnpm dev:server`, its async factory and the original API/TypeBox routes remain unchanged. The frontend catalog still requires no backend.
+
+From a local clone, build prerequisites, then run the executable example regressions:
+
+```sh
+pnpm --filter "@littlejay/api..." build
+pnpm test apps/api/src/examples/policy-app
+```
+
+`createPolicyApp(parsePolicyConfiguration(input), dependencies)` returns a ready, non-listening native Fastify instance. Configuration is revalidated before construction; imports/factory read no environment or install process handlers. Body limit is 16,384 bytes, request timeout 15,000 ms and `trustProxy: false`. Logging is disabled. The caller owns any listener, dependency deadlines/resources and `close()`; partially failed readiness attempts are closed. No real authentication provider, session database, background job or external service is included.
+
+### Explicit policy and hook ownership
+
+- Configuration requires bounded `allowedHosts` and `allowedOrigins` lists (1–8 entries each). Hosts are exact authorities including the configured port; origins are canonical HTTP(S) origins, without credentials, paths or wildcards. Incoming values are compared directly, not normalized into an allowed value or replaced by forwarded headers.
+- `csrfHeader` defaults to `x-policy-csrf`; custom names are lowercase `x-*` header tokens and cannot be forwarded-host/protocol/address fields. Session-bound CSRF values are bounded base64url-style strings (16–128 ASCII characters). Comparison validates encoding and equal byte lengths before `timingSafeEqual`.
+- `sessionCookie` is strict: `name`, `path`, boolean `secure`/`httpOnly`, `sameSite` and bounded `maxAgeSeconds` (1–86400). Defaults are `policy-session`, `/api/policy`, secure, HttpOnly, SameSite Strict and 1800 seconds. No Domain or arbitrary serializer options are accepted. SameSite None and case-insensitive cookie prefixes enforce their Secure/HttpOnly/path constraints; the configured cookie spelling is preserved. Explicit insecure/HttpOnly-disabled settings are demonstrable synthetic policy, not recommended production defaults.
+- Inject `clock()` (epoch milliseconds), `findSession(identifier)`, `preview(text, subject)` and `readAudit(subject)`. Session lookup returns unknown data: the example validates subject, member/admin role, CSRF token and finite expiry, rejecting expiry at `expiresAt <= now`. Native request-local decorators carry the validated identity; no global session state or type assertion substitutes for runtime validation. Optional `observe(stage, requestId)` receives only stage names and generated request IDs, not request/session contents; it has no default logging destination.
+
+The native scoped order is:
+
+1. `@fastify/cookie@11.1.3` parses cookies in `onRequest` before the application hooks. Compatibility is exercised with the API's exact Fastify 5.12.8, not asserted for every plugin/runtime version.
+2. Policy `onRequest` sets `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'` and `Cache-Control: no-store`, then checks exactly one raw Host/Origin field. Present unapproved Origin values (including `null`) are denied; absent Origin is allowed only for GET/HEAD. There is no permissive CORS or successful preflight promise.
+3. Protected `onRequest` resolves one unambiguous configured session cookie and validates its session. Invalid boundaries never reach lookup; missing/invalid sessions never reach protected services.
+4. After Fastify parsing, protected `preValidation` checks CSRF for non-GET/HEAD requests. Parser errors can therefore precede CSRF errors; neither may call protected services.
+5. Protected `preHandler` enforces authentication, and the nested admin scope adds its role check. Async denials terminate by throwing a designated application error. Authorization never performs response/data projection.
+
+Application handlers and not-found handlers are installed separately in the policy, private and admin prefixes. Unknown routes and wrong methods retain the corresponding scope's protections; adjacent original routes keep their canonical contract. Low-level HTTP parser/routing failures can occur outside this scoped lifecycle and are not promised its response shape or headers.
+
+### Routes, projection and error compatibility
+
+| Example route                         | Behavior                                                                                                                                                                                                                                                                             |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `GET /api/policy/public`              | Deliberately public `{ access: "public" }`, still subject to boundary checks.                                                                                                                                                                                                        |
+| `POST /api/policy/validate`           | Public stateless handler-level Zod `.parse()` example; returns only a character count and requires an allowed Origin.                                                                                                                                                                |
+| `GET /api/policy/private/profile`     | Authenticated allowlisted subject/role projection, never the session record.                                                                                                                                                                                                         |
+| `POST /api/policy/private/preview`    | Authenticated/CSRF-checked service-level `.parse()` validation, injected preview and fresh `{ characters }` projection.                                                                                                                                                              |
+| `POST /api/policy/private/session`    | Refreshes only the current authenticated cookie, never a body/query-supplied identifier. Returns `{ refreshed: true }`. Cookie expiry is capped by remaining server-side session lifetime; this does not extend that lifetime. Projection must succeed before scheduling the cookie. |
+| `GET /api/policy/private/admin/audit` | Requires admin; calls its service only after authorization and returns only `{ entries }`.                                                                                                                                                                                           |
+
+The native application error handler returns exactly `{ error: string }`, without changing the opt-in canonical library plugin. Zod request/service-input errors and malformed/empty JSON map to fixed 400 copy; native body limits map to 413, unsupported media types to 415, and scoped missing routes to 404. Explicit `ApplicationError` instances preserve integer 400–599 statuses; bounded trusted 4xx copy is application-supplied, while all 5xx copy is fixed. An optional integer Retry-After of 0–86400 seconds is preserved. Never construct this class from raw exception messages or client input. Unrecognized thrown values/statuses, invalid service output and mutated invalid error settings fail closed with fixed 500 copy. Successful response shapes are not enveloped or rewritten.
+
+Tests assert exact status/headers/bodies, early-denial service counts, scope inheritance, concurrent request isolation, cookie attributes/lifetime and safe projection. The network test creates only task-owned ephemeral loopback listeners, exercises duplicate raw headers, closes the app and proves its port can be rebound and released. Injection/emitted cookie attributes do **not** prove browser cookie acceptance, SameSite enforcement or actual network timeout behavior. Independent security/contract review remains required for changes to these boundaries.
+
 Authoritative compatibility/API references consulted:
 
 - https://github.com/fastify/fastify-type-provider-typebox#compatibility
 - https://github.com/fastify/fastify-plugin#metadata
 - https://fastify.dev/docs/latest/Reference/Logging/
+- https://fastify.dev/docs/latest/Reference/Hooks/
+- https://fastify.dev/docs/latest/Reference/Server/#setnotfoundhandler
+- https://github.com/fastify/fastify-cookie/tree/v11.1.3
+- https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html#name-cookie-name-prefixes-2

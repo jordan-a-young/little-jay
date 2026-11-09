@@ -12,6 +12,7 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
+    "@fastify/cookie": "11.1.3",
     "@fastify/type-provider-typebox": "6.3.0",
     "@littlejay/server": "workspace:*",
     "ajv-formats": "3.0.1",
