@@ -6,7 +6,7 @@
 
 Fastify is a `~5.12.7` peer dependency, not a bundled/runtime dependency; consumers declare their compatible Fastify installation directly. Development retains exactly 5.12.8 and fastify-plugin 6.0.1. Existing factory, plugin and safe-response contracts are unchanged. The [installed server guide](../packages/server/README.md#compatibility) describes installation and the migration from transitive Fastify ownership.
 
-`pnpm test:server-compat` packs the current built server library and checks isolated ESM/strict NodeNext consumers against Fastify 5.12.7 and 5.12.8 on Node 24.18.0 and 26.13.0. The fixture uses Node-major-specific typings (24.19.2 / 26.6.6), does not skip declaration checking, and checks shared Fastify resolution, native plugins and augmentation, typed requests/replies/decorators, hooks, readiness, injection, closing and an application-owned loopback listener. It verifies listener release after closing. This is compatibility evidence for these combinations, not a production deployment or all-version guarantee.
+`pnpm test:server-compat` packs the current built server library and checks isolated ESM/strict NodeNext consumers against Fastify 5.12.7 and 5.12.8 on Node 24.18.0 and 26.13.0. The fixture uses Node-major-specific typings (24.19.2 / 26.6.6), does not skip declaration checking, and checks shared Fastify resolution, native plugins and augmentation, typed requests/replies/decorators, hooks, readiness, injection, closing and an application-owned loopback listener. Its logging fixture exercises disabled/configured/injected native logging, serializers/redaction, disabled automatic request logging and safe operational events across request outcomes. It verifies listener release after closing. This is compatibility evidence for these combinations, not a production deployment or all-version guarantee.
 
 Build first using the repository's pinned Node 26.13.0/pnpm 12.18.0 toolchain. Set `LITTLEJAY_NODE24` to the absolute path of an already-installed Node 24.18.0 executable:
 
@@ -120,6 +120,37 @@ Application handlers and not-found handlers are installed separately in the poli
 The native application error handler returns exactly `{ error: string }`, without changing the opt-in canonical library plugin. Zod request/service-input errors and malformed/empty JSON map to fixed 400 copy; native body limits map to 413, unsupported media types to 415, and scoped missing routes to 404. Explicit `ApplicationError` instances preserve integer 400–599 statuses; bounded trusted 4xx copy is application-supplied, while all 5xx copy is fixed. An optional integer Retry-After of 0–86400 seconds is preserved. Never construct this class from raw exception messages or client input. Unrecognized thrown values/statuses, invalid service output and mutated invalid error settings fail closed with fixed 500 copy. Successful response shapes are not enveloped or rewritten.
 
 Tests assert exact status/headers/bodies, early-denial service counts, scope inheritance, concurrent request isolation, cookie attributes/lifetime and safe projection. The network test creates only task-owned ephemeral loopback listeners, exercises duplicate raw headers, closes the app and proves its port can be rebound and released. Injection/emitted cookie attributes do **not** prove browser cookie acceptance, SameSite enforcement or actual network timeout behavior. Independent security/contract review remains required for changes to these boundaries.
+
+## Operational logging and resource example
+
+`apps/api/src/examples/operational-app/` composes application-owned native logging and injected resource cleanup in one ready, non-listening factory. It preserves the canonical safe-error and TypeBox contracts, independent liveness/readiness, both existing startup entry points and the frontend-only catalog. It is not mounted by either startup command. The policy example remains separate; this is not the final combined security/static-hosting consumer or a production resource framework.
+
+Build prerequisites, then run the focused examples from the root:
+
+```sh
+pnpm --filter '@littlejay/api...' build
+pnpm test apps/api/src/examples/operational-app
+```
+
+### Explicit ownership and configuration
+
+- `parseOperationalConfiguration(input)` accepts a strict object: boolean `backgroundWork` (default false), integer `workIntervalMs` 10–60000 (default 100) and integer `readinessTimeoutMs` 1–5000 (default 100). Invalid settings produce fixed diagnostics before acquisition. No environment variables or process handlers are read/installed by imports or factories.
+- `createOperationalApp(configuration, dependencies, logging?)` revalidates configuration, registers safe errors and probes, starts the lifecycle during readiness, and returns a native Fastify instance only after successful initialization. Body limit is 16384 bytes, request timeout 15000 ms and `trustProxy: false`. Logging and background work default to disabled. The caller owns listening, signals, exit status and closing after listen failure.
+- Initialization remains owned even if the native Fastify readiness-hook timeout fires first. Failed startup awaits that initialization's settlement and rollback/cleanup before rejecting; a late successful lifecycle is closed rather than orphaned, and closing prevents a later readiness hook from starting new acquisition. Cancellation remains cooperative, so a nonsettling callback can also delay this failed-startup handoff.
+- Inject `acquire`, an ordered list of resource factories, optional `runWork(signal)` and optional `operation()`. A resource exposes `check(signal)` and async `close()`. Acquisitions run in dependency order; successful handles are released in reverse order. Each factory owns rollback for partial acquisition before it returns its handle. No database, filesystem data, external service, queue or credentials are supplied.
+- `/api/operation` returns only a validated boolean `{ completed }`, never resource or dependency contents. `/api/text-preview` retains the existing bounded stateless contract. `/api/health` remains independent; `/api/ready` uses the lifecycle's bounded boolean checks and returns fixed safe status bodies.
+
+### Logging and cancellation boundaries
+
+`logging.ts` demonstrates native configured logging and fixed allowlisted operational-event reporting. Tests cover disabled logging, configured options/serializers/redaction and compatible injected loggers. Automatic request logging stays disabled: redaction alone is not a safe policy for raw URLs, arbitrary payloads or exception diagnostics. Operational events contain no request, configuration or caught exception data. Caller-supplied logging code and plugins remain application policy; the example does not sanitize arbitrary logs emitted elsewhere.
+
+The supported native recipes use `logger` for configured options or `loggerInstance` for an injected compatible logger, plus `new LogController({ disableRequestLogging: true })`. Omit `logger` when supplying `loggerInstance`. Tests obtain a genuine compatible logger through a separate native Fastify instance's `.log`, rather than importing a transitive Pino dependency; that owner is closed separately. The application policy sets `requestIdHeader: false` so caller-supplied request IDs do not enter native log bindings. The destination's asynchronous errors, flushing, shutdown and delivery guarantees remain caller-owned. The packed matrix checks the two exact Fastify patch versions above; it does not claim every future version in the peer range has been exercised.
+
+`lifecycle.ts` defensively validates a maximum of eight resources, strict background-work settings and bounded deadlines/intervals. Background work starts only when enabled and does not overlap itself. Cleanup first prevents further scheduling/checks, aborts and awaits active work/checks, then attempts all dependent-resource closes even if an individual close fails. Cleanup is idempotent, including a rejected cleanup result. Initialization/readiness failure rolls back acquired handles. Reporter failures must not prevent cleanup.
+
+Callbacks must cooperate with cancellation and settle within their application-owned bounds. A deadline requests cancellation; it cannot forcibly terminate an arbitrary promise or third-party driver. Outstanding callbacks remain owned until settlement, so shutdown may wait for a non-cooperative implementation rather than pretend resources are safe to close. The synthetic tests demonstrate these ownership rules, not universal driver cancellation guarantees.
+
+The example's combined regressions exercise successful/rejected/missing/validation/error requests, nonempty safe logs and exclusion of configured synthetic private markers, independent probes, disabled/active jobs, rollback and cleanup failures. Runner tests substitute only the async runner's app-composition/listen boundaries; real loopback tests separately cover listening and release. Required full integration, packed runtime compatibility and independent security/lifecycle review remain separate verification gates; a passing focused suite does not substitute for them.
 
 Authoritative compatibility/API references consulted:
 

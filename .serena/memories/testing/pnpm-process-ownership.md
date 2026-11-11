@@ -1,0 +1,5 @@
+# pnpm process-smoke ownership
+
+- Verified 2026-11-11 with pinned pnpm 12.18.0 / Node 26.13.0: a workspace script can be spawned by a non-main pnpm thread. Reading only `/proc/<pid>/task/<pid>/children` missed the running demo. For bounded task-owned descendant inspection, inspect `children` for every thread of each recorded wrapper process, then verify checkout, arguments, start identity and task-created session before signaling. A listening port alone is not ownership evidence.
+- Stop the verified application Node child gracefully, then verify application, wrappers and listener cessation. Wrapper termination does not establish child cessation. Follow the global development-isolation procedure; this note grants no process-control authority.
+- A Python TCP rebind probe without `SO_REUSEADDR` can fail during TIME_WAIT after HTTP shutdown even when no listener remains. Match Node reuse behavior or use `node:net` to prove bind/listen/release; see `apps/api/src/examples/operational-app/network.test.ts`. Never stop a changed listener owner.

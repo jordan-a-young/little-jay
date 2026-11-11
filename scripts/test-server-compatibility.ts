@@ -10,6 +10,7 @@ import { promisify } from "node:util";
 const execFileAsync = promisify(execFile);
 const workspace = fileURLToPath(new URL("../", import.meta.url));
 export const fastifyVersions = ["5.12.7", "5.12.8"] as const;
+export const consumerFixtureNames = ["consumer.ts", "logging.ts"] as const;
 
 export function runtimeTargets(environment: NodeJS.ProcessEnv, currentExecutable: string) {
   assert.ok(
@@ -117,10 +118,12 @@ export async function main() {
         path.join(directory, "tsconfig.json"),
         JSON.stringify(consumerCompilerOptions()),
       );
-      await copyFile(
-        new URL("./fixtures/server-compatibility/consumer.ts", import.meta.url),
-        path.join(directory, "consumer.ts"),
-      );
+      for (const filename of consumerFixtureNames) {
+        await copyFile(
+          new URL(`./fixtures/server-compatibility/${filename}`, import.meta.url),
+          path.join(directory, filename),
+        );
+      }
       await run(pnpm, ["install", "--ignore-scripts"], directory);
       await run(pnpm, ["exec", "tsc", "-p", "tsconfig.json"], directory);
       const output = await run(
@@ -134,12 +137,16 @@ export async function main() {
         fastify: string;
         nodeTypes: string;
         listenerClosed: boolean;
+        logging: { disabled: number; configured: number; injected: number };
       };
       assert.equal(evidence.passed, true);
       assert.equal(evidence.node, target.version);
       assert.equal(evidence.fastify, fastifyVersion);
       assert.equal(evidence.nodeTypes, target.nodeTypes);
       assert.equal(evidence.listenerClosed, true);
+      assert.equal(evidence.logging.disabled, 0);
+      assert.ok(evidence.logging.configured > 0);
+      assert.ok(evidence.logging.injected > 0);
       results.push({ directory, ...evidence });
       await writeFile(
         path.join(root, "results.json"),
