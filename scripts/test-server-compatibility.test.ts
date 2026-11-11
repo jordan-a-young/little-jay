@@ -5,6 +5,7 @@ import { expect, it } from "vite-plus/test";
 import {
   assertRuntimeVersion,
   consumerCompilerOptions,
+  consumerFixtureNames,
   consumerManifest,
   fastifyVersions,
   runtimeTargets,
@@ -26,6 +27,7 @@ it("selects both exact runtimes and matching major-version typings without insta
     { version: "26.13.0", executable: "/installed/node26", nodeTypes: "26.6.6" },
   ]);
   expect(fastifyVersions).toEqual(["5.12.7", "5.12.8"]);
+  expect(consumerFixtureNames).toEqual(["consumer.ts", "logging.ts"]);
 });
 
 it("rejects absent or relative target executables", () => {
