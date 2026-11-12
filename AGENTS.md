@@ -46,7 +46,9 @@ Select browser checks using the matrix's risk policy: changed rendering/styles, 
 
 | Command                                   | Purpose / prerequisite                                                                                                         |
 | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `pnpm check`                              | Generated-token freshness, formatting, and lint checks; does not fix files                                                     |
+| `pnpm workflows:install`                  | Install checksum-pinned local actionlint before check/ready; no global or npm dependency install                               |
+| `pnpm workflows:check`                    | Static workflow syntax/expression/dependency validation; never dispatches workflows                                            |
+| `pnpm check`                              | Generated-token freshness, workflow validation, formatting, and lint checks; requires local actionlint and does not fix files  |
 | `pnpm build`                              | Dependency-ordered builds; required before standalone typechecks/tests on a fresh checkout                                     |
 | `pnpm typecheck`                          | Root tooling and workspace TypeScript                                                                                          |
 | `pnpm test`                               | All configured test projects, one run                                                                                          |

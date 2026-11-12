@@ -15,14 +15,17 @@ Open a terminal in the `little-jay` directory with Node 26.13.0 LTS (`.node-vers
 ```sh
 pnpm install --frozen-lockfile
 pnpm secrets:install
+pnpm workflows:install
 git config --local core.hooksPath .githooks
 pnpm ready
 pnpm dev
 ```
 
-On this workstation, both required tools are already installed. From a fresh checkout, neither `pnpm ready` nor `pnpm dev` requires existing build output or a Vite+ task cache.
+After the setup commands install dependencies and pinned local tools, neither `pnpm ready` nor `pnpm dev` requires existing build output or a Vite+ task cache.
 
 The secret-scanner installer downloads checksum-pinned Gitleaks into ignored `.tools/` (Linux/macOS x64 or ARM64; requires curl, tar, and SHA-256 tooling). Hooks must be enabled in each clone; Git does not activate cloned hooks automatically. Commit scans check staged additions; push scans check all local Git history. Both refuse to proceed if the scanner is missing or ignored files are tracked. Run `pnpm secrets:staged` before committing and `pnpm secrets:scan` to audit history. See [secret handling and limitations](docs/PUBLISHING.md#secret-prevention-and-response).
+
+`pnpm workflows:install` similarly installs checksum-pinned actionlint 1.7.12 into `.tools/`. `pnpm workflows:check` statically validates all GitHub workflows, including expressions and job dependencies, and is included in `pnpm check` / `pnpm ready`. It fails if the validator is unavailable. Optional ShellCheck/Pyflakes integrations are explicitly disabled for a consistent local/CI toolchain; workflow policy regressions and secret scanning remain separate. No global tool or additional npm dependency is installed.
 
 - Playground: http://localhost:5173
 - Optional server demo: run `pnpm dev:server` separately, then inspect http://127.0.0.1:5050/api/health or `/api/example`.
@@ -256,7 +259,7 @@ In a separate PowerShell terminal, use `$env:WEB_PORT = '5174'` followed by `pnp
 
 ## Tooling and distribution
 
-pnpm workspaces link packages; Vite+ supplies build orchestration, formatting, linting, tests, and package builds. CI runs a frozen install and `pnpm ready`.
+pnpm workspaces link packages; Vite+ supplies build orchestration, formatting, linting, tests, and package builds. CI runs a frozen install and `pnpm ready`. CI and Secrets run for opened, updated and reopened pull requests, and for pushes to `main` (including merges); standalone feature-branch/tag pushes do not trigger them. Secrets also retains manual dispatch. Required `verify` / `scan` checks are unchanged, and the post-merge main checks are intentional rather than duplicate feature-push runs.
 
 The source is hosted in the GitHub repository `jordan-a-young/little-jay`, made public by the owner on 2026-11-06, with CI and secret-scanning workflows running on pushes and pull requests. The five `@littlejay` libraries started at `0.1.0` and are versioned independently; their manifests record the current checkout's versions. On 2026-11-06, the owner reported initial bootstrap complete with registry-cache propagation pending; see [PKG-004](docs/BACKLOG.md#pkg-004-initial-npm-bootstrap). That dated observation is not a current registry or activation check. Root/apps remain private packages. [Library releases](docs/RELEASING.md) use Changesets versions/changelogs and three deliberate steps: stage verified tarballs in GitHub, review/approve them on npm with 2FA, then finalize exact-commit GitHub tags/releases. The CI identity must retain stage-only npm permissions; this flow never directly promotes packages. Staging and finalization require separate activation/owner authorization under the runbook; no live settings state is asserted here. Editing this setup does not change remote settings or authorize staging, npm approval or metadata publication. Historical main-protection and owner/environment-gate observations are recorded under [SEC-001](docs/BACKLOG.md#sec-001-protect-public-main-actions-and-npm-publication). Local `release:version` and `release:check` do not upload. Public source/package distribution does not grant artwork reuse rights.
 

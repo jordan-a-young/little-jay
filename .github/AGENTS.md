@@ -1,5 +1,8 @@
 # GitHub automation
 
+- CI and Secrets run on pull requests and pushes to `main`, not standalone feature-branch/tag pushes; Secrets retains manual dispatch. Preserve required job names `verify` / `scan`, read-only PR permissions and the post-merge main checks. Do not replace these with privileged `pull_request_target` execution.
+- `pnpm check` includes pinned local actionlint validation. Jobs running `pnpm ready` or `pnpm release:check` install it with `pnpm workflows:install` first; upload/finalization jobs must not gain verification rebuilds or broader permissions incidentally. Keep release policy regressions alongside semantic validation.
+
 - Read `docs/RELEASING.md` before changing release workflows. Workflow definitions do not authorize dispatch, publication, repository settings, merges or visibility changes.
 - `release-pr.yml` only proposes version/changelog changes through Changesets v3/action v2. It never publishes. Its separate read-only job validates the generated PR without waiting for approval of ordinary PR workflows, which GitHub requires for `GITHUB_TOKEN`-created PRs. Check that job and the required `verify`/`scan` contexts before merging; a bot PR is not an automatic gate waiver.
 - `publish.yml` stages only; `finalize-release.yml` only completes GitHub metadata after npm approvals. Both are manual-only, owner/main-only and off unless `NPM_PUBLISH_ENABLED` is exactly `true`. Keep exact commit/origin/main checks and their shared non-canceling concurrency group. Ordinary pushes/PRs/refs must never upload or finalize packages.
