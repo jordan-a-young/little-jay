@@ -5,6 +5,14 @@ const createApp = vi.hoisted(() => vi.fn(async () => app));
 vi.mock("./app.js", () => ({ createApp, syntheticDependencies: () => ({ synthetic: true }) }));
 import { startDemo } from "./startup.js";
 
+function deferred<Result>() {
+  let resolve!: (value: Result) => void;
+  const promise = new Promise<Result>((settle) => {
+    resolve = settle;
+  });
+  return { promise, resolve };
+}
+
 let originalExitCode: typeof process.exitCode;
 let handlers: Map<string, () => Promise<void>>;
 beforeEach(() => {
@@ -14,14 +22,14 @@ beforeEach(() => {
   app.close.mockReset().mockResolvedValue(undefined);
   createApp.mockClear();
   handlers = new Map();
-  const once = process.once.bind(process);
+  const on = process.on.bind(process);
   const removeListener = process.removeListener.bind(process);
-  vi.spyOn(process, "once").mockImplementation((event, listener) => {
+  vi.spyOn(process, "on").mockImplementation((event, listener) => {
     if (event === "SIGINT" || event === "SIGTERM") {
       handlers.set(event, listener as () => Promise<void>);
       return process;
     }
-    return once(event, listener);
+    return on(event, listener);
   });
   vi.spyOn(process, "removeListener").mockImplementation((event, listener) => {
     if (event === "SIGINT" || event === "SIGTERM") {
@@ -64,7 +72,7 @@ it("rejects invalid listener configuration before constructing an app", async ()
   expect(createApp).not.toHaveBeenCalled();
 });
 
-it("cleans up on listen failure without installing handlers", async () => {
+it("cleans up on listen failure and releases handlers", async () => {
   app.listen.mockRejectedValue(new Error("synthetic-private-listen"));
   await expect(startDemo({})).rejects.toThrow("Unable to start local server demo");
   expect(app.close).toHaveBeenCalledOnce();
@@ -86,4 +94,42 @@ it("reports shutdown failure without private diagnostics", async () => {
   expect(error).toHaveBeenCalledWith("Local server demo shutdown failed");
   expect(process.exitCode).toBe(1);
   expect(handlers.size).toBe(0);
+});
+
+it("owns signals while initialization is pending and never listens after a startup signal", async () => {
+  const initialization = deferred<typeof app>();
+  createApp.mockReturnValueOnce(initialization.promise);
+  const startup = startDemo({});
+  try {
+    expect(handlers.size).toBe(2);
+    const stopping = handlers.get("SIGTERM")!();
+    initialization.resolve(app);
+    await stopping;
+    await startup;
+    expect(app.listen).not.toHaveBeenCalled();
+    expect(app.close).toHaveBeenCalledOnce();
+    expect(handlers.size).toBe(0);
+  } finally {
+    initialization.resolve(app);
+    await (await startup).stop();
+  }
+});
+
+it("retains both handlers until the shared shutdown settles", async () => {
+  const closing = deferred<void>();
+  app.close.mockReturnValueOnce(closing.promise);
+  const demo = await startDemo({});
+  try {
+    const stopping = demo.stop();
+    expect(handlers.size).toBe(2);
+    const interrupt = handlers.get("SIGINT")!();
+    const terminate = handlers.get("SIGTERM")!();
+    closing.resolve();
+    await Promise.all([stopping, interrupt, terminate]);
+    expect(app.close).toHaveBeenCalledOnce();
+    expect(handlers.size).toBe(0);
+  } finally {
+    closing.resolve();
+    await demo.stop();
+  }
 });
