@@ -6,6 +6,8 @@
   "include": [
     "vite.config.ts",
     "scripts/check-coverage.test.ts",
+    "scripts/check-workflows.ts",
+    "scripts/check-workflows.test.ts",
     "scripts/test-server-compatibility.ts",
     "scripts/test-server-compatibility.test.ts"
   ]

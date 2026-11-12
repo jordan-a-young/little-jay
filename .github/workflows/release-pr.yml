@@ -65,4 +65,5 @@ jobs:
           package-manager-cache: false
       - run: pnpm install --frozen-lockfile
       - run: pnpm secrets:install
+      - run: pnpm workflows:install
       - run: pnpm release:check

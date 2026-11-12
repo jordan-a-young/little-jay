@@ -1,5 +1,8 @@
 name: CI
-on: [push, pull_request]
+on:
+  push:
+    branches: [main]
+  pull_request:
 permissions:
   contents: read
 jobs:
@@ -22,5 +25,6 @@ jobs:
           package-manager-cache: false
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm workflows:install
       - run: pnpm ready
       - run: pnpm test:server-compat
