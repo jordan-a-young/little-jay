@@ -10,7 +10,27 @@ import { promisify } from "node:util";
 const execFileAsync = promisify(execFile);
 const workspace = fileURLToPath(new URL("../", import.meta.url));
 export const fastifyVersions = ["5.12.7", "5.12.8"] as const;
-export const consumerFixtureNames = ["consumer.ts", "logging.ts"] as const;
+export const consumerFixtureNames = ["consumer.ts", "logging.ts", "static-hosting.ts"] as const;
+export const hostingApplicationFiles = ["configuration.ts", "hosting.ts"] as const;
+
+/** Copies the authored application module closure, never a parallel fixture implementation. */
+export async function stageHostingApplication(directory: string) {
+  const destination = path.join(directory, "application/static-hosting");
+  await mkdir(destination, { recursive: true });
+  const sources = [];
+  for (const filename of hostingApplicationFiles) {
+    const source = `apps/api/src/examples/static-hosting/${filename}`;
+    const staged = `application/static-hosting/${filename}`;
+    const contents = await readFile(path.join(workspace, source));
+    await writeFile(path.join(directory, staged), contents);
+    sources.push({
+      source,
+      staged,
+      integrity: `sha512-${createHash("sha512").update(contents).digest("base64")}`,
+    });
+  }
+  return sources;
+}
 
 export function runtimeTargets(environment: NodeJS.ProcessEnv, currentExecutable: string) {
   assert.ok(
@@ -37,7 +57,11 @@ export function consumerManifest(tarball: string, fastifyVersion: string, nodeTy
     name: "little-jay-server-compatibility-consumer",
     private: true,
     type: "module",
-    dependencies: { "@littlejay/server": `file:${tarball}`, fastify: fastifyVersion },
+    dependencies: {
+      "@littlejay/server": `file:${tarball}`,
+      fastify: fastifyVersion,
+      "@fastify/static": "10.1.7",
+    },
     devDependencies: { "@types/node": nodeTypes, typescript: "7.0.2" },
   };
 }
@@ -124,6 +148,7 @@ export async function main() {
           path.join(directory, filename),
         );
       }
+      const hostingSources = await stageHostingApplication(directory);
       await run(pnpm, ["install", "--ignore-scripts"], directory);
       await run(pnpm, ["exec", "tsc", "-p", "tsconfig.json"], directory);
       const output = await run(
@@ -138,6 +163,7 @@ export async function main() {
         nodeTypes: string;
         listenerClosed: boolean;
         logging: { disabled: number; configured: number; injected: number };
+        staticHosting: { passed: boolean; listenerClosed: boolean; pluginVersion: string };
       };
       assert.equal(evidence.passed, true);
       assert.equal(evidence.node, target.version);
@@ -147,7 +173,10 @@ export async function main() {
       assert.equal(evidence.logging.disabled, 0);
       assert.ok(evidence.logging.configured > 0);
       assert.ok(evidence.logging.injected > 0);
-      results.push({ directory, ...evidence });
+      assert.equal(evidence.staticHosting.passed, true);
+      assert.equal(evidence.staticHosting.listenerClosed, true);
+      assert.equal(evidence.staticHosting.pluginVersion, "10.1.7");
+      results.push({ directory, hostingSources, ...evidence });
       await writeFile(
         path.join(root, "results.json"),
         JSON.stringify({ tarball, integrity, results }, null, 2),

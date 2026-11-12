@@ -6,7 +6,7 @@
 
 Fastify is a `~5.12.7` peer dependency, not a bundled/runtime dependency; consumers declare their compatible Fastify installation directly. Development retains exactly 5.12.8 and fastify-plugin 6.0.1. Existing factory, plugin and safe-response contracts are unchanged. The [installed server guide](../packages/server/README.md#compatibility) describes installation and the migration from transitive Fastify ownership.
 
-`pnpm test:server-compat` packs the current built server library and checks isolated ESM/strict NodeNext consumers against Fastify 5.12.7 and 5.12.8 on Node 24.18.0 and 26.13.0. The fixture uses Node-major-specific typings (24.19.2 / 26.6.6), does not skip declaration checking, and checks shared Fastify resolution, native plugins and augmentation, typed requests/replies/decorators, hooks, readiness, injection, closing and an application-owned loopback listener. Its logging fixture exercises disabled/configured/injected native logging, serializers/redaction, disabled automatic request logging and safe operational events across request outcomes. It verifies listener release after closing. This is compatibility evidence for these combinations, not a production deployment or all-version guarantee.
+`pnpm test:server-compat` packs the current built server library and checks isolated ESM/strict NodeNext consumers against Fastify 5.12.7 and 5.12.8 on Node 24.18.0 and 26.13.0. The fixture uses Node-major-specific typings (24.19.2 / 26.6.6), does not skip declaration checking, and checks shared Fastify resolution, native plugins and augmentation, typed requests/replies/decorators, hooks, readiness, injection, closing and an application-owned loopback listener. Its logging fixture exercises disabled/configured/injected native logging, serializers/redaction, disabled automatic request logging and safe operational events across request outcomes. Its static fixture stages and hashes the actual application-owned hosting/configuration modules, installs consumer-owned `@fastify/static@10.1.7`, and checks assets, fallback exclusions, protected misses, response headers and native file serving. Both fixtures verify listener release after closing. This is compatibility evidence for these combinations, not a production deployment or all-version guarantee.
 
 Build first using the repository's pinned Node 26.13.0/pnpm 12.18.0 toolchain. Set `LITTLEJAY_NODE24` to the absolute path of an already-installed Node 24.18.0 executable:
 
@@ -154,6 +154,47 @@ Callbacks must cooperate with cancellation and settle within their application-o
 
 The example's combined regressions exercise successful/rejected/missing/validation/error requests, nonempty safe logs and exclusion of configured synthetic private markers, independent probes, disabled/active jobs, rollback and cleanup failures. `runner.test.ts` composes the real operational factory with the async runner over loopback, including repeated use, listener failure, startup signals and native-timeout rollback. `async-app/process.test.ts` adds actual child-process signal/failure/cleanup checks against built modules. Default commands still use the async demo; neither this runner seam nor separate passing examples establish the final combined security/static-hosting consumer. Packed runtime compatibility and independent security/lifecycle review remain separate verification gates; a passing focused suite does not substitute for them.
 
+## Optional static hosting example
+
+`apps/api/src/examples/static-hosting/` demonstrates application-owned optional hosting with `@fastify/static@10.1.7`. It does not add a shared hosting API, mount the policy or operational examples, replace either server entry point, or make the catalog depend on a backend. The static-plugin version is an exercised example target, not a universal consumer pin.
+
+Build prerequisites and run its focused regressions from the root:
+
+```sh
+pnpm --filter '@littlejay/api...' build
+pnpm test apps/api/src/examples/static-hosting
+```
+
+From an application-owned module under `apps/api/src/`, compose the ready non-listening demonstration factory:
+
+```ts
+import { createStaticHostingApp } from "./examples/static-hosting/app.js";
+
+const app = await createStaticHostingApp(
+  { enabled: true, root: "/absolute/canonical/public", entry: "index.html" },
+  { cacheControl: "no-store", contentSecurityPolicy: "default-src 'self'; frame-ancestors 'none'" },
+);
+```
+
+Call `createStaticHostingApp()` for API-only operation. The demonstration preserves the existing probes and stateless text-preview route. It does not start a listener: its caller owns `listen()` and `close()`, or can explicitly supply this factory to the existing `startDemo` seam. Existing startup commands still use their original factories.
+
+For another application composition, `registerStaticHosting(app, configuration)` from `hosting.ts` registers a root-prefixed child after the caller's safe-error plugin and before `ready()`. It uses native `sendFile` without wildcard routes, retaining more-specific API not-found scopes. The registration seam does not install the demonstration's response-header policy or own readiness-failure cleanup. `parseStaticHostingConfiguration` and `parseStaticResponsePolicy` in `configuration.ts` validate explicit settings without filesystem access.
+
+### Hosting and fallback boundaries
+
+- API-only operation does not require or inspect a static root. Hosting is an explicit application choice, not an environment lookup or import side effect.
+- Enabled hosting requires an absolute, canonical public-build root and a usable regular SPA entry file. Root and ancestor symlinks are rejected, as are relative, non-normalized and filesystem-root settings. Invalid or unavailable inputs fail startup with fixed safe diagnostics; filesystem paths and caught exception messages do not become client responses or CLI output.
+- SPA fallback is limited to eligible extensionless frontend `GET` misses explicitly accepting `text/html` with positive quality. Missing Accept, wildcard-only Accept and explicit HTML rejection do not opt into fallback. Query strings do not change path eligibility.
+- `/api` and its descendants, asset-like paths, blocked file paths and unsupported methods never receive SPA fallback. Existing assets support native bodyless `HEAD`; missing frontend `HEAD` requests do not receive the entry file. Static files must not shadow API routes or protected API misses.
+- This example's conservative path profile rejects empty/dot-leading segments, trailing slashes except `/`, trailing dots/spaces, backslashes, ambiguous/double encoding and noncanonical percent spelling. Canonically encoded Unicode and internal spaces remain supported. A missing frontend path containing a dot in any segment is asset-like and cannot trigger fallback; an existing public file may still be served. Accept permits an explicit `text/html` range with only an optional valid `q` parameter; malformed/duplicate quality parameters, unsupported parameters or an explicit HTML zero-quality range fail closed. This is a documented example policy, not a claim to host every SPA URL convention unchanged.
+- Public output must not contain dotfiles or escaping symlinks. Traversal, noncanonical request paths and filesystem escapes are denied rather than normalized into frontend navigation. Use a dedicated, trusted build-output directory, never a checkout, upload directory or secret/configuration root. Treat the served build as immutable while the application runs; these example checks are not protection from a hostile process concurrently replacing filesystem entries.
+- Applications own CSP, security headers and caching. The example keeps conservative policy explicit and verifies headers on assets, fallback, API replies and errors; it does not prescribe immutable asset caching or weaken CSP for arbitrary applications.
+- The demonstration defaults to `Cache-Control: no-store`, `X-Content-Type-Options: nosniff` and a CSP permitting only same-origin external scripts/styles/images, with no inline execution. Native validators/automatic cache policy are disabled. Static 416 responses preserve only a validated native `Content-Range: bytes */<size>` header alongside the canonical safe body, not arbitrary error headers; the shared/API error handler is unchanged. Normal denied paths use canonical safe JSON; if a previously checked file disappears immediately before native delivery, the native sender returns fixed plain-text `404 Not Found` instead. These are Fastify lifecycle responses, not a promise about low-level parser failures outside that lifecycle.
+
+The caller owns listening and closing. Existing runner composition remains opt-in and factories do not load environment files or install process handlers. Injection and owned-loopback checks exercise API/static separation and listener release; a targeted browser check additionally exercises external assets and a frontend deep-link reload.
+
+Packed compatibility uses the existing `pnpm test:server-compat` matrix, with static hosting resolved through the packed server library and consumer-owned Fastify/static-plugin dependencies. It is separate from the repository's ordinary five-package consumer gate. Neither static hosting nor separate policy/operational suites establish the combined security/Zod/resource/SQLite consumer required by [#36](https://github.com/jordan-a-young/little-jay/issues/36), or actual Vision migration compatibility.
+
 Authoritative compatibility/API references consulted:
 
 - https://github.com/fastify/fastify-type-provider-typebox#compatibility
@@ -163,3 +204,4 @@ Authoritative compatibility/API references consulted:
 - https://fastify.dev/docs/latest/Reference/Server/#setnotfoundhandler
 - https://github.com/fastify/fastify-cookie/tree/v11.1.3
 - https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html#name-cookie-name-prefixes-2
+- https://github.com/fastify/fastify-static/tree/v10.1.7
