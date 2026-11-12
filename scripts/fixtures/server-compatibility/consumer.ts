@@ -19,6 +19,7 @@ import {
   type FastifyServerOptions,
 } from "@littlejay/server";
 import { verifyLoggingCompatibility } from "./logging.js";
+import { verifyStaticHostingCompatibility } from "./static-hosting.js";
 
 declare module "fastify" {
   interface FastifyInstance {
@@ -32,6 +33,7 @@ declare module "fastify" {
 const [fastifyVersion, nodeTypes, nodeVersion] = process.argv.slice(2);
 assert.equal(process.versions.node, nodeVersion);
 const logging = await verifyLoggingCompatibility();
+const staticHosting = await verifyStaticHostingCompatibility();
 const require = createRequire(import.meta.url);
 const serverRequire = createRequire(import.meta.resolve("@littlejay/server"));
 assert.equal(
@@ -173,5 +175,6 @@ console.log(
     port: assignedPort,
     listenerClosed: true,
     logging,
+    staticHosting,
   }),
 );

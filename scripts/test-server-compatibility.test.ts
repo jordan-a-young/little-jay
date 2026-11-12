@@ -1,4 +1,7 @@
-import { readFile } from "node:fs/promises";
+import { mkdtemp, readFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { expect, it } from "vite-plus/test";
@@ -9,6 +12,8 @@ import {
   consumerManifest,
   fastifyVersions,
   runtimeTargets,
+  hostingApplicationFiles,
+  stageHostingApplication,
 } from "./test-server-compatibility.ts";
 
 it("leaves Fastify ownership to the consumer while retaining an exact development version", async () => {
@@ -27,7 +32,7 @@ it("selects both exact runtimes and matching major-version typings without insta
     { version: "26.13.0", executable: "/installed/node26", nodeTypes: "26.6.6" },
   ]);
   expect(fastifyVersions).toEqual(["5.12.7", "5.12.8"]);
-  expect(consumerFixtureNames).toEqual(["consumer.ts", "logging.ts"]);
+  expect(consumerFixtureNames).toEqual(["consumer.ts", "logging.ts", "static-hosting.ts"]);
 });
 
 it("rejects absent or relative target executables", () => {
@@ -49,7 +54,11 @@ it.each(["5.12.7", "5.12.8"])(
       name: "little-jay-server-compatibility-consumer",
       private: true,
       type: "module",
-      dependencies: { "@littlejay/server": "file:/fixture/server.tgz", fastify: version },
+      dependencies: {
+        "@littlejay/server": "file:/fixture/server.tgz",
+        fastify: version,
+        "@fastify/static": "10.1.7",
+      },
       devDependencies: { "@types/node": "24.19.2", typescript: "7.0.2" },
     });
   },
@@ -72,6 +81,27 @@ it("rejects matrix drift and keeps strict installed declarations enabled", () =>
     outDir: "dist",
   });
   expect(configuration.include).toEqual(["consumer.ts"]);
+});
+
+it("stages the exact authored hosting closure with audit hashes and isolated relative imports", async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), "little-jay-hosting-r2-staging-"));
+  const evidence = await stageHostingApplication(directory);
+  expect(hostingApplicationFiles).toEqual(["configuration.ts", "hosting.ts"]);
+  expect(evidence).toHaveLength(2);
+  for (const item of evidence) {
+    const original = await readFile(new URL(`../${item.source}`, import.meta.url));
+    const staged = await readFile(path.join(directory, item.staged));
+    expect(staged).toEqual(original);
+    expect(item.integrity).toBe(`sha512-${createHash("sha512").update(original).digest("base64")}`);
+    expect(staged.toString()).not.toMatch(/(?:workspace:|packages\/server|\.\.\/)/u);
+  }
+  const fixture = await readFile(
+    new URL("./fixtures/server-compatibility/static-hosting.ts", import.meta.url),
+    "utf8",
+  );
+  expect(fixture).toContain('from "./application/static-hosting/hosting.js"');
+  expect(fixture).toContain('from "@littlejay/server"');
+  expect(fixture).not.toContain("function registerStaticHosting");
 });
 
 it("fails before packing or installation when the configured Node24 executable is actually Node26", () => {
