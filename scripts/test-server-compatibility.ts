@@ -43,7 +43,7 @@ export function runtimeTargets(environment: NodeJS.ProcessEnv, currentExecutable
   );
   return [
     { version: "24.18.0", executable: environment.LITTLEJAY_NODE24, nodeTypes: "24.19.2" },
-    { version: "26.13.0", executable: currentExecutable, nodeTypes: "26.6.6" },
+    { version: "26.13.1", executable: currentExecutable, nodeTypes: "26.6.6" },
   ];
 }
 
@@ -101,7 +101,7 @@ export function assertRuntimeVersion(actual: string, expected: string) {
 }
 
 export async function main() {
-  assertRuntimeVersion(process.version, "26.13.0");
+  assertRuntimeVersion(process.version, "26.13.1");
   const targets = runtimeTargets(process.env, process.execPath);
   const pnpm = process.env.npm_execpath;
   assert.ok(pnpm, "Run with pnpm test:server-compat");

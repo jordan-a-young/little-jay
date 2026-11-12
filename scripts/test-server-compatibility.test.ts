@@ -29,7 +29,7 @@ it("leaves Fastify ownership to the consumer while retaining an exact developmen
 it("selects both exact runtimes and matching major-version typings without installing a runtime", () => {
   expect(runtimeTargets({ LITTLEJAY_NODE24: "/installed/node24" }, "/installed/node26")).toEqual([
     { version: "24.18.0", executable: "/installed/node24", nodeTypes: "24.19.2" },
-    { version: "26.13.0", executable: "/installed/node26", nodeTypes: "26.6.6" },
+    { version: "26.13.1", executable: "/installed/node26", nodeTypes: "26.6.6" },
   ]);
   expect(fastifyVersions).toEqual(["5.12.7", "5.12.8"]);
   expect(consumerFixtureNames).toEqual(["consumer.ts", "logging.ts", "static-hosting.ts"]);
@@ -44,7 +44,7 @@ it("rejects absent or relative target executables", () => {
 
 it("does not silently substitute a newer runtime", () => {
   expect(() => assertRuntimeVersion("v24.18.0\n", "24.18.0")).not.toThrow();
-  expect(() => assertRuntimeVersion("v26.13.0", "24.18.0")).toThrow("exact target runtime");
+  expect(() => assertRuntimeVersion("v26.13.1", "24.18.0")).toThrow("exact target runtime");
 });
 
 it.each(["5.12.7", "5.12.8"])(

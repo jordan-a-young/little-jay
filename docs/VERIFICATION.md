@@ -2,6 +2,24 @@
 
 Run commands from the repository root using pnpm. Scripts in `package.json`, test projects in `vite.config.ts`, CI in `.github/workflows/ci.yml`, and applicable scoped `AGENTS.md` files are authoritative. Use [the task-to-file map](REPO-MAP.md) to find affected tests and consumers.
 
+The development toolchain is Node 26.13.1, pnpm 12.18.0, Vite+/core 1.6.0 and
+Vitest/coverage 5.1.0. Existing TypeScript 7.0.2, lint/format defaults, build and
+declaration settings remain unchanged. Range-qualified Vite/Vitest overrides
+keep the toolchain aligned. Peer exceptions accept core's 1.6.0 alias version
+only for the four exact Vite consumers verified by the integration checks;
+reassess those entries when their versions change rather than adding a wildcard.
+
+The 2026-11-12 upgrade passed a clean frozen install, `pnpm peers check`, and
+`TMPDIR=/tmp/opencode pnpm ready`: 869 tests in 69 files, 90 authored sources,
+96.28% statements, 94.44% branches, 95.68% functions and 97.11% lines, including
+strict declaration checks and all five packed consumers. The separate server
+matrix passed all four Node 24.18.0/26.13.1 × Fastify 5.12.7/5.12.8 combinations.
+A task-owned production preview at port 4282 passed button click/Enter,
+lazy Dialog navigation and reload at 1440×1000 and 390×844, with no horizontal
+overflow, console warnings/errors, failed assets or API requests. Browser setup
+and checks ran from 14:14 to 14:15 local time; the preview was stopped afterward.
+The existing TypeScript experimental-API build advisory remains nonfatal.
+
 ## Select checks without repeating work
 
 - Combine every applicable row below. Start with the smallest relevant test during development, then run the checks warranted by the final diff. Scoped requirements still apply.
@@ -29,7 +47,7 @@ Run commands from the repository root using pnpm. Scripts in `package.json`, tes
 
 ## Server compatibility matrix
 
-Server/Fastify dependency ownership, runtime-support claims and compatibility consumer tooling also require `pnpm test scripts/test-server-compatibility.test.ts packages/server/src apps/api/src` and the separate four-combination `pnpm test:server-compat` gate after build prerequisites. Keep the host on pinned Node 26.13.0 and set `LITTLEJAY_NODE24` to an installed exact Node 24.18.0 executable; see [setup and evidence](SERVER.md#consumer-owned-fastify-and-compatibility). The matrix checks both Fastify 5.12.7/5.12.8 versions under both runtimes with strict isolated typings and packed artifacts. Combine the package-distribution/root-tooling rows, preserve peer ownership and tested-version limits, and require independent final public-API review. No browser checks are needed for this server-only scope.
+Server/Fastify dependency ownership, runtime-support claims and compatibility consumer tooling also require `pnpm test scripts/test-server-compatibility.test.ts packages/server/src apps/api/src` and the separate four-combination `pnpm test:server-compat` gate after build prerequisites. Keep the host on pinned Node 26.13.1 and set `LITTLEJAY_NODE24` to an installed exact Node 24.18.0 executable; see [setup and evidence](SERVER.md#consumer-owned-fastify-and-compatibility). The matrix checks both Fastify 5.12.7/5.12.8 versions under both runtimes with strict isolated typings and packed artifacts. Combine the package-distribution/root-tooling rows, preserve peer ownership and tested-version limits, and require independent final public-API review. No browser checks are needed for this server-only scope.
 
 Optional static-hosting changes also require the temporary-root fallback/file-boundary/header matrix and packed static-plugin integration. Unlike server-only factory/logging checks, changed browser-serving behavior needs a targeted real-browser check of external assets and frontend deep-link reload; do not expand it into unrelated UI/theme validation. Keep existing entry points and catalog independence covered. Static hosting alone does not satisfy #36's combined-consumer acceptance criteria.
 

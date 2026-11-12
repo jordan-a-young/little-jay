@@ -1,6 +1,6 @@
 # @littlejay/http
 
-ESM bounded JSON transport for browsers and Node with platform-compatible fetch, AbortController, and Web Streams, prepared for public npm distribution. No React, CommonJS entry point, or CSS setup is required. The repository validates Node 26.13.0; other runtimes need consumer verification. Public exports and declarations are listed in [package.json](package.json).
+ESM bounded JSON transport for browsers and Node with platform-compatible fetch, AbortController, and Web Streams, prepared for public npm distribution. No React, CommonJS entry point, or CSS setup is required. The repository validates Node 26.13.1; other runtimes need consumer verification. Public exports and declarations are listed in [package.json](package.json).
 
 OpenCode and Codex: have the consuming project's `AGENTS.md` explicitly request this installed README for transport tasks. See the [shared setup/template](https://github.com/jordan-a-young/little-jay/blob/main/docs/CONSUMER-AGENTS.md); installation alone does not activate agent instructions.
 

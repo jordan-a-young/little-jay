@@ -10,7 +10,7 @@ Each library ships a usage README with public imports, compatibility, setup, opt
 
 ## Run on your workstation
 
-Open a terminal in the `little-jay` directory with Node 26.13.0 LTS (`.node-version`) and pnpm 12.18.0 available. The supported Node range is `^26.13.0`. With fnm, run `fnm install` and `fnm use` in this directory. No global Vite+ installation is needed:
+Open a terminal in the `little-jay` directory with Node 26.13.1 LTS (`.node-version`) and pnpm 12.18.0 available. The development Node range is `^26.13.1`; public library engine ranges remain in their package manifests. Vite+ and its core alias are pinned to 1.6.0, with Vitest/coverage 5.1.0. With fnm, run `fnm install` and `fnm use` in this directory. No global Vite+ installation is needed:
 
 ```sh
 pnpm install --frozen-lockfile
