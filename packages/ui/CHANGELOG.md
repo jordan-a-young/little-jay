@@ -1,5 +1,17 @@
 # @littlejay/ui
 
+## 0.4.1
+
+### Patch Changes
+
+- a552d9c: Keep PasswordField revealed when its form owner changes during another form's reset, while preserving masking on its current owner's reset.
+
+  Render PebbleState's supplied heading nodes in a neutral container, separate from the decorative illustration, so native semantic headings no longer nest inside a strong element. Existing heading props and plain-text usage remain supported.
+
+- a552d9c: Allow long uninterrupted Field labels to shrink and wrap in narrow layouts. Wrap Alert titles so long identifiers do not overflow their content column or cover dismissal controls.
+
+  Keep the keyboard-active Combobox option visibly outlined with a system color in forced-colors mode, without changing selection or ordinary theme styling.
+
 ## 0.4.0
 
 ### Minor Changes
