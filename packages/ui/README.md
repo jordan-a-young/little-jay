@@ -38,6 +38,8 @@ Button supplies its own border reset and typography baseline (1rem text, 1.5 lin
 
 PebbleState needs application-served assets. Copy the state PNGs from the installed `@littlejay/brand/states/manifest.json` into your own public asset pipeline, preserving names and proportions. Pass a deployment-aware `assetBaseUrl` ending in `/` (for example `/my-app/branding/`, with images under `states/`). The library does not copy assets or infer the app base URL. Artwork has separate reserved rights; read the installed brand README before reuse.
 
+PebbleState renders the decorative image separately from a neutral heading container. `heading` accepts plain text or an unchanged React node: use `heading={<h2>No projects yet</h2>}` when the surrounding document needs a level-two heading. Plain strings do not create a heading. Direct native headings keep the component's title typography without default margins; direct native heading children are normalized regardless of whether they come from a custom React component. Deeper/custom wrappers own their internal styling. The application owns heading level, descriptions, actions and announcements.
+
 ## UI and UX design principles
 
 - Start with the person's task and reuse existing controls before adding a new interaction. Keep primary emphasis selective, group related content with consistent spacing/alignment, and use meaningful headings and readable typography. Containers do not choose your page's heading levels or landmarks.
@@ -263,7 +265,7 @@ Optional nonblank `showLabel` / `hideLabel` strings default to â€œShow passwordâ
 
 The same input, name, value and selection range/direction survive visibility changes. The component does not programmatically move focus: keyboard activation keeps button focus, and pointer focus follows native browser behavior. Long labels and narrow layouts wrap instead of overlapping the input. Ref exposes the native input for application focus/selection policy.
 
-An uncancelled native form reset re-masks the input and restores uncontrolled native defaults. Explicit `form` association is respected; unrelated and cancelled resets do not change visibility. Controlled values and controlled reset handling remain with the application. Reveal state is local and resets on unmount. These are presentation semantics, not authentication or authorization; validate submitted credentials on the server and do not expose real credentials in examples or diagnostics.
+An uncancelled native form reset restores uncontrolled native defaults and re-masks the input after dispatch in a later task, provided that form still owns the input. Stopping event propagation alone does not cancel masking; `preventDefault()` cancels reset. Explicit `form` association is respected; unrelated and cancelled resets do not change visibility. Controlled values and controlled reset handling remain with the application. Reveal state is local and resets on unmount. These are presentation semantics, not authentication or authorization; validate submitted credentials on the server and do not expose real credentials in examples or diagnostics.
 
 ## Breadcrumb
 

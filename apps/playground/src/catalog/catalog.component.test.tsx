@@ -509,7 +509,7 @@ describe("component catalog", () => {
     await act(() =>
       container.querySelector<HTMLButtonElement>('.catalog-preview button[type="reset"]')!.click(),
     );
-    expect(input.type).toBe("password");
+    await vi.waitFor(() => expect(input.type).toBe("password"));
     expect(fetch).not.toHaveBeenCalled();
   });
 

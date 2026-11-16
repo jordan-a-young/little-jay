@@ -1,6 +1,5 @@
 import type { ComponentProps, ReactNode } from "react";
 import illustrations from "@littlejay/brand/states/manifest.json" with { type: "json" };
-import { EmptyState } from "../empty-state/index.js";
 
 export type PebbleStateKind = "loading" | "success" | "error" | "empty";
 
@@ -23,37 +22,35 @@ export function PebbleState({
   action,
   assetBaseUrl,
   illustrationSize = 160,
+  className = "",
   ...props
 }: PebbleStateProps) {
   const illustration = illustrations[state];
   const size = Number.isFinite(illustrationSize) && illustrationSize > 0 ? illustrationSize : 160;
   return (
-    <EmptyState
+    <div
       {...props}
-      title={
-        <>
-          <img
-            src={`${assetBaseUrl.replace(/\/$/, "")}/states/${illustration.file}`}
-            alt=""
-            width={illustration.width}
-            height={illustration.height}
-            loading="lazy"
-            decoding="async"
-            className="mb-3 block"
-            style={{
-              width: size,
-              maxWidth: "100%",
-              height: "auto",
-              aspectRatio: "1 / 1",
-              objectFit: "contain",
-            }}
-          />
-          {heading}
-        </>
-      }
-      action={action}
+      className={`min-w-0 space-y-3 rounded-control border border-dashed border-border bg-surface p-6 text-content ${className}`}
     >
-      {description}
-    </EmptyState>
+      <img
+        src={`${assetBaseUrl.replace(/\/$/, "")}/states/${illustration.file}`}
+        alt=""
+        width={illustration.width}
+        height={illustration.height}
+        loading="lazy"
+        decoding="async"
+        className="block"
+        style={{
+          width: size,
+          maxWidth: "100%",
+          height: "auto",
+          aspectRatio: "1 / 1",
+          objectFit: "contain",
+        }}
+      />
+      <div className="lj-pebble-state-heading font-semibold">{heading}</div>
+      {description != null && <div className="break-words text-muted">{description}</div>}
+      {action != null && <div>{action}</div>}
+    </div>
   );
 }

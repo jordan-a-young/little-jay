@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises";
 import { act, createRef, memo, useActionState, useState } from "react";
 import { createRoot, hydrateRoot, type Root } from "react-dom/client";
 import { renderToString } from "react-dom/server";
@@ -58,6 +59,35 @@ describe("native form components", () => {
     expect(labels[0]?.control).toBe(getInput("run"));
     expect(getInput("run").id).toBe("run-name");
     expect(container.querySelectorAll("#run-name")).toHaveLength(1);
+  });
+
+  it.each(["vertical", "horizontal"] as const)(
+    "preserves long unbroken label text and native associations in %s Fields",
+    async (orientation) => {
+      const text = "UnbrokenFieldLabel".repeat(20);
+      await act(() =>
+        root.render(
+          <Field id="long-label" label={text} orientation={orientation}>
+            {orientation === "horizontal" ? <Checkbox name="long" /> : <Input name="long" />}
+          </Field>,
+        ),
+      );
+      const label = container.querySelector("label")!;
+      expect(label.textContent).toBe(text);
+      expect(label.id).toBe("long-label-label");
+      expect(label.htmlFor).toBe("long-label");
+      expect(label.control).toBe(getInput("long"));
+      expect(label.classList.contains("lj-field-label")).toBe(true);
+    },
+  );
+
+  it("allows Field labels to shrink and wrap unbroken text in source styles", async () => {
+    const stylesheet = await readFile("packages/ui/src/styles.css", "utf8");
+    const labelRules = [...stylesheet.matchAll(/\.lj-field-label\s*\{([^}]+)\}/g)]
+      .map((match) => match[1])
+      .join("\n");
+    expect(labelRules).toMatch(/min-width:\s*0\s*;/);
+    expect(labelRules).toMatch(/overflow-wrap:\s*anywhere\s*;/);
   });
 
   it("merges descriptions without duplicate tokens and removes stale error references without losing input", async () => {

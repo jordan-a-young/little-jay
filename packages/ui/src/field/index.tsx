@@ -41,7 +41,11 @@ export function Field({
     [controlId, labelId, descriptionId, errorId, invalid, required, disabled],
   );
   const fieldLabel = (
-    <label id={labelId} htmlFor={controlId} className="block text-sm font-medium text-content">
+    <label
+      id={labelId}
+      htmlFor={controlId}
+      className="lj-field-label block text-sm font-medium text-content"
+    >
       {label}
       {required && <span aria-hidden="true"> *</span>}
     </label>
