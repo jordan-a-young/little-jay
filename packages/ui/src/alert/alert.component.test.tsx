@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises";
 import { act, createRef, useState, type FormEvent } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
@@ -26,6 +27,47 @@ describe("Alert dismissal", () => {
     expect(container.querySelector("button")).toBeNull();
     expect(container.firstElementChild?.hasAttribute("dismissLabel")).toBe(false);
     expect(container.firstElementChild?.getAttribute("role")).toBe("status");
+  });
+
+  it.each([false, true])(
+    "preserves long unbroken title text and native dismissal with dismissible=%s",
+    async (dismissible) => {
+      const text = "UnbrokenAlertTitle".repeat(20);
+      const onDismiss = vi.fn();
+      const onSubmit = vi.fn((event: FormEvent<HTMLFormElement>) => event.preventDefault());
+      await act(() =>
+        root.render(
+          <form onSubmit={onSubmit}>
+            <Alert title={text} onDismiss={dismissible ? onDismiss : undefined}>
+              Saved data remains available.
+            </Alert>
+          </form>,
+        ),
+      );
+      const title = container.querySelector("strong")!;
+      expect(title.textContent).toBe(text);
+      const close = container.querySelector("button");
+      if (dismissible) {
+        expect(close).toBeInstanceOf(HTMLButtonElement);
+        expect(close!.type).toBe("button");
+        expect(close!.getAttribute("aria-label")).toBe("Dismiss alert");
+        await act(() => close!.click());
+        expect(onDismiss).toHaveBeenCalledOnce();
+        expect(onSubmit).not.toHaveBeenCalled();
+        expect(title.textContent).toBe(text);
+      } else {
+        expect(close).toBeNull();
+      }
+      expect(title.classList.contains("lj-alert-title")).toBe(true);
+    },
+  );
+
+  it("wraps unbroken Alert titles in source styles", async () => {
+    const stylesheet = await readFile("packages/ui/src/styles.css", "utf8");
+    const titleRules = [...stylesheet.matchAll(/\.lj-alert-title\s*\{([^}]+)\}/g)]
+      .map((match) => match[1])
+      .join("\n");
+    expect(titleRules).toMatch(/overflow-wrap:\s*anywhere\s*;/);
   });
 
   it("requests dismissal once per click without hiding itself, submitting, or moving focus", async () => {

@@ -25,7 +25,7 @@ export function Alert({
 }: AlertProps) {
   const content = (
     <>
-      {title != null && <strong className="block font-semibold">{title}</strong>}
+      {title != null && <strong className="lj-alert-title block font-semibold">{title}</strong>}
       {children != null && <div className="break-words text-content">{children}</div>}
       {action != null && <div className="pt-2">{action}</div>}
     </>

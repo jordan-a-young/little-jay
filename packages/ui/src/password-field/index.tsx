@@ -45,19 +45,28 @@ export function PasswordField({
     const root = inputReference.current?.getRootNode();
     if (!root) return;
     let subscribed = true;
+    const resetTimers = new Set<ReturnType<typeof setTimeout>>();
     function handleReset(event: Event) {
       if (event.target !== inputReference.current?.form) return;
-      queueMicrotask(() => {
-        if (subscribed && !event.defaultPrevented) {
+      const timer = setTimeout(() => {
+        resetTimers.delete(timer);
+        if (
+          subscribed &&
+          !event.defaultPrevented &&
+          event.target === inputReference.current?.form
+        ) {
           pendingSelection.current = null;
           setRevealed(false);
         }
-      });
+      }, 0);
+      resetTimers.add(timer);
     }
     root.addEventListener("reset", handleReset, true);
     return () => {
       subscribed = false;
       root.removeEventListener("reset", handleReset, true);
+      resetTimers.forEach((timer) => clearTimeout(timer));
+      resetTimers.clear();
     };
   }, []);
 

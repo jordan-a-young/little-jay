@@ -1,4 +1,5 @@
 import { act, createRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
@@ -27,6 +28,12 @@ describe("PasswordField", () => {
   }
   function toggle() {
     return container.querySelector<HTMLButtonElement>(".lj-password-field-toggle")!;
+  }
+  async function settleReset(dispatch: () => void) {
+    await act(async () => {
+      dispatch();
+      await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    });
   }
 
   it("starts masked, forwards native input props/ref/className, and names a non-submit reveal action", async () => {
@@ -201,7 +208,25 @@ describe("PasswordField", () => {
     const native = input();
     native.value = "updated-sample";
     await act(() => toggle().click());
-    await act(() => container.querySelector("form")!.reset());
+    await settleReset(() => container.querySelector("form")!.reset());
+    expect(input()).toBe(native);
+    expect(native.value).toBe("sample-only");
+    expect(native.type).toBe("password");
+    expect(toggle().textContent).toBe("Show password");
+  });
+
+  it("masks a current-form reset even when the application stops propagation", async () => {
+    await act(() =>
+      root.render(
+        <form onReset={(event) => event.stopPropagation()}>
+          <PasswordField defaultValue="sample-only" />
+        </form>,
+      ),
+    );
+    const native = input();
+    native.value = "updated-sample";
+    await act(() => toggle().click());
+    await settleReset(() => container.querySelector("form")!.reset());
     expect(input()).toBe(native);
     expect(native.value).toBe("sample-only");
     expect(native.type).toBe("password");
@@ -218,7 +243,7 @@ describe("PasswordField", () => {
     );
     input().value = "updated-sample";
     await act(() => toggle().click());
-    await act(() => container.querySelector("form")!.reset());
+    await settleReset(() => container.querySelector("form")!.reset());
     expect(input().type).toBe("text");
     expect(input().value).toBe("updated-sample");
   });
@@ -237,13 +262,82 @@ describe("PasswordField", () => {
     }
     await renderOwner("first-form");
     await act(() => toggle().click());
-    await act(() => container.querySelector<HTMLFormElement>("#second-form")!.reset());
+    await settleReset(() => container.querySelector<HTMLFormElement>("#second-form")!.reset());
     expect(input().type).toBe("text");
     await renderOwner("second-form");
-    await act(() => container.querySelector<HTMLFormElement>("#first-form")!.reset());
+    await settleReset(() => container.querySelector<HTMLFormElement>("#first-form")!.reset());
     expect(input().type).toBe("text");
-    await act(() => container.querySelector<HTMLFormElement>("#second-form")!.reset());
+    await settleReset(() => container.querySelector<HTMLFormElement>("#second-form")!.reset());
     expect(input().type).toBe("password");
+  });
+
+  it("ignores a queued reset when the application changes the form owner during reset", async () => {
+    function Reassociated() {
+      const [formId, setFormId] = useState("first-form");
+      return (
+        <>
+          <form id="first-form" onReset={() => flushSync(() => setFormId("second-form"))} />
+          <form id="second-form" />
+          <PasswordField form={formId} defaultValue="sample-only" />
+        </>
+      );
+    }
+    await act(() => root.render(<Reassociated />));
+    const native = input();
+    const firstForm = container.querySelector<HTMLFormElement>("#first-form")!;
+    const secondForm = container.querySelector<HTMLFormElement>("#second-form")!;
+    expect(native.form).toBe(firstForm);
+    await act(() => toggle().click());
+    expect(native.type).toBe("text");
+    await settleReset(() => firstForm.reset());
+    expect(input()).toBe(native);
+    expect(native.form).toBe(secondForm);
+    expect(native.type).toBe("text");
+    expect(toggle().textContent).toBe("Hide password");
+    await settleReset(() => secondForm.reset());
+    expect(native.type).toBe("password");
+    expect(toggle().textContent).toBe("Show password");
+  });
+
+  it("settles reset after application handlers when native dispatch checkpoints microtasks", async () => {
+    const queued: VoidFunction[] = [];
+    const microtasks = vi.spyOn(globalThis, "queueMicrotask").mockImplementation((callback) => {
+      queued.push(callback);
+    });
+    function drainMicrotasks() {
+      while (queued.length) queued.shift()!();
+    }
+    function Reassociated() {
+      const [formId, setFormId] = useState("first-form");
+      return (
+        <>
+          <form id="first-form" onReset={() => flushSync(() => setFormId("second-form"))} />
+          <form id="second-form" onReset={(event) => event.preventDefault()} />
+          <PasswordField form={formId} />
+        </>
+      );
+    }
+    try {
+      await act(() => root.render(<Reassociated />));
+      const firstForm = container.querySelector<HTMLFormElement>("#first-form")!;
+      const secondForm = container.querySelector<HTMLFormElement>("#second-form")!;
+      firstForm.addEventListener("reset", drainMicrotasks, true);
+      secondForm.addEventListener("reset", drainMicrotasks, true);
+      await act(() => toggle().click());
+      await settleReset(() => {
+        firstForm.reset();
+        drainMicrotasks();
+      });
+      expect(input().form).toBe(secondForm);
+      expect(input().type).toBe("text");
+      await settleReset(() => {
+        secondForm.reset();
+        drainMicrotasks();
+      });
+      expect(input().type).toBe("text");
+    } finally {
+      microtasks.mockRestore();
+    }
   });
 
   it.each(["prop", "field", "fieldset"] as const)(
@@ -308,8 +402,9 @@ describe("PasswordField", () => {
     expect(() => renderToStaticMarkup(<PasswordField hideLabel="" />)).toThrow("nonblank");
   });
 
-  it("cleans up its reset listener and cancels a queued reset update when unmounted", async () => {
+  it("cleans up its reset listener and all pending settlement timers when unmounted", async () => {
     const removeListener = vi.spyOn(document, "removeEventListener");
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
     try {
       await act(() =>
         root.render(
@@ -319,12 +414,17 @@ describe("PasswordField", () => {
         ),
       );
       await act(() => toggle().click());
+      const timersBeforeReset = vi.getTimerCount();
       await act(() => {
         container.querySelector("form")!.reset();
+        container.querySelector("form")!.reset();
+        expect(vi.getTimerCount()).toBe(timersBeforeReset + 2);
         root.unmount();
       });
+      expect(vi.getTimerCount()).toBe(timersBeforeReset);
       expect(removeListener).toHaveBeenCalledWith("reset", expect.any(Function), true);
     } finally {
+      vi.useRealTimers();
       removeListener.mockRestore();
     }
   });

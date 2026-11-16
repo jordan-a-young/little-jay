@@ -1,4 +1,6 @@
-import { act } from "react";
+import { readFileSync } from "node:fs";
+import { act, createRef } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
 import { Button } from "../button/index.js";
@@ -74,6 +76,71 @@ describe("PebbleState", () => {
     expect(button.type).toBe("button");
     await act(() => button.click());
     expect(retry).toHaveBeenCalledTimes(1);
+  });
+
+  it("preserves caller-owned semantic headings without invalid phrasing ancestors", async () => {
+    await act(() =>
+      root.render(
+        <PebbleState
+          state="empty"
+          heading={<h2>No projects yet</h2>}
+          description="Create a local project."
+          assetBaseUrl="/branding/"
+        />,
+      ),
+    );
+    const heading = container.querySelector("h2")!;
+    expect(heading.textContent).toBe("No projects yet");
+    expect(heading.closest("strong, p")).toBeNull();
+    expect(heading.contains(container.querySelector("img"))).toBe(false);
+    expect(container.querySelector("img")?.alt).toBe("");
+    expect(container.querySelectorAll("h1, h2, h3, h4, h5, h6")).toHaveLength(1);
+  });
+
+  it("normalizes direct heading weight without overriding EmptyState title weight", () => {
+    const stylesheet = readFileSync("packages/ui/src/styles.css", "utf8");
+    expect(stylesheet).toMatch(
+      /\.lj-pebble-state-heading > :is\(h1, h2, h3, h4, h5, h6\)\s*\{\s*font-weight: inherit;/,
+    );
+  });
+
+  it("keeps native root props and refs with string headings", async () => {
+    const ref = createRef<HTMLDivElement>();
+    await act(() =>
+      root.render(
+        <PebbleState
+          ref={ref}
+          state="success"
+          heading="Local draft ready"
+          assetBaseUrl="/branding/"
+          id="draft-state"
+          className="consumer-state"
+          style={{ maxWidth: "20rem" }}
+          hidden
+        />,
+      ),
+    );
+    expect(ref.current).toBe(container.firstElementChild);
+    expect(ref.current?.id).toBe("draft-state");
+    expect(ref.current?.classList.contains("consumer-state")).toBe(true);
+    expect(ref.current?.style.maxWidth).toBe("20rem");
+    expect(ref.current?.hidden).toBe(true);
+    expect(container.querySelector(".lj-pebble-state-heading")?.textContent).toBe(
+      "Local draft ready",
+    );
+    expect(container.querySelector("h1, h2, h3, h4, h5, h6")).toBeNull();
+  });
+
+  it("renders custom heading components as supplied in server markup", () => {
+    function StateHeading() {
+      return <h3>Local state</h3>;
+    }
+    const markup = renderToStaticMarkup(
+      <PebbleState state="empty" heading={<StateHeading />} assetBaseUrl="/branding/" />,
+    );
+    expect(markup).toContain("<h3>Local state</h3>");
+    expect(markup).not.toContain("<strong");
+    expect(markup).toContain('alt=""');
   });
 
   it("keeps a valid reserved box when given an invalid size", async () => {

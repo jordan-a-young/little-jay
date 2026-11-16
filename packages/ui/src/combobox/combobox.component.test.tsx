@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { act, createRef, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -14,6 +15,12 @@ const options: readonly ComboboxOption[] = [
 ];
 
 describe("Combobox", () => {
+  it("preserves a system-color virtual-focus outline in forced colors", () => {
+    const stylesheet = readFileSync("packages/ui/src/styles.css", "utf8");
+    expect(stylesheet).toMatch(
+      /@media \(forced-colors: active\)\s*\{\s*\.lj-combobox-option\[data-focused\]\s*\{\s*outline: 2px solid Highlight;\s*outline-offset: -2px;/,
+    );
+  });
   let container: HTMLDivElement;
   let root: Root;
 

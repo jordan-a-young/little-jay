@@ -87,11 +87,23 @@
   .lj-button-link-ghost:hover {
     background: var(--lj-background);
   }
-  .lj-empty-state-title {
+  .lj-field-label {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .lj-alert-title {
+    overflow-wrap: anywhere;
+  }
+  .lj-empty-state-title,
+  .lj-pebble-state-heading,
+  .lj-pebble-state-heading > :is(h1, h2, h3, h4, h5, h6) {
     margin: 0;
     font-size: inherit;
     line-height: inherit;
     overflow-wrap: anywhere;
+  }
+  .lj-pebble-state-heading > :is(h1, h2, h3, h4, h5, h6) {
+    font-weight: inherit;
   }
   .lj-combobox {
     min-width: 0;
@@ -181,6 +193,12 @@
   }
   .lj-combobox-option[data-disabled] {
     opacity: 0.5;
+  }
+  @media (forced-colors: active) {
+    .lj-combobox-option[data-focused] {
+      outline: 2px solid Highlight;
+      outline-offset: -2px;
+    }
   }
   .lj-combobox-empty {
     display: block;

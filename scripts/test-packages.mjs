@@ -221,18 +221,59 @@ for (const name of ["brand", "tokens", "ui", "server", "http"]) {
         `${className} must restore its default display only when shown`,
       );
     }
+    assert.match(
+      stylesheet,
+      /@media\s*\(forced-colors:\s*active\)\s*\{\s*\.lj-combobox-option\[data-focused\]\s*\{[^}]*outline:\s*2px solid [Hh]ighlight(?:;|})/,
+      "Combobox virtual focus must retain its forced-colors outline in packaged CSS",
+    );
+    for (const className of ["lj-field-label", "lj-alert-title"]) {
+      const rules = stylesheetRules
+        .filter(([, selectors]) =>
+          selectors.split(",").some((selector) => selector.trim() === `.${className}`),
+        )
+        .map(([, , declarations]) => declarations)
+        .join(";");
+      assert.match(rules, /overflow-wrap:\s*anywhere(?:;|$)/, `${className} must wrap long tokens`);
+      if (className === "lj-field-label") {
+        assert.match(
+          rules,
+          /min-width:\s*0(?:;|$)/,
+          "Field labels must shrink in horizontal composition",
+        );
+      }
+    }
     assert.ok(
       stylesheetRules.some(
         ([, selectors, declarations]) =>
-          selectors.split(",").some((selector) => selector.trim() === ".mb-3") &&
-          /(?:^|;)\s*margin-bottom:\s*calc\(var\(--spacing\)\s*\*\s*3\)\s*(?:;|$)/.test(
-            declarations,
-          ),
+          selectors.includes(".space-y-3") &&
+          /margin-block-end:\s*calc\(calc\(var\(--spacing\)\s*\*\s*3\)/.test(declarations),
       ),
       "PebbleState illustration spacing must be included in packaged CSS",
     );
   }
 }
+
+await writeFile(
+  path.join(consumer, "pebble-markup.mjs"),
+  `import assert from "node:assert/strict";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { PebbleState as RootPebbleState } from "@littlejay/ui";
+import { PebbleState } from "@littlejay/ui/pebble-state";
+for (const Component of [RootPebbleState, PebbleState]) {
+  const markup = renderToStaticMarkup(createElement(Component, {
+    state: "empty",
+    heading: createElement("h2", null, "No projects yet"),
+    assetBaseUrl: "/branding/",
+  }));
+  assert.ok(markup.includes("<h2>No projects yet</h2>"));
+  assert.ok(!markup.includes("<strong"));
+  assert.ok(markup.includes('alt=""'));
+  assert.ok(markup.indexOf("<img") < markup.indexOf("<h2>"));
+}
+`,
+);
+execFileSync(process.execPath, ["pebble-markup.mjs"], { cwd: consumer, stdio: "inherit" });
 
 await writeFile(
   path.join(consumer, "server.mjs"),
@@ -295,6 +336,7 @@ import { Alert, type AlertProps } from "@littlejay/ui/alert";
 import { EmptyState, type EmptyStateProps } from "@littlejay/ui/empty-state";
 import { EmptyState as RootEmptyState, type EmptyStateProps as RootEmptyStateProps } from "@littlejay/ui";
 import { PebbleState, type PebbleStateProps } from "@littlejay/ui/pebble-state";
+import { PebbleState as RootPebbleState, type PebbleStateProps as RootPebbleStateProps } from "@littlejay/ui";
 import { StatusIndicator } from "@littlejay/ui/status-indicator";
 import { LoadingIndicator, type LoadingIndicatorProps } from "@littlejay/ui/loading-indicator";
 import { ErrorBoundary } from "@littlejay/ui/error-boundary";
@@ -689,7 +731,8 @@ function App() {
     <div data-theme="dark"><img src={logoDark} alt="Little Jay on dark" width={275} height={75} /></div>
     <img src={pebblePng} alt="" width={128} height={128} />
     {(["light", "dark"] as const).map(theme => <div key={theme} data-theme={theme} data-consumer-pebble={theme}>
-      <PebbleState {...{ state: "empty", heading: "No projects yet.", assetBaseUrl: "/branding/" } satisfies PebbleStateProps} />
+      <PebbleState {...{ state: "empty", heading: <h2>No projects yet.</h2>, assetBaseUrl: "/branding/" } satisfies PebbleStateProps} />
+      <RootPebbleState {...{ state: "success", heading: <h3>Local draft ready.</h3>, assetBaseUrl: "/branding/" } satisfies RootPebbleStateProps} />
     </div>)}
     <form onSubmit={(event) => { event.preventDefault(); setSubmits(submits + 1); }}>
       <Button {...nativeProps} ref={ref} onClick={() => setClicks(clicks + 1)}>Count</Button>
@@ -722,6 +765,12 @@ function App() {
     <ExternalNumericSetting theme="dark" />
     <ExternalComboboxes />
     <ExternalComboboxValidation />
+    {(["light", "dark"] as const).map(theme => <section key={theme} data-theme={theme} data-consumer-long-copy={theme} style={{ width: "17.5rem", maxWidth: "100%" }}>
+      <Field label={"UnbrokenFieldLabel".repeat(12)}><Input name="long-copy" /></Field>
+      <Field label={"UnbrokenCheckboxLabel".repeat(12)} orientation="horizontal"><RootCheckbox name="long-checkbox" /></Field>
+      <Field label={"UnbrokenSwitchLabel".repeat(12)} orientation="horizontal"><Switch name="long-switch" /></Field>
+      <Alert title={"UnbrokenAlertTitle".repeat(12)} onDismiss={() => {}}>Local-only long-title notice.</Alert>
+    </section>)}
     <section aria-label="External breadcrumbs">
       {(["light", "dark"] as const).map(theme => {
         const Navigation = theme === "light" ? Breadcrumb : RootBreadcrumb;
